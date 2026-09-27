@@ -3,5 +3,13 @@
     use Illuminate\Database\Eloquent\Model;
 
     class LoaiDichVu extends Model{
-        protected 
+        protected $table = 'LOAIDICHVU';
+        protected $primaryKey = 'MaLoaiDV';
+        public $timetamps = false;
+        protected $fillable = ['TenLoaiDV', 'MoTa', 'HinhAnh', 'TrangThai'];
+
+        public function dichVus(){
+            return $this->hasMany(DichVu::class, 'MaLoaiDV', 'MaLoaiDV');
+        }
+
     }
