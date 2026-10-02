@@ -5,7 +5,7 @@
     class DichVu extends Model{
         protected $table = 'DICHVU';
         protected $primaryKey = 'MaDV';
-        public $timetamps = false;
+        public $timestamps = false;
         protected $fillable = ['MaLoaiDV', 'TenDV', 'MoTa', 'Gia', 'HinhAnh', 'TrangThai'];
 
         public function loaiDichVu(){
