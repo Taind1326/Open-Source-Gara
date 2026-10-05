@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PhuTungController;
 use App\Http\Controllers\HoaDonController;
+use App\Http\Controllers\ThongKeController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -68,3 +69,14 @@ Route::post(
     '/hoadon/{maHD}/thanh-toan',
     [HoaDonController::class, 'thanhToan']
 )->name('hoadon.thanh-toan');
+
+/*
+|--------------------------------------------------------------------------
+| M12 - THỐNG KÊ
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/admin/thongke',
+    [ThongKeController::class, 'index']
+)->name('thongke.admin.index');
