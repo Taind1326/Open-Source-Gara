@@ -64,11 +64,14 @@ class LichHenService
 
         return array_map(function (string $khungGio) use ($ngay, $soKtv) {
             $daNhan = $this->demSoLichDaNhan($ngay, $khungGio);
+            $conHan = $this->thoiGianKhungGioHopLe($ngay, $khungGio);
+
             return [
                 'khung_gio' => $khungGio,
                 'da_nhan'   => $daNhan,
                 'suc_chua'  => $soKtv,
-                'con_cho'   => $daNhan < $soKtv,
+                'con_cho'   => $daNhan < $soKtv && $conHan,
+                'da_qua_gio' => !$conHan,
             ];
         }, $this->khungGioHopLe);
     }
@@ -79,14 +82,36 @@ class LichHenService
         return Carbon::parse($ngay)->startOfDay()->gte(Carbon::today());
     }
 
+    // Kiểm tra kết hợp ngày + khung giờ so với thời điểm hiện tại
+    // Nếu là hôm nay, khung giờ đã bắt đầu (hoặc đang diễn ra) thì không cho chọn nữa
+    public function thoiGianKhungGioHopLe(string $ngay, string $khungGio): bool
+    {
+        $ngayHen = Carbon::parse($ngay)->startOfDay();
+        $homNay = Carbon::today();
+
+        if ($ngayHen->lt($homNay)) {
+            return false; // ngày quá khứ
+        }
+
+        if ($ngayHen->gt($homNay)) {
+            return true; // ngày tương lai, không cần so giờ
+        }
+
+        // Là hôm nay → so giờ bắt đầu khung với giờ hiện tại
+        [$gioBatDau] = explode('-', $khungGio);
+        $thoiDiemBatDau = Carbon::parse($ngay . ' ' . $gioBatDau);
+
+        return $thoiDiemBatDau->gt(now());
+    }
+
     // Danh sách KTV đang rảnh trong đúng (ngày, khung giờ) — dùng cho Admin phân công
     public function ktvRanh(string $ngay, string $khungGio)
     {
         $maKtvDaBan = PhanCong::whereHas('yeuCau', function ($q) use ($ngay, $khungGio) {
-                $q->where('NgayHen', $ngay)
-                  ->where('KhungGioHen', $khungGio)
-                  ->whereNotIn('TrangThai', $this->trangThaiKhongTinh);
-            })
+            $q->where('NgayHen', $ngay)
+                ->where('KhungGioHen', $khungGio)
+                ->whereNotIn('TrangThai', $this->trangThaiKhongTinh);
+        })
             ->where('TrangThai', 'DANG_PHU_TRACH')
             ->pluck('MaKTV');
 
@@ -103,8 +128,8 @@ class LichHenService
             ->where('TrangThai', 'DANG_PHU_TRACH')
             ->whereHas('yeuCau', function ($q) use ($ngay, $khungGio) {
                 $q->where('NgayHen', $ngay)
-                  ->where('KhungGioHen', $khungGio)
-                  ->whereNotIn('TrangThai', $this->trangThaiKhongTinh);
+                    ->where('KhungGioHen', $khungGio)
+                    ->whereNotIn('TrangThai', $this->trangThaiKhongTinh);
             });
 
         // Khi Admin sửa lại phân công cũ, loại chính yêu cầu đang sửa ra khỏi kiểm tra
