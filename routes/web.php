@@ -104,3 +104,20 @@ Route::post('/kiem-tra-xe/{maYC}',
 Route::get('/kiem-tra-xe/{maYC}/ket-qua',
     [KiemTraXeController::class, 'show'])
     ->name('kiemtraxe.show');
+
+    use App\Http\Controllers\BaoGiaController;
+
+Route::get(
+    '/bao-gia/{maYC}/lap',
+    [BaoGiaController::class, 'create']
+)->name('baogia.create');
+
+Route::post(
+    '/bao-gia/{maYC}',
+    [BaoGiaController::class, 'store']
+)->name('baogia.store');
+
+Route::get(
+    '/bao-gia/{maYC}',
+    [BaoGiaController::class, 'show']
+)->name('baogia.show');

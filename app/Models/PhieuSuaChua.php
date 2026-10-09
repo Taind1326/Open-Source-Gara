@@ -50,4 +50,13 @@ class PhieuSuaChua extends Model
             'MaPSC'
         );
     }
+
+    public function baoGia()
+    {
+        return $this->hasOne(
+            BaoGia::class,
+            'MaYC',
+            'MaYC'
+        );
+    }
 }

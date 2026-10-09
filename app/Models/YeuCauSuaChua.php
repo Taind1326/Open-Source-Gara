@@ -58,4 +58,13 @@ class YeuCauSuaChua extends Model
             'MaYC'
         );
     }
+
+    public function baoGia()
+    {
+        return $this->hasOne(
+            BaoGia::class,
+            'MaYC',
+            'MaYC'
+        );
+    }
 }
