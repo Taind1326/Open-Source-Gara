@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PhuTungController;
 use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\ThongKeController;
+use App\Http\Controllers\LoaiDichVuController;
+use App\Http\Controllers\DichVuController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -80,3 +82,11 @@ Route::get(
     '/admin/thongke',
     [ThongKeController::class, 'index']
 )->name('thongke.admin.index');
+
+// M04 - Loại dịch vụ
+Route::resource('loaidichvu', LoaiDichVuController::class)
+    ->except(['show', 'destroy']);
+
+// M04 - Dịch vụ
+Route::resource('dichvu', DichVuController::class)
+    ->except(['show', 'destroy']);
