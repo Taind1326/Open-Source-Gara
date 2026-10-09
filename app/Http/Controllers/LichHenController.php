@@ -68,8 +68,8 @@ class LichHenController extends Controller
             return back()->withErrors(['MaXe' => 'Xe không hợp lệ.']);
         }
 
-        if (!$this->service->ngayHopLe($data['NgayHen'])) {
-            return back()->withErrors(['NgayHen' => 'Không được đặt lịch trong quá khứ.'])->withInput();
+        if (!$this->service->thoiGianKhungGioHopLe($data['NgayHen'], $data['KhungGioHen'])) {
+            return back()->withErrors(['NgayHen' => 'Thời gian đã chọn không còn hợp lệ (đã qua hoặc ở quá khứ).'])->withInput();
         }
 
         if (!$this->service->laKhungGioHopLe($data['KhungGioHen'])) {
@@ -196,13 +196,15 @@ class LichHenController extends Controller
 
         if ($tuKhoa) {
             $ketQua = YeuCauSuaChua::where('TrangThai', 'DA_PHAN_CONG')
-                ->whereHas('xe', function ($q) use ($tuKhoa) {
-                    $q->where('BienSo', 'like', "%{$tuKhoa}%")
-                        ->orWhereHas('taiKhoan', function ($q2) use ($tuKhoa) {
+                ->where(function ($q) use ($tuKhoa) {
+                    $q->where('MaYC', 'like', "%{$tuKhoa}%")
+                        ->orWhereHas('xe', function ($q2) use ($tuKhoa) {
+                            $q2->where('BienSo', 'like', "%{$tuKhoa}%");
+                        })
+                        ->orWhereHas('xe.taiKhoan', function ($q2) use ($tuKhoa) {
                             $q2->where('SoDienThoai', 'like', "%{$tuKhoa}%");
                         });
                 })
-                ->orWhere('MaYC', 'like', "%{$tuKhoa}%")
                 ->with(['xe.taiKhoan', 'phanCong.ktv'])
                 ->get();
         }
@@ -233,10 +235,18 @@ class LichHenController extends Controller
             'dich_vu.*'   => 'exists:DICHVU,MaDV',
         ]);
 
+        $khungGioHienTai = $this->khungGioHienTai();
+
+        if ($khungGioHienTai === null) {
+            return back()->withErrors([
+                'error' => 'Garage hiện ngoài giờ hoạt động (07:30–20:00), không thể tiếp nhận xe lúc này.'
+            ]);
+        }
+
         $yeuCau = YeuCauSuaChua::create([
             'MaXe'        => $data['MaXe'],
             'NgayHen'     => now()->toDateString(),
-            'KhungGioHen' => $this->khungGioHienTai(),
+            'KhungGioHen' => $khungGioHienTai,
             'MoTa'        => $data['MoTa'] ?? null,
             'TrangThai'   => 'CHO_PHAN_CONG',
         ]);
@@ -249,8 +259,8 @@ class LichHenController extends Controller
             ->with('success', 'Đã tạo yêu cầu tại chỗ. Vui lòng phân công KTV.');
     }
 
-    // Xác định khung giờ hiện tại (dùng cho khách đến trực tiếp)
-    private function khungGioHienTai(): string
+    // Xác định khung giờ hiện tại — trả về null nếu ngoài giờ hoạt động
+    private function khungGioHienTai(): ?string
     {
         $gioHienTai = now()->format('H:i');
         $danhSachKhungGio = $this->service->layDanhSachKhungGio();
@@ -262,7 +272,6 @@ class LichHenController extends Controller
             }
         }
 
-        // Nếu ngoài giờ hoạt động, trả về khung cuối cùng
-        return end($danhSachKhungGio);
+        return null; // ngoài giờ hoạt động 07:30-20:00
     }
 }
