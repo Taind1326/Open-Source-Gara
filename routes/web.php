@@ -90,3 +90,17 @@ Route::resource('loaidichvu', LoaiDichVuController::class)
 // M04 - Dịch vụ
 Route::resource('dichvu', DichVuController::class)
     ->except(['show', 'destroy']);
+
+use App\Http\Controllers\KiemTraXeController;
+
+Route::get('/kiem-tra-xe/{maYC}',
+    [KiemTraXeController::class, 'create'])
+    ->name('kiemtraxe.create');
+
+Route::post('/kiem-tra-xe/{maYC}',
+    [KiemTraXeController::class, 'store'])
+    ->name('kiemtraxe.store');
+
+Route::get('/kiem-tra-xe/{maYC}/ket-qua',
+    [KiemTraXeController::class, 'show'])
+    ->name('kiemtraxe.show');

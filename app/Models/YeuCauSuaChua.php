@@ -49,4 +49,13 @@ class YeuCauSuaChua extends Model
             'MaDV'
         );
     }
+
+    public function kiemTraXe()
+    {
+        return $this->hasOne(
+            KiemTraXe::class,
+            'MaYC',
+            'MaYC'
+        );
+    }
 }
