@@ -86,10 +86,7 @@ class BaoGiaController extends Controller
 
             $tongTien = 0;
 
-            foreach (
-                $yeuCau->kiemTraXe->deXuatDichVus
-                as $deXuat
-            ) {
+            foreach ($yeuCau->kiemTraXe->deXuatDichVus as $deXuat) {
                 $donGia = $deXuat->dichVu->Gia;
 
                 ChiTietBaoGia::create([
@@ -103,10 +100,7 @@ class BaoGiaController extends Controller
                 $tongTien += $donGia;
             }
 
-            foreach (
-                $yeuCau->kiemTraXe->deXuatPhuTungs
-                as $deXuat
-            ) {
+            foreach ($yeuCau->kiemTraXe->deXuatPhuTungs as $deXuat) {
                 $donGia = $deXuat->phuTung->Gia;
                 $soLuong = $deXuat->SoLuong;
 
@@ -161,6 +155,7 @@ class BaoGiaController extends Controller
             compact('yeuCau')
         );
     }
+
 
     public function approve($maYC)
     {

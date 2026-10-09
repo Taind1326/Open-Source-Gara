@@ -26,20 +26,31 @@ class YeuCauSuaChua extends Model
 
     public function xe()
     {
-        return $this->belongsTo(Xe::class, 'MaXe', 'MaXe');
+        return $this->belongsTo(
+            Xe::class,
+            'MaXe',
+            'MaXe'
+        );
     }
 
     public function chiTietDichVu()
     {
-        return $this->hasMany(ChiTietYeuCauDichVu::class, 'MaYC', 'MaYC');
+        return $this->hasMany(
+            ChiTietYeuCauDichVu::class,
+            'MaYC',
+            'MaYC'
+        );
     }
 
     public function phanCong()
     {
-        return $this->hasOne(PhanCong::class, 'MaYC', 'MaYC');
+        return $this->hasOne(
+            PhanCong::class,
+            'MaYC',
+            'MaYC'
+        );
     }
 
-    // Tiện lấy nhanh danh sách dịch vụ đã chọn (many-to-many qua bảng trung gian)
     public function dichVu()
     {
         return $this->belongsToMany(

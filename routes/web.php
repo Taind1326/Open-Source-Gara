@@ -121,3 +121,13 @@ Route::get(
     '/bao-gia/{maYC}',
     [BaoGiaController::class, 'show']
 )->name('baogia.show');
+
+Route::post(
+    '/bao-gia/{maYC}/dong-y',
+    [BaoGiaController::class, 'approve']
+)->name('baogia.approve');
+
+Route::post(
+    '/bao-gia/{maYC}/tu-choi',
+    [BaoGiaController::class, 'reject']
+)->name('baogia.reject');
