@@ -173,3 +173,21 @@ Route::post(
     '/sua-chua/{maYC}/hoan-thanh',
     [SuaChuaController::class, 'complete']
 )->name('suachua.complete');
+
+/*
+|--------------------------------------------------------------------------
+| DỊCH VỤ PUBLIC
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/dich-vu',
+    [\App\Http\Controllers\DichVuPublicController::class, 'index']
+)->name('public.dichvu.index');
+
+Route::get(
+    '/dich-vu/{maDV}',
+    [\App\Http\Controllers\DichVuPublicController::class, 'show']
+)
+    ->whereNumber('maDV')
+    ->name('public.dichvu.show');
