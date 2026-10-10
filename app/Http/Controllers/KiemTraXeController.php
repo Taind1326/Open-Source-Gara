@@ -124,6 +124,7 @@ class KiemTraXeController extends Controller
             'dich_vu_de_xuat.*' => [
                 'integer',
                 'exists:DICHVU,MaDV',
+                'distinct',
             ],
 
             // Phụ tùng KTV đề xuất
@@ -136,6 +137,7 @@ class KiemTraXeController extends Controller
                 'required',
                 'integer',
                 'exists:PHUTUNG,MaPT',
+                'distinct',
             ],
 
             'phu_tung_de_xuat.*.SoLuong' => [
@@ -179,6 +181,14 @@ class KiemTraXeController extends Controller
         }
 
         DB::transaction(function () use ($data, $yeuCau) {
+
+            $yeuCau = YeuCauSuaChua::where('MaYC', $yeuCau->MaYC)
+                ->lockForUpdate()->firstOrFail();
+            if ($yeuCau->TrangThai !== 'DA_TIEP_NHAN' || $yeuCau->kiemTraXe || !$yeuCau->phanCong) {
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'error' => 'Yêu cầu đã được xử lý hoặc chưa có phân công.'
+                ]);
+            }
 
             // 1. Lưu kết quả kiểm tra
             $kiemTra = KiemTraXe::create([
@@ -234,6 +244,10 @@ class KiemTraXeController extends Controller
             'kiemTraXe.deXuatDichVus.dichVu',
             'kiemTraXe.deXuatPhuTungs.phuTung',
         ])->findOrFail($maYC);
+
+        if (!$yeuCau->kiemTraXe) {
+            return redirect()->route('kiemtraxe.create', $maYC);
+        }
 
         return view(
             'kiemtraxe.show',

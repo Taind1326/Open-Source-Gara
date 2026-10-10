@@ -75,6 +75,18 @@ class BaoGiaController extends Controller
         ]);
 
         DB::transaction(function () use ($yeuCau, $data) {
+            $yeuCau = YeuCauSuaChua::where('MaYC', $yeuCau->MaYC)
+                ->lockForUpdate()->with([
+                    'kiemTraXe.deXuatDichVus.dichVu',
+                    'kiemTraXe.deXuatPhuTungs.phuTung', 'baoGia',
+                ])->firstOrFail();
+            if ($yeuCau->TrangThai !== 'DA_KIEM_TRA' || !$yeuCau->kiemTraXe || $yeuCau->baoGia) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['error' => 'Yêu cầu không còn cho phép lập báo giá.']);
+            }
+            if ($yeuCau->kiemTraXe->deXuatDichVus->isEmpty() && $yeuCau->kiemTraXe->deXuatPhuTungs->isEmpty()) {
+                throw \Illuminate\Validation\ValidationException::withMessages(['error' => 'Cần ít nhất một hạng mục đề xuất để lập báo giá.']);
+            }
+
 
             $baoGia = BaoGia::create([
                 'MaYC' => $yeuCau->MaYC,
@@ -175,6 +187,12 @@ class BaoGiaController extends Controller
         }
 
         DB::transaction(function () use ($yeuCau) {
+            $yeuCau = YeuCauSuaChua::where('MaYC', $yeuCau->MaYC)
+                ->lockForUpdate()->with('baoGia')->firstOrFail();
+            if ($yeuCau->TrangThai !== 'CHO_DUYET_BAO_GIA' || $yeuCau->baoGia?->TrangThai !== 'CHO_DUYET') {
+                throw \Illuminate\Validation\ValidationException::withMessages(['error' => 'Báo giá đã được xử lý.']);
+            }
+
 
             $yeuCau->baoGia->update([
                 'TrangThai' => 'DA_DUYET',
@@ -212,6 +230,12 @@ class BaoGiaController extends Controller
         }
 
         DB::transaction(function () use ($yeuCau) {
+            $yeuCau = YeuCauSuaChua::where('MaYC', $yeuCau->MaYC)
+                ->lockForUpdate()->with('baoGia')->firstOrFail();
+            if ($yeuCau->TrangThai !== 'CHO_DUYET_BAO_GIA' || $yeuCau->baoGia?->TrangThai !== 'CHO_DUYET') {
+                throw \Illuminate\Validation\ValidationException::withMessages(['error' => 'Báo giá đã được xử lý.']);
+            }
+
 
             $yeuCau->baoGia->update([
                 'TrangThai' => 'TU_CHOI',

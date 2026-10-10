@@ -762,5 +762,10 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
 
+
+@if($yeuCau->baoGia?->TrangThai === 'DA_DUYET')
+<a class="btn btn-primary mb-3" href="{{ route('suachua.show', $yeuCau->MaYC) }}">Phiếu sửa chữa và tiến độ</a>
+@endif
+
 </body>
 </html>

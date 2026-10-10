@@ -374,5 +374,12 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
 
+
+@if($yeuCau->TrangThai === 'DA_KIEM_TRA')
+<a class="btn btn-primary mb-3" href="{{ route('baogia.create', $yeuCau->MaYC) }}">Lập báo giá</a>
+@elseif($yeuCau->baoGia)
+<a class="btn btn-primary mb-3" href="{{ route('baogia.show', $yeuCau->MaYC) }}">Xem báo giá</a>
+@endif
+
 </body>
 </html>

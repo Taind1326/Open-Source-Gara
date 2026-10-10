@@ -48,7 +48,7 @@ class DichVuController extends Controller
     {
         $data = $request->validate([
             'MaLoaiDV' => 'required|exists:LOAIDICHVU,MaLoaiDV',
-            'TenDV' => 'required|string|max:150',
+            'TenDV' => 'required|string|max:100',
             'MoTa' => 'nullable|string|max:500',
             'Gia' => 'required|numeric|min:0',
             'HinhAnh' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
@@ -91,7 +91,7 @@ class DichVuController extends Controller
     {
         $data = $request->validate([
             'MaLoaiDV' => 'required|exists:LOAIDICHVU,MaLoaiDV',
-            'TenDV' => 'required|string|max:150',
+            'TenDV' => 'required|string|max:100',
             'MoTa' => 'nullable|string|max:500',
             'Gia' => 'required|numeric|min:0',
             'HinhAnh' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
