@@ -173,3 +173,6 @@ Route::post(
     '/sua-chua/{maYC}/hoan-thanh',
     [SuaChuaController::class, 'complete']
 )->name('suachua.complete');
+
+
+require __DIR__ . '/tv1.php';
