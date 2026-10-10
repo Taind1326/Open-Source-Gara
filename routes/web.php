@@ -191,3 +191,30 @@ Route::get(
 )
     ->whereNumber('maDV')
     ->name('public.dichvu.show');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/dang-nhap', [
+        \App\Http\Controllers\AuthController::class,
+        'showLogin',
+    ])->name('login');
+
+    Route::post('/dang-nhap', [
+        \App\Http\Controllers\AuthController::class,
+        'login',
+    ])->middleware('throttle:5,1')->name('login.store');
+
+    Route::get('/dang-ky', [
+        \App\Http\Controllers\AuthController::class,
+        'showRegister',
+    ])->name('register');
+
+    Route::post('/dang-ky', [
+        \App\Http\Controllers\AuthController::class,
+        'register',
+    ])->middleware('throttle:5,1')->name('register.store');
+});
+
+Route::post('/dang-xuat', [
+    \App\Http\Controllers\AuthController::class,
+    'logout',
+])->middleware('auth')->name('logout');
