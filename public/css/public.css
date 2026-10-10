@@ -1,0 +1,339 @@
+:root {
+    --garage-navy: #10243a;
+    --garage-blue: #2563eb;
+    --garage-muted: #64748b;
+    --garage-bg: #f5f7fb;
+    --garage-border: #e5eaf1;
+}
+
+body {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    color: var(--garage-navy);
+    background: var(--garage-bg);
+}
+
+a {
+    text-decoration: none;
+}
+
+/* Thanh điều hướng */
+
+.site-navbar {
+    background: #fff;
+    border-bottom: 1px solid var(--garage-border);
+}
+
+.site-navbar .navbar-brand {
+    color: var(--garage-navy);
+    font-weight: 800;
+    letter-spacing: -0.6px;
+}
+
+.brand-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    color: #fff;
+    background: var(--garage-blue);
+}
+
+.site-navbar .nav-link {
+    padding: 0.65rem 0.85rem !important;
+    color: #526176;
+    font-weight: 600;
+}
+
+.site-navbar .nav-link.active,
+.site-navbar .nav-link:hover {
+    color: var(--garage-blue);
+}
+
+.account-button {
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Thành phần dùng chung */
+
+.btn-primary {
+    --bs-btn-bg: var(--garage-blue);
+    --bs-btn-border-color: var(--garage-blue);
+    --bs-btn-hover-bg: #1d4ed8;
+    --bs-btn-hover-border-color: #1d4ed8;
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.btn-outline-primary,
+.btn-light,
+.btn-outline-light {
+    border-radius: 10px;
+    font-weight: 600;
+}
+
+.section-space {
+    padding: 72px 0;
+}
+
+.section-eyebrow {
+    color: var(--garage-blue);
+    font-size: 0.8rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.section-title {
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.text-muted {
+    color: var(--garage-muted) !important;
+}
+
+.feature-card {
+    height: 100%;
+    padding: 28px;
+    border: 1px solid var(--garage-border);
+    border-radius: 20px;
+    background: #fff;
+}
+
+.feature-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 54px;
+    height: 54px;
+    margin-bottom: 22px;
+    border-radius: 16px;
+    background: #eaf1ff;
+    color: var(--garage-blue);
+    font-size: 1.5rem;
+}
+
+/* Trang chủ */
+
+.home-hero {
+    overflow: hidden;
+    padding: 85px 0;
+    color: #fff;
+    background:
+        radial-gradient(
+            ellipse at 85% 20%,
+            rgba(37, 99, 235, 0.22),
+            transparent 55%
+        ),
+        var(--garage-navy);
+}
+
+.hero-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 30px;
+    color: #bfdbfe;
+    font-size: 0.85rem;
+}
+
+.home-hero h1 {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -1.8px;
+}
+
+.hero-highlight {
+    color: #93c5fd;
+}
+
+.hero-description {
+    max-width: 510px;
+    color: #bdcada;
+}
+
+.hero-benefits {
+    color: #bdcada;
+}
+
+.hero-panel {
+    padding: 32px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 26px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.hero-car {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 170px;
+    margin-bottom: 24px;
+    border-radius: 20px;
+    background: linear-gradient(
+        135deg,
+        rgba(37, 99, 235, 0.19),
+        rgba(255, 255, 255, 0.02)
+    );
+    color: #93c5fd;
+    font-size: 7rem;
+}
+
+.hero-panel-description {
+    color: #bdcada;
+}
+
+.hero-step {
+    display: flex;
+    gap: 14px;
+    padding: 15px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.hero-step:last-child {
+    border-bottom: 0;
+}
+
+.hero-step > i {
+    flex-shrink: 0;
+    color: #93c5fd;
+    font-size: 1.25rem;
+}
+
+.hero-step small {
+    color: #bdcada;
+}
+
+.step-number {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    margin-bottom: 18px;
+    border-radius: 50%;
+    background: var(--garage-navy);
+    color: #fff;
+    font-weight: 700;
+}
+
+.cta-panel {
+    padding: 45px;
+    border-radius: 24px;
+    color: #fff;
+    background: var(--garage-blue);
+}
+
+.cta-description {
+    color: #dbeafe;
+}
+
+/* Trang dịch vụ */
+
+.hero {
+    padding: 56px 0;
+    color: #fff;
+    background: var(--garage-navy);
+}
+
+.service-card {
+    overflow: hidden;
+    height: 100%;
+    border: 1px solid var(--garage-border);
+    border-radius: 18px;
+    background: #fff;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 35px rgba(16, 36, 58, 0.07);
+}
+
+.service-card img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+}
+
+/* Chân trang */
+
+.site-footer {
+    background: var(--garage-navy);
+    color: #c1cbd8;
+}
+
+.site-footer a {
+    color: #c1cbd8;
+}
+
+.site-footer a:hover {
+    color: #fff;
+}
+
+.site-footer .footer-title {
+    color: #fff;
+    font-weight: 700;
+}
+
+.footer-description {
+    max-width: 380px;
+}
+
+/* Điện thoại và máy tính bảng */
+
+@media (max-width: 991.98px) {
+    .site-navbar .navbar-collapse {
+        padding-top: 12px;
+        padding-bottom: 12px;
+    }
+
+    .site-navbar .nav-link {
+        padding-left: 0 !important;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .section-space {
+        padding: 48px 0;
+    }
+
+    .section-title {
+        letter-spacing: -0.5px;
+    }
+
+    .home-hero {
+        padding: 55px 0;
+    }
+
+    .home-hero h1 {
+        letter-spacing: -1px;
+    }
+
+    .hero-panel {
+        padding: 24px;
+    }
+
+    .cta-panel {
+        padding: 28px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .service-card {
+        transition: none;
+    }
+
+    .service-card:hover {
+        transform: none;
+    }
+}

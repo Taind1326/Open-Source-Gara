@@ -19,9 +19,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return redirect()->route('public.dichvu.index');
-});
+Route::view('/', 'public.home')->name('public.home');
+Route::view('/gioi-thieu', 'public.about')->name('public.about');
+Route::view('/lien-he', 'public.contact')->name('public.contact');
 
 Route::get(
     '/dich-vu',
