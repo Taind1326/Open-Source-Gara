@@ -1,1180 +1,398 @@
-<!DOCTYPE html>
-<html lang="vi">
+@extends('admin.layout')
 
-<head>
+@section('title', 'Thống kê doanh thu')
 
-    <meta charset="UTF-8">
+@push('styles')
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+        .stat-value {
+            font-size: 1.65rem;
+            font-weight: 800;
+        }
+    </style>
+@endpush
 
-    <title>
-        Thống kê
-    </title>
+@section('content')
+    <div class="mb-4">
+        <h1 class="h4 fw-bold mb-1">Thống kê doanh thu</h1>
 
-    @vite('resources/css/thongke.css')
-
-</head>
-
-
-<body>
-
-<div class="container">
-
-
-    <div class="page-header">
-
-        <div>
-
-            <h1 class="page-title">
-                Thống kê
-            </h1>
-
-            <p class="page-description">
-                Thống kê hoạt động Garage
-            </p>
-
-        </div>
-
-
-        <a
-            href="{{ url('/') }}"
-            class="btn btn-back"
-        >
-            Trang chủ
-        </a>
-
+        <p class="text-secondary mb-0">
+            Doanh thu thực nhận, xu hướng tăng trưởng và hạng mục đóng góp nhiều nhất.
+        </p>
     </div>
 
-
-    {{-- =================================================
-         BỘ LỌC
-    ================================================== --}}
-
-    <div class="section">
-
-        <h2 class="section-title">
-            Khoảng thời gian thống kê
-        </h2>
-
-
-        <div
-            id="dateMessage"
-            class="date-message"
-            style="display: none;"
-        ></div>
-
-
-        <form
-            method="GET"
-            action="{{ route('thongke.admin.index') }}"
-            class="filter-form"
-            id="filterForm"
-        >
-
-
-            {{-- =========================
-                 TỪ NGÀY
-            ========================== --}}
-
-            <div class="filter-item">
-
-                <label>
-                    Từ ngày
-                </label>
-
-
-                <div class="date-picker-group">
-
-                    <input
-                        type="text"
-                        id="tu_ngay_hien_thi"
-                        class="date-text"
-                        value="{{ \Carbon\Carbon::parse($tuNgay)->format('d/m/Y') }}"
-                        placeholder="dd/mm/yyyy"
-                        maxlength="10"
-                        autocomplete="off"
-                    >
-
-
-                    <button
-                        type="button"
-                        class="calendar-button"
-                        id="btnTuNgay"
-                        title="Chọn ngày"
-                    >
-                        📅
-                    </button>
-
-
-                    <input
-                        type="date"
-                        id="tu_ngay"
-                        name="tu_ngay"
-                        value="{{ $tuNgay }}"
-                        class="hidden-date-input"
-                    >
-
-                </div>
-
-            </div>
-
-
-            {{-- =========================
-                 ĐẾN NGÀY
-            ========================== --}}
-
-            <div class="filter-item">
-
-                <label>
-                    Đến ngày
-                </label>
-
-
-                <div class="date-picker-group">
-
-                    <input
-                        type="text"
-                        id="den_ngay_hien_thi"
-                        class="date-text"
-                        value="{{ \Carbon\Carbon::parse($denNgay)->format('d/m/Y') }}"
-                        placeholder="dd/mm/yyyy"
-                        maxlength="10"
-                        autocomplete="off"
-                    >
-
-
-                    <button
-                        type="button"
-                        class="calendar-button"
-                        id="btnDenNgay"
-                        title="Chọn ngày"
-                    >
-                        📅
-                    </button>
-
-
-                    <input
-                        type="date"
-                        id="den_ngay"
-                        name="den_ngay"
-                        value="{{ $denNgay }}"
-                        class="hidden-date-input"
-                    >
-
-                </div>
-
-            </div>
-
-
-            <button
-                type="submit"
-                class="btn btn-primary"
-            >
-                Xem thống kê
-            </button>
-
-        </form>
-
-    </div>
-
-
-    {{-- =================================================
-         TỔNG QUAN
-    ================================================== --}}
-
-    <div class="stats-grid">
-
-
-        <div class="stat-card">
-
-            <div class="stat-title">
-                Yêu cầu sửa chữa
-            </div>
-
-            <div class="stat-value">
-
-                {{ number_format(
-                    $tongYeuCau,
-                    0,
-                    ',',
-                    '.'
-                ) }}
-
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-title">
-                Doanh thu
-            </div>
-
-            <div class="stat-value">
-
-                {{ number_format(
-                    $doanhThu,
-                    0,
-                    ',',
-                    '.'
-                ) }} đ
-
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-title">
-                Hóa đơn đã thanh toán
-            </div>
-
-            <div class="stat-value">
-
-                {{ number_format(
-                    $soHoaDonThanhToan,
-                    0,
-                    ',',
-                    '.'
-                ) }}
-
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-title">
-                Hóa đơn chưa thanh toán
-            </div>
-
-            <div class="stat-value">
-
-                {{ number_format(
-                    $soHoaDonChuaThanhToan,
-                    0,
-                    ',',
-                    '.'
-                ) }}
-
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-title">
-                Lượt sử dụng dịch vụ
-            </div>
-
-            <div class="stat-value">
-
-                {{ number_format(
-                    $tongLuotDichVu,
-                    0,
-                    ',',
-                    '.'
-                ) }}
-
-            </div>
-
-        </div>
-
-
-        <div class="stat-card">
-
-            <div class="stat-title">
-                Lượt sử dụng phụ tùng
-            </div>
-
-            <div class="stat-value">
-
-                {{ number_format(
-                    $tongLuotPhuTung,
-                    0,
-                    ',',
-                    '.'
-                ) }}
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    {{-- =================================================
-         DOANH THU THEO NGÀY
-    ================================================== --}}
-
-    <div class="section">
-
-        <h2 class="section-title">
-            Doanh thu theo ngày
-        </h2>
-
-
-        @if($doanhThuTheoNgay->count() > 0)
-
-            @php
-
-                $doanhThuLonNhat =
-                    $doanhThuTheoNgay->max(
-                        'DoanhThu'
-                    );
-
-            @endphp
-
-
-            <div class="chart">
-
-                @foreach(
-                    $doanhThuTheoNgay
-                    as $item
-                )
-
-                    @php
-
-                        $phanTram =
-                            $doanhThuLonNhat > 0
-                                ? (
-                                    $item->DoanhThu
-                                    /
-                                    $doanhThuLonNhat
-                                ) * 100
-                                : 0;
-
-                    @endphp
-
-
-                    <div class="chart-row">
-
-                        <div class="chart-date">
-
-                            {{
-                                \Carbon\Carbon::parse(
-                                    $item->Ngay
-                                )->format('d/m/Y')
-                            }}
-
-                        </div>
-
-
-                        <div class="chart-bar-wrapper">
-
-                            <div
-                                class="chart-bar"
-                                style="width: {{ $phanTram }}%;"
-                            ></div>
-
-                        </div>
-
-
-                        <div class="chart-money">
-
-                            {{ number_format(
-                                $item->DoanhThu,
-                                0,
-                                ',',
-                                '.'
-                            ) }} đ
-
-                        </div>
-
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ route('thongke.admin.index') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-4">
+                        <label for="tu_ngay" class="form-label">Từ ngày</label>
+
+                        <input
+                            type="date"
+                            id="tu_ngay"
+                            name="tu_ngay"
+                            value="{{ $tuNgay }}"
+                            max="{{ now('Asia/Ho_Chi_Minh')->format('Y-m-d') }}"
+                            class="form-control"
+                            required
+                        >
                     </div>
 
-                @endforeach
+                    <div class="col-md-4">
+                        <label for="den_ngay" class="form-label">Đến ngày</label>
 
-            </div>
+                        <input
+                            type="date"
+                            id="den_ngay"
+                            name="den_ngay"
+                            value="{{ $denNgay }}"
+                            max="{{ now('Asia/Ho_Chi_Minh')->format('Y-m-d') }}"
+                            class="form-control"
+                            required
+                        >
+                    </div>
 
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Xem thống kê
+                        </button>
+                    </div>
 
-        @else
-
-            <div class="empty">
-                Chưa có doanh thu trong khoảng thời gian này.
-            </div>
-
-        @endif
-
+                    <div class="col-md-2">
+                        <a
+                            href="{{ route('thongke.admin.index') }}"
+                            class="btn btn-outline-secondary w-100"
+                        >
+                            Tháng này
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="text-secondary mb-2">Doanh thu thực nhận</div>
 
-    {{-- =================================================
-         THỐNG KÊ DỊCH VỤ
-    ================================================== --}}
+                    <div class="stat-value text-primary">
+                        {{ number_format($doanhThu, 0, ',', '.') }} đ
+                    </div>
 
-    <div class="section">
-
-        <h2 class="section-title">
-            Thống kê dịch vụ
-        </h2>
-
-
-        @if($dichVu->count() > 0)
-
-            <div class="table-wrapper">
-
-                <table class="statistics-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                STT
-                            </th>
-
-                            <th>
-                                Tên dịch vụ
-                            </th>
-
-                            <th>
-                                Số lượng
-                            </th>
-
-                            <th>
-                                Thành tiền
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                    @foreach(
-                        $dichVu as $index => $item
-                    )
-
-                        <tr>
-
-                            <td>
-                                {{ $index + 1 }}
-                            </td>
-
-                            <td>
-                                {{ $item->TenDV }}
-                            </td>
-
-                            <td>
-
-                                {{ number_format(
-                                    $item->SoLuong,
-                                    0,
-                                    ',',
-                                    '.'
-                                ) }}
-
-                            </td>
-
-                            <td class="money">
-
-                                {{ number_format(
-                                    $item->ThanhTien,
-                                    0,
-                                    ',',
-                                    '.'
-                                ) }} đ
-
-                            </td>
-
-                        </tr>
-
-                    @endforeach
-
-                    </tbody>
-
-                </table>
-
+                    <div class="small text-secondary mt-2">
+                        Hóa đơn thanh toán trong khoảng đã chọn.
+                    </div>
+                </div>
             </div>
+        </div>
 
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="text-secondary mb-2">Đã thanh toán</div>
 
-        @else
+                    <div class="stat-value text-success">
+                        {{ $soHoaDonThanhToan }}
+                    </div>
 
-            <div class="empty">
-                Chưa có dữ liệu dịch vụ.
+                    <div class="small text-secondary mt-2">
+                        Theo ngày thanh toán.
+                    </div>
+                </div>
             </div>
+        </div>
 
-        @endif
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="text-secondary mb-2">Chưa thanh toán</div>
 
+                    <div class="stat-value text-warning">
+                        {{ $soHoaDonChuaThanhToan }}
+                    </div>
+
+                    <div class="small text-secondary mt-2">
+                        Lập trong khoảng chọn, hiện chưa thanh toán.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 col-xl-3">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <div class="text-secondary mb-2">Yêu cầu mới</div>
+
+                    <div class="stat-value">{{ $tongYeuCau }}</div>
+
+                    <div class="small text-secondary mt-2">
+                        Theo ngày tạo yêu cầu.
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
+    @if ($soHoaDonThanhToan === 0)
+        <div class="alert alert-info">
+            Chưa có hóa đơn đã thanh toán trong khoảng chọn.
+            Biểu đồ theo ngày và bảng top sẽ chưa có doanh thu.
+        </div>
+    @endif
 
-    {{-- =================================================
-         THỐNG KÊ PHỤ TÙNG
-    ================================================== --}}
+    <div class="row g-4 mb-4">
+        <div class="col-xl-7">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold">Doanh thu theo ngày</h2>
 
-    <div class="section">
+                    <p class="small text-secondary">
+                        Trong khoảng ngày đã chọn, theo giờ Việt Nam.
+                    </p>
 
-        <h2 class="section-title">
-            Thống kê phụ tùng
-        </h2>
-
-
-        @if($phuTung->count() > 0)
-
-            <div class="table-wrapper">
-
-                <table class="statistics-table">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>
-                                STT
-                            </th>
-
-                            <th>
-                                Tên phụ tùng
-                            </th>
-
-                            <th>
-                                Số lượng
-                            </th>
-
-                            <th>
-                                Thành tiền
-                            </th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                    @foreach(
-                        $phuTung as $index => $item
-                    )
-
-                        <tr>
-
-                            <td>
-                                {{ $index + 1 }}
-                            </td>
-
-                            <td>
-                                {{ $item->TenPT }}
-                            </td>
-
-                            <td>
-
-                                {{ number_format(
-                                    $item->SoLuong,
-                                    0,
-                                    ',',
-                                    '.'
-                                ) }}
-
-                            </td>
-
-                            <td class="money">
-
-                                {{ number_format(
-                                    $item->ThanhTien,
-                                    0,
-                                    ',',
-                                    '.'
-                                ) }} đ
-
-                            </td>
-
-                        </tr>
-
-                    @endforeach
-
-                    </tbody>
-
-                </table>
-
+                    <div class="chart-container">
+                        <canvas
+                            id="dailyChart"
+                            role="img"
+                            aria-label="Biểu đồ doanh thu theo ngày"
+                        ></canvas>
+                    </div>
+                </div>
             </div>
+        </div>
 
+        <div class="col-xl-5">
+            <div class="card h-100">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold">So sánh với tháng trước</h2>
 
-        @else
+                    <p class="small text-secondary mb-3">
+                        So sánh ngày 01–{{ $comparisonDays }} của
+                        tháng {{ $currentMonthLabel }} và {{ $previousMonthLabel }}.
+                    </p>
 
-            <div class="empty">
-                Chưa có dữ liệu phụ tùng.
+                    <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                        <span class="h4 fw-bold mb-0">
+                            {{ number_format($currentRevenue, 0, ',', '.') }} đ
+                        </span>
+
+                        @if ($growth !== null)
+                            <span class="badge {{ $growth >= 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
+                                {{ $growth > 0 ? '+' : '' }}{{ number_format($growth, 1, ',', '.') }}%
+                            </span>
+                        @else
+                            <span class="badge bg-secondary-subtle text-secondary">
+                                Tháng trước bằng 0
+                            </span>
+                        @endif
+                    </div>
+
+                    <p class="small text-secondary">
+                        Chênh lệch:
+                        {{ $difference > 0 ? '+' : '' }}{{ number_format($difference, 0, ',', '.') }} đ
+                    </p>
+
+                    <div class="chart-container" style="height: 220px;">
+                        <canvas
+                            id="comparisonChart"
+                            role="img"
+                            aria-label="Biểu đồ so sánh doanh thu hai tháng"
+                        ></canvas>
+                    </div>
+                </div>
             </div>
+        </div>
 
-        @endif
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold">Doanh thu 6 tháng</h2>
 
+                    <p class="small text-secondary">
+                        Kết thúc ở tháng {{ $currentMonthLabel }}.
+                        Tháng cuối chỉ tính đến ngày {{ $denNgay }};
+                        các tháng trước tính cả tháng.
+                    </p>
+
+                    <div class="chart-container">
+                        <canvas
+                            id="monthlyChart"
+                            role="img"
+                            aria-label="Biểu đồ doanh thu sáu tháng"
+                        ></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-</div>
-
-
-<script>
-
-    const filterForm =
-        document.getElementById(
-            'filterForm'
-        );
-
-
-    const dateMessage =
-        document.getElementById(
-            'dateMessage'
-        );
-
-
-    const inputTuNgay =
-        document.getElementById(
-            'tu_ngay'
-        );
-
-
-    const inputDenNgay =
-        document.getElementById(
-            'den_ngay'
-        );
-
-
-    const textTuNgay =
-        document.getElementById(
-            'tu_ngay_hien_thi'
-        );
-
-
-    const textDenNgay =
-        document.getElementById(
-            'den_ngay_hien_thi'
-        );
-
-
-    const btnTuNgay =
-        document.getElementById(
-            'btnTuNgay'
-        );
-
-
-    const btnDenNgay =
-        document.getElementById(
-            'btnDenNgay'
-        );
-
-
-    function hienThiMessage(
-        noiDung
-    ) {
-
-        dateMessage.textContent =
-            noiDung;
-
-        dateMessage.style.display =
-            'block';
-
-    }
-
-
-    function anMessage() {
-
-        dateMessage.textContent =
-            '';
-
-        dateMessage.style.display =
-            'none';
-
-    }
-
-
-    function formatNgay(
-        value
-    ) {
-
-        if (!value) {
-            return '';
-        }
-
-
-        const parts =
-            value.split('-');
-
-
-        if (parts.length !== 3) {
-            return '';
-        }
-
-
-        return (
-            parts[2]
-            + '/'
-            + parts[1]
-            + '/'
-            + parts[0]
-        );
-
-    }
-
-
-    function parseNgay(
-        value
-    ) {
-
-        const parts =
-            value
-                .trim()
-                .split('/');
-
-
-        if (parts.length !== 3) {
-            return null;
-        }
-
-
-        const ngayText =
-            parts[0];
-
-        const thangText =
-            parts[1];
-
-        const namText =
-            parts[2];
-
-
-        if (
-            ngayText.length !== 2 ||
-            thangText.length !== 2 ||
-            namText.length !== 4
-        ) {
-
-            return null;
-
-        }
-
-
-        const ngay =
-            parseInt(
-                ngayText,
-                10
-            );
-
-
-        const thang =
-            parseInt(
-                thangText,
-                10
-            );
-
-
-        const nam =
-            parseInt(
-                namText,
-                10
-            );
-
-
-        if (
-            Number.isNaN(ngay) ||
-            Number.isNaN(thang) ||
-            Number.isNaN(nam)
-        ) {
-
-            return null;
-
-        }
-
-
-        if (
-            ngay < 1 ||
-            ngay > 31
-        ) {
-
-            return null;
-
-        }
-
-
-        if (
-            thang < 1 ||
-            thang > 12
-        ) {
-
-            return null;
-
-        }
-
-
-        if (
-            nam < 1900 ||
-            nam > 2100
-        ) {
-
-            return null;
-
-        }
-
-
-        const testDate =
-            new Date(
-                nam,
-                thang - 1,
-                ngay
-            );
-
-
-        if (
-            testDate.getFullYear()
-                !== nam
-            ||
-            testDate.getMonth()
-                !== thang - 1
-            ||
-            testDate.getDate()
-                !== ngay
-        ) {
-
-            return null;
-
-        }
-
-
-        return (
-            nam
-            + '-'
-            + String(thang)
-                .padStart(2, '0')
-            + '-'
-            + String(ngay)
-                .padStart(2, '0')
-        );
-
-    }
-
-
-    function moLich(
-        input
-    ) {
-
-        if (
-            typeof input.showPicker
-            === 'function'
-        ) {
-
-            input.showPicker();
-
+    <div class="mb-3">
+        <h2 class="h5 fw-bold mb-1">Top hạng mục theo doanh thu</h2>
+
+        <p class="small text-secondary mb-0">
+            Trong khoảng ngày đã chọn, chỉ tính hóa đơn đã thanh toán.
+            Giảm giá được phân bổ theo tỷ trọng giá trị từng hạng mục.
+        </p>
+    </div>
+
+    <div class="row g-4">
+        @foreach ([
+            ['title' => 'Top 10 dịch vụ', 'items' => $topServices, 'count' => $tongLuotDichVu],
+            ['title' => 'Top 10 phụ tùng', 'items' => $topParts, 'count' => $tongLuotPhuTung],
+        ] as $group)
+            <div class="col-xl-6">
+                <div class="card h-100">
+                    <div class="card-body p-4 border-bottom">
+                        <h3 class="h5 fw-bold mb-1">{{ $group['title'] }}</h3>
+
+                        <div class="small text-secondary">
+                            Tổng số lượng đã thanh toán:
+                            {{ number_format($group['count'], 0, ',', '.') }}
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Hạng</th>
+                                    <th>Hạng mục</th>
+                                    <th>Số lượng</th>
+                                    <th class="text-end pe-4">Doanh thu</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @forelse ($group['items'] as $item)
+                                    <tr>
+                                        <td class="ps-4">
+                                            <span class="badge {{ $loop->first ? 'bg-primary' : 'bg-secondary-subtle text-secondary' }}">
+                                                {{ $loop->iteration }}
+                                            </span>
+                                        </td>
+
+                                        <td class="fw-semibold">{{ $item->Ten }}</td>
+                                        <td>{{ $item->SoLuong }}</td>
+
+                                        <td class="text-end pe-4 text-nowrap">
+                                            {{ number_format($item->DoanhThu, 0, ',', '.') }} đ
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="4" class="text-center text-secondary py-4">
+                                            Chưa có doanh thu.
+                                        </td>
+                                    </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        @endforeach
+    </div>
+
+    <div id="chartError" class="alert alert-warning mt-4 d-none">
+        Không tải được thư viện biểu đồ. Kiểm tra kết nối mạng rồi tải lại trang.
+    </div>
+@endsection
+
+@push('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+
+    <script>
+        const report = {{ \Illuminate\Support\Js::from($chartData) }};
+        const money = new Intl.NumberFormat('vi-VN');
+
+        if (typeof Chart === 'undefined') {
+            document.getElementById('chartError').classList.remove('d-none');
         } else {
+            function drawChart(id, type, labels, values, colors) {
+                return new Chart(document.getElementById(id), {
+                    type,
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Doanh thu',
+                            data: values,
+                            backgroundColor: colors,
+                            borderColor: '#2563eb',
+                            borderWidth: type === 'line' ? 2 : 0,
+                            borderRadius: type === 'bar' ? 6 : 0,
+                            fill: type === 'line',
+                            tension: 0.3,
+                            pointRadius: values.length > 60 ? 0 : 3
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: context =>
+                                        'Doanh thu: ' + money.format(context.parsed.y) + ' đ'
+                                }
+                            }
+                        },
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    maxTicksLimit: 12
+                                }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: value => money.format(value) + ' đ'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
 
-            input.focus();
-
-            input.click();
-
-        }
-
-    }
-
-
-    btnTuNgay.addEventListener(
-        'click',
-        function () {
-
-            moLich(
-                inputTuNgay
+            drawChart(
+                'dailyChart',
+                'line',
+                report.dailyLabels,
+                report.dailyValues,
+                'rgba(37, 99, 235, 0.12)'
             );
 
-        }
-    );
-
-
-    btnDenNgay.addEventListener(
-        'click',
-        function () {
-
-            moLich(
-                inputDenNgay
+            drawChart(
+                'monthlyChart',
+                'bar',
+                report.monthlyLabels,
+                report.monthlyValues,
+                '#2563eb'
             );
 
-        }
-    );
-
-
-    inputTuNgay.addEventListener(
-        'change',
-        function () {
-
-            textTuNgay.value =
-                formatNgay(
-                    this.value
-                );
-
-            textTuNgay.dispatchEvent(
-                new Event('change')
+            drawChart(
+                'comparisonChart',
+                'bar',
+                report.comparisonLabels,
+                report.comparisonValues,
+                ['#94a3b8', '#2563eb']
             );
-
-            anMessage();
-
         }
-    );
-
-
-    inputDenNgay.addEventListener(
-        'change',
-        function () {
-
-            textDenNgay.value =
-                formatNgay(
-                    this.value
-                );
-
-            textDenNgay.dispatchEvent(
-                new Event('change')
-            );
-
-            anMessage();
-
-        }
-    );
-
-
-    textTuNgay.addEventListener(
-        'input',
-        function () {
-
-            this.value =
-                this.value.replace(
-                    /\D/g,
-                    ''
-                );
-
-
-            if (
-                this.value.length > 8
-            ) {
-
-                this.value =
-                    this.value.substring(
-                        0,
-                        8
-                    );
-
-            }
-
-
-            if (
-                this.value.length >= 5
-            ) {
-
-                this.value =
-                    this.value.substring(
-                        0,
-                        2
-                    )
-                    + '/'
-                    + this.value.substring(
-                        2,
-                        4
-                    )
-                    + '/'
-                    + this.value.substring(
-                        4
-                    );
-
-            } else if (
-                this.value.length >= 3
-            ) {
-
-                this.value =
-                    this.value.substring(
-                        0,
-                        2
-                    )
-                    + '/'
-                    + this.value.substring(
-                        2
-                    );
-
-            }
-
-        }
-    );
-
-
-    textDenNgay.addEventListener(
-        'input',
-        function () {
-
-            this.value =
-                this.value.replace(
-                    /\D/g,
-                    ''
-                );
-
-
-            if (
-                this.value.length > 8
-            ) {
-
-                this.value =
-                    this.value.substring(
-                        0,
-                        8
-                    );
-
-            }
-
-
-            if (
-                this.value.length >= 5
-            ) {
-
-                this.value =
-                    this.value.substring(
-                        0,
-                        2
-                    )
-                    + '/'
-                    + this.value.substring(
-                        2,
-                        4
-                    )
-                    + '/'
-                    + this.value.substring(
-                        4
-                    );
-
-            } else if (
-                this.value.length >= 3
-            ) {
-
-                this.value =
-                    this.value.substring(
-                        0,
-                        2
-                    )
-                    + '/'
-                    + this.value.substring(
-                        2
-                    );
-
-            }
-
-        }
-    );
-
-
-    filterForm.addEventListener(
-        'submit',
-        function (event) {
-
-            anMessage();
-
-
-            const tuNgay =
-                parseNgay(
-                    textTuNgay.value
-                );
-
-
-            const denNgay =
-                parseNgay(
-                    textDenNgay.value
-                );
-
-
-            if (
-                !tuNgay ||
-                !denNgay
-            ) {
-
-                event.preventDefault();
-
-                hienThiMessage(
-                    'Vui lòng nhập ngày theo đúng dạng dd/mm/yyyy.'
-                );
-
-                return;
-
-            }
-
-
-            if (
-                tuNgay > denNgay
-            ) {
-
-                event.preventDefault();
-
-                hienThiMessage(
-                    'Từ ngày không được lớn hơn đến ngày.'
-                );
-
-                return;
-
-            }
-
-
-            inputTuNgay.value =
-                tuNgay;
-
-
-            inputDenNgay.value =
-                denNgay;
-
-        }
-    );
-
-
-    textTuNgay.addEventListener(
-        'blur',
-        function () {
-
-            const value =
-                parseNgay(
-                    this.value
-                );
-
-
-            if (
-                this.value !== ''
-                &&
-                !value
-            ) {
-
-                hienThiMessage(
-                    'Ngày bắt đầu không hợp lệ. Vui lòng nhập theo dạng dd/mm/yyyy.'
-                );
-
-            }
-
-        }
-    );
-
-
-    textDenNgay.addEventListener(
-        'blur',
-        function () {
-
-            const value =
-                parseNgay(
-                    this.value
-                );
-
-
-            if (
-                this.value !== ''
-                &&
-                !value
-            ) {
-
-                hienThiMessage(
-                    'Ngày kết thúc không hợp lệ. Vui lòng nhập theo dạng dd/mm/yyyy.'
-                );
-
-            }
-
-        }
-    );
-
-</script>
-
-
-</body>
-
-</html>
+    </script>
+@endpush
