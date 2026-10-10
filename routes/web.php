@@ -1,195 +1,301 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PhuTungController;
-use App\Http\Controllers\HoaDonController;
-use App\Http\Controllers\ThongKeController;
-use App\Http\Controllers\LoaiDichVuController;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\BaoGiaController;
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\DichVuPublicController;
+use App\Http\Controllers\HoaDonController;
+use App\Http\Controllers\KiemTraXeController;
+use App\Http\Controllers\LoaiDichVuController;
+use App\Http\Controllers\PhuTungController;
 use App\Http\Controllers\SuaChuaController;
+use App\Http\Controllers\ThongKeController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| TRANG PUBLIC
+|--------------------------------------------------------------------------
+*/
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('public.dichvu.index');
 });
-
-
-/*
-|--------------------------------------------------------------------------
-| M05 - PHỤ TÙNG
-|--------------------------------------------------------------------------
-*/
-
-Route::resource(
-    'phutung',
-    PhuTungController::class
-)->except(['show']);
-
-
-/*
-|--------------------------------------------------------------------------
-| M11 - HÓA ĐƠN & THANH TOÁN
-|--------------------------------------------------------------------------
-*/
-
-// Admin xem danh sách hóa đơn
-Route::get(
-    '/admin/hoadon',
-    [HoaDonController::class, 'adminIndex']
-)->name('hoadon.admin.index');
-
-// Admin lập hóa đơn
-Route::post(
-    '/admin/hoadon/tao/{maPSC}',
-    [HoaDonController::class, 'taoHoaDon']
-)->name('hoadon.admin.tao');
-
-// User xem danh sách hóa đơn
-Route::get(
-    '/hoadon',
-    [HoaDonController::class, 'index']
-)->name('hoadon.index');
-
-// User xem chi tiết hóa đơn
-Route::get(
-    '/hoadon/{maHD}',
-    [HoaDonController::class, 'show']
-)->name('hoadon.show');
-
-// User áp dụng điểm
-Route::post(
-    '/hoadon/{maHD}/ap-dung-diem',
-    [HoaDonController::class, 'apDungDiem']
-)->name('hoadon.ap-dung-diem');
-
-// User bỏ sử dụng điểm
-Route::post(
-    '/hoadon/{maHD}/bo-diem',
-    [HoaDonController::class, 'boDiem']
-)->name('hoadon.bo-diem');
-
-// User thanh toán
-Route::post(
-    '/hoadon/{maHD}/thanh-toan',
-    [HoaDonController::class, 'thanhToan']
-)->name('hoadon.thanh-toan');
-
-/*
-|--------------------------------------------------------------------------
-| M12 - THỐNG KÊ
-|--------------------------------------------------------------------------
-*/
-
-Route::get(
-    '/admin/thongke',
-    [ThongKeController::class, 'index']
-)->name('thongke.admin.index');
-
-// M04 - Loại dịch vụ
-Route::resource('loaidichvu', LoaiDichVuController::class)
-    ->except(['show', 'destroy']);
-
-// M04 - Dịch vụ
-Route::resource('dichvu', DichVuController::class)
-    ->except(['show', 'destroy']);
-
-use App\Http\Controllers\KiemTraXeController;
-
-Route::get('/kiem-tra-xe/{maYC}',
-    [KiemTraXeController::class, 'create'])
-    ->name('kiemtraxe.create');
-
-Route::post('/kiem-tra-xe/{maYC}',
-    [KiemTraXeController::class, 'store'])
-    ->name('kiemtraxe.store');
-
-Route::get('/kiem-tra-xe/{maYC}/ket-qua',
-    [KiemTraXeController::class, 'show'])
-    ->name('kiemtraxe.show');
-
-    use App\Http\Controllers\BaoGiaController;
-
-Route::get(
-    '/bao-gia/{maYC}/lap',
-    [BaoGiaController::class, 'create']
-)->name('baogia.create');
-
-Route::post(
-    '/bao-gia/{maYC}',
-    [BaoGiaController::class, 'store']
-)->name('baogia.store');
-
-Route::get(
-    '/bao-gia/{maYC}',
-    [BaoGiaController::class, 'show']
-)->name('baogia.show');
-
-Route::post(
-    '/bao-gia/{maYC}/dong-y',
-    [BaoGiaController::class, 'approve']
-)->name('baogia.approve');
-
-Route::post(
-    '/bao-gia/{maYC}/tu-choi',
-    [BaoGiaController::class, 'reject']
-)->name('baogia.reject');
-
-/*
-|--------------------------------------------------------------------------
-| M10 - SỬA CHỮA & TIẾN ĐỘ
-|--------------------------------------------------------------------------
-*/
-
-Route::get(
-    '/sua-chua/{maYC}/bat-dau',
-    [SuaChuaController::class, 'create']
-)->name('suachua.create');
-
-Route::post(
-    '/sua-chua/{maYC}/bat-dau',
-    [SuaChuaController::class, 'store']
-)->name('suachua.store');
-
-Route::get(
-    '/sua-chua/{maYC}',
-    [SuaChuaController::class, 'show']
-)->name('suachua.show');
-
-Route::post(
-    '/sua-chua/{maYC}/dich-vu',
-    [SuaChuaController::class, 'addService']
-)->name('suachua.service');
-
-Route::post(
-    '/sua-chua/{maYC}/phu-tung',
-    [SuaChuaController::class, 'addPart']
-)->name('suachua.part');
-
-Route::post(
-    '/sua-chua/{maYC}/tien-do',
-    [SuaChuaController::class, 'addProgress']
-)->name('suachua.progress');
-
-Route::post(
-    '/sua-chua/{maYC}/hoan-thanh',
-    [SuaChuaController::class, 'complete']
-)->name('suachua.complete');
-
-/*
-|--------------------------------------------------------------------------
-| DỊCH VỤ PUBLIC
-|--------------------------------------------------------------------------
-*/
 
 Route::get(
     '/dich-vu',
-    [\App\Http\Controllers\DichVuPublicController::class, 'index']
+    [DichVuPublicController::class, 'index']
 )->name('public.dichvu.index');
 
 Route::get(
     '/dich-vu/{maDV}',
-    [\App\Http\Controllers\DichVuPublicController::class, 'show']
+    [DichVuPublicController::class, 'show']
 )
     ->whereNumber('maDV')
     ->name('public.dichvu.show');
 
-require __DIR__ . '/tv1.php';
+/*
+|--------------------------------------------------------------------------
+| ĐĂNG NHẬP & ĐĂNG KÝ
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware('guest')->group(function () {
+    Route::get(
+        '/dang-nhap',
+        [AuthController::class, 'showLogin']
+    )->name('login');
+
+    Route::post(
+        '/dang-nhap',
+        [AuthController::class, 'login']
+    )
+        ->middleware('throttle:5,1')
+        ->name('login.store');
+
+    Route::get(
+        '/dang-ky',
+        [AuthController::class, 'showRegister']
+    )->name('register');
+
+    Route::post(
+        '/dang-ky',
+        [AuthController::class, 'register']
+    )
+        ->middleware('throttle:5,1')
+        ->name('register.store');
+});
+
+Route::post(
+    '/dang-xuat',
+    [AuthController::class, 'logout']
+)
+    ->middleware('auth')
+    ->name('logout');
+
+/*
+|--------------------------------------------------------------------------
+| QUẢN TRỊ: DANH MỤC, HÓA ĐƠN & THỐNG KÊ
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:ADMIN'])->group(function () {
+    Route::resource(
+        'loaidichvu',
+        LoaiDichVuController::class
+    )->except(['show', 'destroy']);
+
+    Route::resource(
+        'dichvu',
+        DichVuController::class
+    )->except(['show', 'destroy']);
+
+    Route::resource(
+        'phutung',
+        PhuTungController::class
+    )->except(['show']);
+
+    Route::get(
+        '/admin/hoadon',
+        [HoaDonController::class, 'adminIndex']
+    )->name('hoadon.admin.index');
+
+    Route::post(
+        '/admin/hoadon/tao/{maPSC}',
+        [HoaDonController::class, 'taoHoaDon']
+    )
+        ->whereNumber('maPSC')
+        ->name('hoadon.admin.tao');
+
+    Route::get(
+        '/admin/thongke',
+        [ThongKeController::class, 'index']
+    )->name('thongke.admin.index');
+});
+
+/*
+|--------------------------------------------------------------------------
+| NGHIỆP VỤ: YÊU CẦU ĐĂNG NHẬP
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware([
+    'auth',
+    'role:ADMIN,TECHNICIAN,USER',
+])->group(function () {
+    /*
+    |--------------------------------------------------------------------------
+    | HÓA ĐƠN KHÁCH HÀNG
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/hoadon',
+        [HoaDonController::class, 'index']
+    )->name('hoadon.index');
+
+    Route::get(
+        '/hoadon/{maHD}',
+        [HoaDonController::class, 'show']
+    )
+        ->whereNumber('maHD')
+        ->name('hoadon.show');
+
+    Route::post(
+        '/hoadon/{maHD}/ap-dung-diem',
+        [HoaDonController::class, 'apDungDiem']
+    )
+        ->whereNumber('maHD')
+        ->name('hoadon.ap-dung-diem');
+
+    Route::post(
+        '/hoadon/{maHD}/bo-diem',
+        [HoaDonController::class, 'boDiem']
+    )
+        ->whereNumber('maHD')
+        ->name('hoadon.bo-diem');
+
+    Route::post(
+        '/hoadon/{maHD}/thanh-toan',
+        [HoaDonController::class, 'thanhToan']
+    )
+        ->whereNumber('maHD')
+        ->name('hoadon.thanh-toan');
+
+    /*
+    |--------------------------------------------------------------------------
+    | KIỂM TRA XE
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/kiem-tra-xe/{maYC}',
+        [KiemTraXeController::class, 'create']
+    )
+        ->whereNumber('maYC')
+        ->middleware('role:ADMIN,TECHNICIAN')
+        ->name('kiemtraxe.create');
+
+    Route::post(
+        '/kiem-tra-xe/{maYC}',
+        [KiemTraXeController::class, 'store']
+    )
+        ->whereNumber('maYC')
+        ->middleware('role:ADMIN,TECHNICIAN')
+        ->name('kiemtraxe.store');
+
+    Route::get(
+        '/kiem-tra-xe/{maYC}/ket-qua',
+        [KiemTraXeController::class, 'show']
+    )
+        ->whereNumber('maYC')
+        ->name('kiemtraxe.show');
+
+    /*
+    |--------------------------------------------------------------------------
+    | BÁO GIÁ
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/bao-gia/{maYC}/lap',
+        [BaoGiaController::class, 'create']
+    )
+        ->whereNumber('maYC')
+        ->middleware('role:ADMIN')
+        ->name('baogia.create');
+
+    Route::post(
+        '/bao-gia/{maYC}',
+        [BaoGiaController::class, 'store']
+    )
+        ->whereNumber('maYC')
+        ->middleware('role:ADMIN')
+        ->name('baogia.store');
+
+    Route::get(
+        '/bao-gia/{maYC}',
+        [BaoGiaController::class, 'show']
+    )
+        ->whereNumber('maYC')
+        ->name('baogia.show');
+
+    Route::post(
+        '/bao-gia/{maYC}/dong-y',
+        [BaoGiaController::class, 'approve']
+    )
+        ->whereNumber('maYC')
+        ->middleware('role:USER')
+        ->name('baogia.approve');
+
+    Route::post(
+        '/bao-gia/{maYC}/tu-choi',
+        [BaoGiaController::class, 'reject']
+    )
+        ->whereNumber('maYC')
+        ->middleware('role:USER')
+        ->name('baogia.reject');
+
+    /*
+    |--------------------------------------------------------------------------
+    | XEM SỬA CHỮA & TIẾN ĐỘ
+    |--------------------------------------------------------------------------
+    */
+
+    Route::get(
+        '/sua-chua/{maYC}',
+        [SuaChuaController::class, 'show']
+    )
+        ->whereNumber('maYC')
+        ->name('suachua.show');
+
+    /*
+    |--------------------------------------------------------------------------
+    | THAO TÁC SỬA CHỮA
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('role:ADMIN,TECHNICIAN')->group(function () {
+        Route::get(
+            '/sua-chua/{maYC}/bat-dau',
+            [SuaChuaController::class, 'create']
+        )
+            ->whereNumber('maYC')
+            ->name('suachua.create');
+
+        Route::post(
+            '/sua-chua/{maYC}/bat-dau',
+            [SuaChuaController::class, 'store']
+        )
+            ->whereNumber('maYC')
+            ->name('suachua.store');
+
+        Route::post(
+            '/sua-chua/{maYC}/dich-vu',
+            [SuaChuaController::class, 'addService']
+        )
+            ->whereNumber('maYC')
+            ->name('suachua.service');
+
+        Route::post(
+            '/sua-chua/{maYC}/phu-tung',
+            [SuaChuaController::class, 'addPart']
+        )
+            ->whereNumber('maYC')
+            ->name('suachua.part');
+
+        Route::post(
+            '/sua-chua/{maYC}/tien-do',
+            [SuaChuaController::class, 'addProgress']
+        )
+            ->whereNumber('maYC')
+            ->name('suachua.progress');
+
+        Route::post(
+            '/sua-chua/{maYC}/hoan-thanh',
+            [SuaChuaController::class, 'complete']
+        )
+            ->whereNumber('maYC')
+            ->name('suachua.complete');
+    });
+});

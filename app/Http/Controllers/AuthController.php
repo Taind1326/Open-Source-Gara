@@ -3,109 +3,125 @@
 namespace App\Http\Controllers;
 
 use App\Models\TaiKhoan;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\Rules\Password;
+use Illuminate\Validation\ValidationException;
+use Illuminate\View\View;
 
-// M01 - Xác thực
 class AuthController extends Controller
 {
-    public function showLogin()
+    public function showLogin(): View
     {
         return view('auth.login');
     }
 
-    public function login(Request $request)
+    public function login(Request $request): RedirectResponse
     {
-        $cred = $request->validate([
-            'SoDienThoai' => 'required|string',
-            'password'    => 'required|string',
-        ], [], ['SoDienThoai' => 'số điện thoại', 'password' => 'mật khẩu']);
+        $data = $request->validate([
+            'Email' => ['required', 'email', 'max:100'],
+            'MatKhau' => ['required', 'string', 'max:255'],
+        ], [
+            'Email.required' => 'Vui lòng nhập email.',
+            'Email.email' => 'Email không đúng định dạng.',
+            'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
+        ]);
 
-        $tk = TaiKhoan::where('SoDienThoai', $cred['SoDienThoai'])->first();
+        $credentials = [
+            'Email' => trim($data['Email']),
+            'password' => $data['MatKhau'],
+            'TrangThai' => 'HOAT_DONG',
+        ];
 
-        // Chỉ báo "bị khóa" khi đã đúng mật khẩu, tránh lộ thông tin tài khoản cho người lạ
-        if ($tk && Hash::check($cred['password'], $tk->MatKhau) && !$tk->dangHoatDong()) {
-            return back()->withInput($request->only('SoDienThoai'))
-                ->withErrors(['SoDienThoai' => 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ gara.']);
-        }
-
-        if (!Auth::attempt([
-            'SoDienThoai' => $cred['SoDienThoai'],
-            'password'    => $cred['password'],
-            'TrangThai'   => TaiKhoan::HOAT_DONG,
-        ])) {
-            return back()->withInput($request->only('SoDienThoai'))
-                ->withErrors(['SoDienThoai' => 'Số điện thoại hoặc mật khẩu không đúng.']);
+        if (! Auth::attempt($credentials)) {
+            throw ValidationException::withMessages([
+                'Email' => 'Email hoặc mật khẩu không đúng, hoặc tài khoản đã bị khóa.',
+            ]);
         }
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('trang-chu'));
+        return redirect()->intended(route('public.dichvu.index'));
     }
 
-    public function showRegister()
+    public function showRegister(): View
     {
         return view('auth.register');
     }
 
-    public function register(Request $request)
+    public function register(Request $request): RedirectResponse
     {
+        $request->merge([
+            'HoTen' => trim((string) $request->input('HoTen')),
+            'Email' => trim((string) $request->input('Email')),
+            'SoDienThoai' => trim((string) $request->input('SoDienThoai')),
+        ]);
+
         $data = $request->validate([
-            'HoTen'       => 'required|string|max:100',
-            'SoDienThoai' => ['required', 'regex:/^0\d{9}$/', 'unique:TAIKHOAN,SoDienThoai'],
-            'Email'       => 'nullable|email|max:150|unique:TAIKHOAN,Email',
-            'DiaChi'      => 'nullable|string|max:255',
-            'password'    => ['required', 'confirmed', Password::min(6)],
+            'HoTen' => ['required', 'string', 'max:100'],
+            'Email' => [
+                'required',
+                'email',
+                'max:100',
+                'unique:TAIKHOAN,Email',
+            ],
+            'SoDienThoai' => [
+                'required',
+                'regex:/^0[0-9]{9}$/',
+                'unique:TAIKHOAN,SoDienThoai',
+            ],
+            'MatKhau' => [
+                'required',
+                'string',
+                'max:255',
+                'confirmed',
+                Password::min(8)->letters()->numbers(),
+            ],
         ], [
-            'SoDienThoai.regex'  => 'Số điện thoại phải gồm 10 chữ số và bắt đầu bằng 0.',
-            'SoDienThoai.unique' => 'Số điện thoại này đã được đăng ký.',
-            'Email.unique'       => 'Email này đã được sử dụng.',
+            'HoTen.required' => 'Vui lòng nhập họ tên.',
+            'HoTen.max' => 'Họ tên không được vượt quá 100 ký tự.',
+            'Email.required' => 'Vui lòng nhập email.',
+            'Email.email' => 'Email không đúng định dạng.',
+            'Email.unique' => 'Email đã được sử dụng.',
+            'Email.max' => 'Email không được vượt quá 100 ký tự.',
+            'SoDienThoai.required' => 'Vui lòng nhập số điện thoại.',
+            'SoDienThoai.regex' => 'Số điện thoại gồm 10 chữ số và bắt đầu bằng 0.',
+            'SoDienThoai.unique' => 'Số điện thoại đã được sử dụng.',
+            'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
+            'MatKhau.confirmed' => 'Mật khẩu xác nhận không khớp.',
+            'MatKhau.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
+            'MatKhau.letters' => 'Mật khẩu phải có chữ cái.',
+            'MatKhau.numbers' => 'Mật khẩu phải có chữ số.',
         ]);
 
-        // Đăng ký công khai luôn là khách hàng; KTV/Admin do Admin tạo
-        $tk = TaiKhoan::create([
-            'HoTen'       => $data['HoTen'],
+        $taiKhoan = TaiKhoan::create([
+            'HoTen' => $data['HoTen'],
+            'Email' => $data['Email'],
             'SoDienThoai' => $data['SoDienThoai'],
-            'Email'       => $data['Email'] ?? null,
-            'DiaChi'      => $data['DiaChi'] ?? null,
-            'MatKhau'     => $data['password'],
-            'VaiTro'      => TaiKhoan::VAI_TRO_USER,
-            'TrangThai'   => TaiKhoan::HOAT_DONG,
+            'MatKhau' => Hash::make($data['MatKhau']),
+            'VaiTro' => 'USER',
+            'DiemTichLuy' => 0,
+            'TrangThai' => 'HOAT_DONG',
         ]);
 
-        Auth::login($tk);
+        Auth::login($taiKhoan);
+
         $request->session()->regenerate();
 
-        return redirect()->route('trang-chu')->with('success', 'Đăng ký thành công!');
+        return redirect()
+            ->intended(route('public.dichvu.index'))
+            ->with('success', 'Đăng ký tài khoản thành công.');
     }
 
-    public function logout(Request $request)
+    public function logout(Request $request): RedirectResponse
     {
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('login');
-    }
-
-    // Điều hướng sau đăng nhập theo vai trò. Route của module khác chưa có thì fallback về '/'
-    public function trangChu()
-    {
-        $user = Auth::user();
-
-        $routeDich = match ($user->VaiTro) {
-            TaiKhoan::VAI_TRO_ADMIN => 'admin.taikhoan.index',
-            TaiKhoan::VAI_TRO_USER  => 'lichhen.index',   // M06
-            default                 => null,              // KTV: chờ module KTV
-        };
-
-        if ($routeDich && Route::has($routeDich)) {
-            return redirect()->route($routeDich);
-        }
-
-        return redirect()->route('ho-so.show');
+        return redirect()->route('public.dichvu.index');
     }
 }

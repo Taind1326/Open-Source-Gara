@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Middleware\KiemTraVaiTro;
-use App\Http\Middleware\TaiKhoanHoatDong;
+use App\Http\Middleware\CheckRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,15 +14,21 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'role' => KiemTraVaiTro::class,
-            'hoat-dong' => TaiKhoanHoatDong::class,
+            'role' => CheckRole::class,
         ]);
 
-        $middleware->redirectGuestsTo(fn () => route('login'));
-        $middleware->redirectUsersTo(fn () => route('trang-chu'));
+        $middleware->redirectGuestsTo(
+            fn (Request $request) => route('login')
+        );
+
+        $middleware->redirectUsersTo(
+            fn (Request $request) => route('public.dichvu.index')
+        );
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
-            fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
+            fn (Request $request) => $request->is('api/*')
+                || $request->expectsJson(),
         );
-    })->create();
+    })
+    ->create();
