@@ -59,4 +59,13 @@ class PhieuSuaChua extends Model
             'MaYC'
         );
     }
+
+    public function tienDos()
+    {
+        return $this->hasMany(
+            TienDo::class,
+            'MaPSC',
+            'MaPSC'
+        );
+    }
 }

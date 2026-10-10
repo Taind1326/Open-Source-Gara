@@ -78,4 +78,13 @@ class YeuCauSuaChua extends Model
             'MaYC'
         );
     }
+
+    public function phieuSuaChua()
+    {
+        return $this->hasOne(
+            PhieuSuaChua::class,
+            'MaYC',
+            'MaYC'
+        );
+    }
 }

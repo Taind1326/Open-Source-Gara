@@ -6,6 +6,7 @@ use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\DichVuController;
+use App\Http\Controllers\SuaChuaController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -131,3 +132,44 @@ Route::post(
     '/bao-gia/{maYC}/tu-choi',
     [BaoGiaController::class, 'reject']
 )->name('baogia.reject');
+
+/*
+|--------------------------------------------------------------------------
+| M10 - SỬA CHỮA & TIẾN ĐỘ
+|--------------------------------------------------------------------------
+*/
+
+Route::get(
+    '/sua-chua/{maYC}/bat-dau',
+    [SuaChuaController::class, 'create']
+)->name('suachua.create');
+
+Route::post(
+    '/sua-chua/{maYC}/bat-dau',
+    [SuaChuaController::class, 'store']
+)->name('suachua.store');
+
+Route::get(
+    '/sua-chua/{maYC}',
+    [SuaChuaController::class, 'show']
+)->name('suachua.show');
+
+Route::post(
+    '/sua-chua/{maYC}/dich-vu',
+    [SuaChuaController::class, 'addService']
+)->name('suachua.service');
+
+Route::post(
+    '/sua-chua/{maYC}/phu-tung',
+    [SuaChuaController::class, 'addPart']
+)->name('suachua.part');
+
+Route::post(
+    '/sua-chua/{maYC}/tien-do',
+    [SuaChuaController::class, 'addProgress']
+)->name('suachua.progress');
+
+Route::post(
+    '/sua-chua/{maYC}/hoan-thanh',
+    [SuaChuaController::class, 'complete']
+)->name('suachua.complete');
