@@ -1,172 +1,191 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý dịch vụ</title>
+@extends('admin.layout')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-</head>
+@section('title', 'Quản lý dịch vụ')
 
-<body class="bg-light">
+@section('content')
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+        <div>
+            <h1 class="h4 fw-bold mb-1">Dịch vụ</h1>
 
-<div class="container py-4">
+            <p class="text-secondary mb-0">
+                Quản lý thông tin, hình ảnh và giá dịch vụ.
+            </p>
+        </div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Quản lý dịch vụ</h2>
-
-        <a href="{{ route('dichvu.create') }}"
-           class="btn btn-primary">
+        <a href="{{ route('dichvu.create') }}" class="btn btn-primary">
             + Thêm dịch vụ
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="alert alert-success">
-            {{ session('success') }}
+    <div class="card mb-4">
+        <div class="card-body p-4">
+            <form method="GET" action="{{ route('dichvu.index') }}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-5">
+                        <label for="tu_khoa" class="form-label">
+                            Tên dịch vụ
+                        </label>
+
+                        <input
+                            type="search"
+                            id="tu_khoa"
+                            name="tu_khoa"
+                            value="{{ $tuKhoa }}"
+                            class="form-control"
+                            maxlength="100"
+                            placeholder="Nhập tên dịch vụ..."
+                        >
+                    </div>
+
+                    <div class="col-lg-3">
+                        <label for="ma_loai" class="form-label">
+                            Loại dịch vụ
+                        </label>
+
+                        <select id="ma_loai" name="ma_loai" class="form-select">
+                            <option value="">Tất cả loại dịch vụ</option>
+
+                            @foreach ($loaiDichVuList as $loai)
+                                <option
+                                    value="{{ $loai->MaLoaiDV }}"
+                                    @selected((string) $maLoai === (string) $loai->MaLoaiDV)
+                                >
+                                    {{ $loai->TenLoaiDV }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-lg-2 col-6">
+                        <button type="submit" class="btn btn-primary w-100">
+                            Tìm kiếm
+                        </button>
+                    </div>
+
+                    <div class="col-lg-2 col-6">
+                        <a
+                            href="{{ route('dichvu.index') }}"
+                            class="btn btn-outline-secondary w-100"
+                        >
+                            Làm mới
+                        </a>
+                    </div>
+                </div>
+            </form>
         </div>
-    @endif
+    </div>
 
-    <form method="GET"
-          action="{{ route('dichvu.index') }}"
-          class="row g-2 mb-4">
+    <div class="card">
+        <div class="card-body p-4 border-bottom">
+            <div class="fw-semibold">
+                Danh sách dịch vụ
 
-        <div class="col-md-5">
-            <input type="text"
-                   name="tu_khoa"
-                   value="{{ $tuKhoa }}"
-                   class="form-control"
-                   placeholder="Tìm theo tên dịch vụ...">
+                <span class="badge bg-primary-subtle text-primary ms-2">
+                    {{ $danhSach->total() }}
+                </span>
+            </div>
         </div>
 
-        <div class="col-md-3">
-            <select name="ma_loai" class="form-select">
-                <option value="">Tất cả loại dịch vụ</option>
-
-                @foreach($loaiDichVuList as $loai)
-                    <option value="{{ $loai->MaLoaiDV }}"
-                        @selected($maLoai == $loai->MaLoaiDV)>
-                        {{ $loai->TenLoaiDV }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
-
-        <div class="col-md-2">
-            <button class="btn btn-dark w-100">
-                Tìm kiếm
-            </button>
-        </div>
-
-        <div class="col-md-2">
-            <a href="{{ route('dichvu.index') }}"
-               class="btn btn-secondary w-100">
-                Làm mới
-            </a>
-        </div>
-
-    </form>
-
-    <div class="card shadow-sm">
         <div class="table-responsive">
-
             <table class="table table-hover align-middle mb-0">
-
-                <thead class="table-dark">
-                <tr>
-                    <th>Mã</th>
-                    <th>Hình ảnh</th>
-                    <th>Tên dịch vụ</th>
-                    <th>Loại dịch vụ</th>
-                    <th>Giá</th>
-                    <th>Trạng thái</th>
-                    <th>Thao tác</th>
-                </tr>
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Mã</th>
+                        <th>Hình ảnh</th>
+                        <th>Dịch vụ</th>
+                        <th>Giá</th>
+                        <th>Trạng thái</th>
+                        <th class="text-end pe-4">Thao tác</th>
+                    </tr>
                 </thead>
 
                 <tbody>
+                    @forelse ($danhSach as $item)
+                        <tr>
+                            <td class="ps-4">#{{ $item->MaDV }}</td>
 
-                @forelse($danhSach as $item)
+                            <td>
+                                @if ($item->HinhAnh)
+                                    <img
+                                        src="{{ asset('storage/' . $item->HinhAnh) }}"
+                                        alt="{{ $item->TenDV }}"
+                                        width="80"
+                                        height="60"
+                                        class="rounded"
+                                        style="object-fit: cover;"
+                                        loading="lazy"
+                                    >
+                                @else
+                                    <span class="small text-secondary">
+                                        Chưa có ảnh
+                                    </span>
+                                @endif
+                            </td>
 
-                    <tr>
-                        <td>{{ $item->MaDV }}</td>
+                            <td>
+                                <div class="fw-semibold">{{ $item->TenDV }}</div>
 
-                        <td>
-                            @if($item->HinhAnh)
-                                <img
-                                    src="{{ asset('storage/' . $item->HinhAnh) }}"
-                                    width="80"
-                                    height="60"
-                                    style="object-fit: cover;"
-                                    class="rounded">
-                            @else
-                                <span class="text-muted">
-                                    Chưa có ảnh
-                                </span>
-                            @endif
-                        </td>
-
-                        <td>
-                            <strong>{{ $item->TenDV }}</strong>
-
-                            @if($item->MoTa)
-                                <div class="small text-muted">
-                                    {{ \Illuminate\Support\Str::limit($item->MoTa, 60) }}
+                                <div class="small text-secondary mt-1">
+                                    {{ $item->loaiDichVu?->TenLoaiDV ?? 'Chưa có loại dịch vụ' }}
                                 </div>
-                            @endif
-                        </td>
 
-                        <td>
-                            {{ $item->loaiDichVu?->TenLoaiDV ?? 'Không xác định' }}
-                        </td>
+                                @if ($item->MoTa)
+                                    <div class="small text-secondary mt-1">
+                                        {{ \Illuminate\Support\Str::limit($item->MoTa, 80) }}
+                                    </div>
+                                @endif
+                            </td>
 
-                        <td>
-                            {{ number_format($item->Gia, 0, ',', '.') }} đ
-                        </td>
+                            <td class="fw-semibold text-nowrap">
+                                {{ number_format($item->Gia, 0, ',', '.') }} đ
+                            </td>
 
-                        <td>
-                            @if($item->TrangThai === 'HOAT_DONG')
-                                <span class="badge bg-success">
-                                    Hoạt động
-                                </span>
-                            @else
-                                <span class="badge bg-secondary">
-                                    Ngừng hoạt động
-                                </span>
-                            @endif
-                        </td>
+                            <td>
+                                @if ($item->TrangThai === 'HOAT_DONG')
+                                    <span class="badge bg-success-subtle text-success">
+                                        Hoạt động
+                                    </span>
+                                @else
+                                    <span class="badge bg-secondary-subtle text-secondary">
+                                        Ngừng hoạt động
+                                    </span>
+                                @endif
 
-                        <td>
-                            <a href="{{ route('dichvu.edit', $item->MaDV) }}"
-                               class="btn btn-sm btn-warning">
-                                Sửa
-                            </a>
-                        </td>
-                    </tr>
+                                @if ($item->loaiDichVu?->TrangThai === 'NGUNG_HOAT_DONG')
+                                    <div class="small text-secondary mt-1">
+                                        Loại dịch vụ đã ngừng hoạt động
+                                    </div>
+                                @endif
+                            </td>
 
-                @empty
+                            <td class="text-end pe-4">
+                                <a
+                                    href="{{ route('dichvu.edit', $item->MaDV) }}"
+                                    class="btn btn-outline-primary btn-sm text-nowrap"
+                                >
+                                    Chỉnh sửa
+                                </a>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-5">
+                                <div class="fw-semibold mb-1">
+                                    Không có dịch vụ phù hợp
+                                </div>
 
-                    <tr>
-                        <td colspan="7"
-                            class="text-center py-4 text-muted">
-                            Chưa có dịch vụ.
-                        </td>
-                    </tr>
-
-                @endforelse
-
+                                <div class="small text-secondary">
+                                    Thử thay đổi từ khóa hoặc loại dịch vụ.
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
+        </div>
 
+        <div class="card-body border-top">
+            {{ $danhSach->links('pagination::bootstrap-5') }}
         </div>
     </div>
-
-    <div class="mt-3">
-        {{ $danhSach->links() }}
-    </div>
-
-</div>
-
-</body>
-</html>
+@endsection

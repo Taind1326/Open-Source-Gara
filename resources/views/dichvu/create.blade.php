@@ -1,128 +1,47 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thêm dịch vụ</title>
+@extends('admin.layout')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-</head>
+@section('title', 'Thêm dịch vụ')
 
-<body class="bg-light">
+@section('content')
+    <div class="mb-4">
+        <a href="{{ route('dichvu.index') }}" class="text-decoration-none">
+            ← Danh sách dịch vụ
+        </a>
 
-<div class="container py-4">
+        <h1 class="h4 fw-bold mt-3 mb-1">Thêm dịch vụ</h1>
 
-    <div class="card shadow-sm">
-
-        <div class="card-header">
-            <h4 class="mb-0">Thêm dịch vụ</h4>
-        </div>
-
-        <div class="card-body">
-
-            @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            <form action="{{ route('dichvu.store') }}"
-                  method="POST"
-                  enctype="multipart/form-data">
-
-                @csrf
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        Loại dịch vụ
-                    </label>
-
-                    <select name="MaLoaiDV"
-                            class="form-select">
-
-                        <option value="">
-                            -- Chọn loại dịch vụ --
-                        </option>
-
-                        @foreach($loaiDichVuList as $loai)
-                            <option value="{{ $loai->MaLoaiDV }}"
-                                @selected(old('MaLoaiDV') == $loai->MaLoaiDV)>
-                                {{ $loai->TenLoaiDV }}
-                            </option>
-                        @endforeach
-
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        Tên dịch vụ
-                    </label>
-
-                    <input type="text"
-                           name="TenDV"
-                           value="{{ old('TenDV') }}"
-                           class="form-control">
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        Mô tả
-                    </label>
-
-                    <textarea name="MoTa"
-                              rows="4"
-                              class="form-control">{{ old('MoTa') }}</textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        Giá dịch vụ
-                    </label>
-
-                    <div class="input-group">
-                        <input type="number"
-                               name="Gia"
-                               value="{{ old('Gia') }}"
-                               min="0"
-                               step="1000"
-                               class="form-control">
-
-                        <span class="input-group-text">VNĐ</span>
-                    </div>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label">
-                        Hình ảnh
-                    </label>
-
-                    <input type="file"
-                           name="HinhAnh"
-                           accept="image/*"
-                           class="form-control">
-                </div>
-
-                <button class="btn btn-primary">
-                    Lưu dịch vụ
-                </button>
-
-                <a href="{{ route('dichvu.index') }}"
-                   class="btn btn-secondary">
-                    Quay lại
-                </a>
-
-            </form>
-
-        </div>
+        <p class="text-secondary mb-0">
+            Dịch vụ mới sẽ được đặt ở trạng thái hoạt động.
+        </p>
     </div>
 
-</div>
+    @if ($loaiDichVuList->isEmpty())
+        <div class="alert alert-warning">
+            Chưa có loại dịch vụ đang hoạt động.
 
-</body>
-</html>
+            <a href="{{ route('loaidichvu.create') }}" class="alert-link">
+                Thêm loại dịch vụ
+            </a>
+
+            hoặc bật lại một loại dịch vụ trước khi tạo dịch vụ mới.
+        </div>
+    @else
+        <div class="row">
+            <div class="col-xl-9">
+                <div class="card">
+                    <div class="card-body p-4">
+                        <form
+                            action="{{ route('dichvu.store') }}"
+                            method="POST"
+                            enctype="multipart/form-data"
+                        >
+                            @csrf
+
+                            @include('dichvu._form')
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+@endsection
