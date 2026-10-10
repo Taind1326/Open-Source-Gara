@@ -6,6 +6,8 @@ use App\Models\YeuCauSuaChua;
 use App\Models\PhanCong;
 use App\Models\TaiKhoan;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\Exceptions\LichHenException;
 
 class LichHenService
 {
@@ -139,4 +141,117 @@ class LichHenService
 
         return !$query->exists();
     }
+
+    // Khóa toàn bộ KTV đang hoạt động theo thứ tự cố định → mọi giao dịch đặt lịch/phân công xếp hàng
+    protected function khoaKtvDangHoatDong()
+    {
+        return TaiKhoan::where('VaiTro', 'TECHNICIAN')
+            ->where('TrangThai', 'HOAT_DONG')
+            ->orderBy('MaTK')
+            ->lockForUpdate()
+            ->get();
+    }
+
+    // User đặt lịch online — kiểm tra FULL và insert nằm chung 1 giao dịch
+    public function taoLichHen(array $data, ?string $duongDanAnh = null): YeuCauSuaChua
+    {
+        return DB::transaction(function () use ($data, $duongDanAnh) {
+            $this->khoaKtvDangHoatDong(); // phải khóa TRƯỚC khi đếm
+
+            if (!$this->laKhungGioHopLe($data['KhungGioHen'])) {
+                throw new LichHenException('Khung giờ không hợp lệ.');
+            }
+            if (!$this->thoiGianKhungGioHopLe($data['NgayHen'], $data['KhungGioHen'])) {
+                throw new LichHenException('Thời gian đã chọn không còn hợp lệ (đã qua hoặc ở quá khứ).');
+            }
+            if (!$this->khungGioConCho($data['NgayHen'], $data['KhungGioHen'])) {
+                throw new LichHenException('Khung giờ này đã đầy, vui lòng chọn khung khác.');
+            }
+
+            $yeuCau = YeuCauSuaChua::create([
+                'MaXe'        => $data['MaXe'],
+                'NgayHen'     => $data['NgayHen'],
+                'KhungGioHen' => $data['KhungGioHen'],
+                'MoTa'        => $data['MoTa'] ?? null,
+                'HinhAnh'     => $duongDanAnh,
+            ]);
+
+            foreach ($data['dich_vu'] ?? [] as $maDV) {
+                $yeuCau->chiTietDichVu()->create(['MaDV' => $maDV]);
+            }
+
+            return $yeuCau;
+        }, 3); // thử lại tối đa 3 lần nếu MySQL báo deadlock
+    }
+
+    // Khách đến trực tiếp — cũng phải tuân thủ sức chứa và có KTV rảnh
+    public function taoLichTrucTiep(array $data, string $khungGio): YeuCauSuaChua
+    {
+        return DB::transaction(function () use ($data, $khungGio) {
+            $this->khoaKtvDangHoatDong();
+            $homNay = now()->toDateString();
+
+            if (!$this->khungGioConCho($homNay, $khungGio)) {
+                throw new LichHenException("Khung giờ {$khungGio} đã đủ lịch, hiện không thể nhận thêm xe.");
+            }
+            if ($this->ktvRanh($homNay, $khungGio)->isEmpty()) {
+                throw new LichHenException("Hiện không có KTV rảnh trong khung giờ {$khungGio}.");
+            }
+
+            $yeuCau = YeuCauSuaChua::create([
+                'MaXe'        => $data['MaXe'],
+                'NgayHen'     => $homNay,
+                'KhungGioHen' => $khungGio,
+                'MoTa'        => $data['MoTa'] ?? null,
+                'TrangThai'   => 'CHO_PHAN_CONG',
+            ]);
+
+            foreach ($data['dich_vu'] ?? [] as $maDV) {
+                $yeuCau->chiTietDichVu()->create(['MaDV' => $maDV]);
+            }
+
+            return $yeuCau;
+        }, 3);
+    }
+
+    // Admin phân công — khóa yêu cầu + KTV, kiểm tra lại bên trong giao dịch
+    // $tiepNhanNgay = true (khách tại quầy): phân công xong tự chuyển DA_TIEP_NHAN
+    public function phanCongKtv(int $maYC, int $maKTV, bool $tiepNhanNgay = false): TaiKhoan
+    {
+        return DB::transaction(function () use ($maYC, $maKTV, $tiepNhanNgay) {
+            $yeuCau = YeuCauSuaChua::whereKey($maYC)->lockForUpdate()->firstOrFail();
+
+            if (!in_array($yeuCau->TrangThai, ['CHO_PHAN_CONG', 'DA_PHAN_CONG'], true)) {
+                throw new LichHenException('Yêu cầu này không ở trạng thái có thể phân công.');
+            }
+            if ($tiepNhanNgay && !$yeuCau->NgayHen->isToday()) {
+                throw new LichHenException('Chỉ tiếp nhận ngay được với yêu cầu của ngày hôm nay.');
+            }
+
+            // Khóa đúng KTV được chọn → 2 Admin gán cùng 1 KTV sẽ xếp hàng, người sau bị từ chối
+            $ktv = TaiKhoan::where('MaTK', $maKTV)
+                ->where('VaiTro', 'TECHNICIAN')
+                ->where('TrangThai', 'HOAT_DONG')
+                ->lockForUpdate()
+                ->first();
+
+            if (!$ktv) {
+                throw new LichHenException('KTV không hợp lệ hoặc không hoạt động.');
+            }
+
+            if (!$this->ktvConRanh($maKTV, $yeuCau->NgayHen->toDateString(), $yeuCau->KhungGioHen, $maYC)) {
+                throw new LichHenException('KTV này đã bận trong khung giờ này, vui lòng chọn KTV khác.');
+            }
+
+            PhanCong::updateOrCreate(
+                ['MaYC' => $maYC],
+                ['MaKTV' => $maKTV, 'TrangThai' => 'DANG_PHU_TRACH']
+            );
+
+            $yeuCau->update(['TrangThai' => $tiepNhanNgay ? 'DA_TIEP_NHAN' : 'DA_PHAN_CONG']);
+
+            return $ktv;
+        }, 3);
+    }
 }
+?>

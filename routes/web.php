@@ -191,3 +191,5 @@ Route::get(
 )
     ->whereNumber('maDV')
     ->name('public.dichvu.show');
+
+require __DIR__ . '/tv1.php';

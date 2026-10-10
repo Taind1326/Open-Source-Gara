@@ -10,6 +10,8 @@ use App\Models\TaiKhoan;
 use App\Services\LichHenService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Exceptions\LichHenException;
+use Illuminate\Support\Facades\Storage;
 
 class LichHenController extends Controller
 {
@@ -60,38 +62,30 @@ class LichHenController extends Controller
             'dich_vu'     => 'nullable|array',
             'dich_vu.*'   => 'exists:DICHVU,MaDV',
             'MoTa'        => 'nullable|string|max:1000',
+            'HinhAnh'     => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048', // tối đa 2MB
         ]);
 
-        // Đảm bảo xe thuộc đúng user đang login
         $xe = Xe::where('MaXe', $data['MaXe'])->where('MaTK', Auth::id())->first();
         if (!$xe) {
-            return back()->withErrors(['MaXe' => 'Xe không hợp lệ.']);
+            return back()->withErrors(['MaXe' => 'Xe không hợp lệ.'])->withInput();
         }
 
-        if (!$this->service->thoiGianKhungGioHopLe($data['NgayHen'], $data['KhungGioHen'])) {
-            return back()->withErrors(['NgayHen' => 'Thời gian đã chọn không còn hợp lệ (đã qua hoặc ở quá khứ).'])->withInput();
+        $duongDanAnh = $request->hasFile('HinhAnh')
+            ? $request->file('HinhAnh')->store('lichhen', 'public')
+            : null;
+
+        try {
+            $this->service->taoLichHen($data, $duongDanAnh);
+        } catch (LichHenException $e) {
+            if ($duongDanAnh) Storage::disk('public')->delete($duongDanAnh); // không để file mồ côi
+            return back()->withErrors(['KhungGioHen' => $e->getMessage()])->withInput();
+        } catch (\Throwable $e) {
+            if ($duongDanAnh) Storage::disk('public')->delete($duongDanAnh);
+            throw $e;
         }
 
-        if (!$this->service->laKhungGioHopLe($data['KhungGioHen'])) {
-            return back()->withErrors(['KhungGioHen' => 'Khung giờ không hợp lệ.'])->withInput();
-        }
-
-        if (!$this->service->khungGioConCho($data['NgayHen'], $data['KhungGioHen'])) {
-            return back()->withErrors(['KhungGioHen' => 'Khung giờ này đã đầy, vui lòng chọn khung khác.'])->withInput();
-        }
-
-        $yeuCau = YeuCauSuaChua::create([
-            'MaXe'        => $data['MaXe'],
-            'NgayHen'     => $data['NgayHen'],
-            'KhungGioHen' => $data['KhungGioHen'],
-            'MoTa'        => $data['MoTa'] ?? null,
-        ]);
-
-        foreach ($data['dich_vu'] ?? [] as $maDV) {
-            $yeuCau->chiTietDichVu()->create(['MaDV' => $maDV]);
-        }
-
-        return redirect()->route('lichhen.index')->with('success', 'Đặt lịch thành công! Vui lòng chờ xác nhận.');
+        return redirect()->route('lichhen.index')
+            ->with('success', 'Đặt lịch thành công! Vui lòng chờ xác nhận.');
     }
 
     // Xem chi tiết 1 lịch (dùng chung cho User xem lại)
@@ -135,55 +129,35 @@ class LichHenController extends Controller
     }
 
     // Trang chi tiết để chọn KTV
-    public function formPhanCong(YeuCauSuaChua $yeuCau)
+    public function formPhanCong(Request $request, YeuCauSuaChua $yeuCau)
     {
         $ktvRanh = $this->service->ktvRanh($yeuCau->NgayHen->toDateString(), $yeuCau->KhungGioHen);
         $yeuCau->load(['xe.taiKhoan', 'dichVu']);
+        $trucTiep = $request->boolean('truc_tiep'); // khách tại quầy
 
-        return view('admin.lichhen.phan-cong', compact('yeuCau', 'ktvRanh'));
+        return view('admin.lichhen.phan-cong', compact('yeuCau', 'ktvRanh', 'trucTiep'));
     }
 
     // Xử lý lưu phân công
     public function luuPhanCong(Request $request, YeuCauSuaChua $yeuCau)
     {
         $data = $request->validate([
-            'MaKTV' => 'required|exists:TAIKHOAN,MaTK',
+            'MaKTV'          => 'required|exists:TAIKHOAN,MaTK',
+            'tiep_nhan_ngay' => 'nullable|boolean',
         ]);
+        $tiepNhanNgay = $request->boolean('tiep_nhan_ngay');
 
-        if ($yeuCau->TrangThai !== 'CHO_PHAN_CONG' && $yeuCau->TrangThai !== 'DA_PHAN_CONG') {
-            return back()->withErrors(['error' => 'Yêu cầu này không ở trạng thái có thể phân công.']);
+        try {
+            $ktv = $this->service->phanCongKtv($yeuCau->MaYC, (int) $data['MaKTV'], $tiepNhanNgay);
+        } catch (LichHenException $e) {
+            return back()->withErrors(['MaKTV' => $e->getMessage()]);
         }
 
-        // Kiểm tra lại server-side, không tin dropdown phía client
-        $conRanh = $this->service->ktvConRanh(
-            $data['MaKTV'],
-            $yeuCau->NgayHen->toDateString(),
-            $yeuCau->KhungGioHen,
-            $yeuCau->MaYC // bỏ qua chính yêu cầu này khi đang sửa lại phân công
-        );
+        $thongBao = $tiepNhanNgay
+            ? "Đã phân công KTV {$ktv->HoTen} và tiếp nhận xe cho yêu cầu #{$yeuCau->MaYC}. KTV có thể bắt đầu kiểm tra."
+            : "Đã phân công KTV {$ktv->HoTen} cho yêu cầu #{$yeuCau->MaYC}.";
 
-        if (!$conRanh) {
-            return back()->withErrors(['MaKTV' => 'KTV này đã bận trong khung giờ này, vui lòng chọn KTV khác.']);
-        }
-
-        $ktv = TaiKhoan::where('MaTK', $data['MaKTV'])
-            ->where('VaiTro', 'TECHNICIAN')
-            ->where('TrangThai', 'HOAT_DONG')
-            ->first();
-
-        if (!$ktv) {
-            return back()->withErrors(['MaKTV' => 'KTV không hợp lệ hoặc không hoạt động.']);
-        }
-
-        PhanCong::updateOrCreate(
-            ['MaYC' => $yeuCau->MaYC],
-            ['MaKTV' => $data['MaKTV'], 'TrangThai' => 'DANG_PHU_TRACH']
-        );
-
-        $yeuCau->update(['TrangThai' => 'DA_PHAN_CONG']);
-
-        return redirect()->route('admin.lichhen.cho-phan-cong')
-            ->with('success', "Đã phân công KTV {$ktv->HoTen} cho yêu cầu #{$yeuCau->MaYC}.");
+        return redirect()->route('admin.lichhen.cho-phan-cong')->with('success', $thongBao);
     }
 
     // ================= ADMIN TIẾP NHẬN XE (đầu M08) =================
@@ -229,34 +203,28 @@ class LichHenController extends Controller
     public function taoTiepNhanTrucTiep(Request $request)
     {
         $data = $request->validate([
-            'MaXe'        => 'required|exists:XE,MaXe',
-            'MoTa'        => 'nullable|string|max:1000',
-            'dich_vu'     => 'nullable|array',
-            'dich_vu.*'   => 'exists:DICHVU,MaDV',
+            'MaXe'      => 'required|exists:XE,MaXe',
+            'MoTa'      => 'nullable|string|max:1000',
+            'dich_vu'   => 'nullable|array',
+            'dich_vu.*' => 'exists:DICHVU,MaDV',
         ]);
 
-        $khungGioHienTai = $this->khungGioHienTai();
-
-        if ($khungGioHienTai === null) {
+        $khungGio = $this->khungGioHienTai();
+        if ($khungGio === null) {
             return back()->withErrors([
                 'error' => 'Garage hiện ngoài giờ hoạt động (07:30–20:00), không thể tiếp nhận xe lúc này.'
-            ]);
+            ])->withInput();
         }
 
-        $yeuCau = YeuCauSuaChua::create([
-            'MaXe'        => $data['MaXe'],
-            'NgayHen'     => now()->toDateString(),
-            'KhungGioHen' => $khungGioHienTai,
-            'MoTa'        => $data['MoTa'] ?? null,
-            'TrangThai'   => 'CHO_PHAN_CONG',
-        ]);
-
-        foreach ($data['dich_vu'] ?? [] as $maDV) {
-            $yeuCau->chiTietDichVu()->create(['MaDV' => $maDV]);
+        try {
+            $yeuCau = $this->service->taoLichTrucTiep($data, $khungGio);
+        } catch (LichHenException $e) {
+            return back()->withErrors(['error' => $e->getMessage()])->withInput();
         }
 
-        return redirect()->route('admin.lichhen.phan-cong', $yeuCau->MaYC)
-            ->with('success', 'Đã tạo yêu cầu tại chỗ. Vui lòng phân công KTV.');
+        // truc_tiep=1 → form phân công sẽ gửi kèm tiep_nhan_ngay
+        return redirect()->route('admin.lichhen.phan-cong', ['yeuCau' => $yeuCau->MaYC, 'truc_tiep' => 1])
+            ->with('success', 'Đã tạo yêu cầu tại quầy. Chọn KTV để phân công, hệ thống sẽ tự tiếp nhận xe.');
     }
 
     // Xác định khung giờ hiện tại — trả về null nếu ngoài giờ hoạt động
