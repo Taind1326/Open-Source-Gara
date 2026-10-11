@@ -107,6 +107,14 @@
                                 @endif
 
                                 @if(auth()->user()->VaiTro === 'USER')
+                                <li>
+                                    <a class="dropdown-item" href="{{ route('public.xe.index') }}">
+                                        <i class="bi bi-car-front me-2" aria-hidden="true"></i>
+                                        Xe của tôi
+                                    </a>
+                                </li>
+
+
                                     <li>
                                         <a class="dropdown-item"
                                            href="{{ route('hoadon.index') }}">
@@ -243,6 +251,10 @@
 
                         @auth
                             @if(auth()->user()->VaiTro === 'USER')
+                                <a href="{{ route('public.xe.index') }}">
+                                    Xe của tôi
+                                </a>
+
                                 <a href="{{ route('hoadon.index') }}">
                                     Hóa đơn của tôi
                                 </a>

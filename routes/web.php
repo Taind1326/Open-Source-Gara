@@ -13,6 +13,7 @@ use App\Http\Controllers\ThanhToanController;
 use App\Http\Controllers\ThongKeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaiKhoanController;
+use App\Http\Controllers\XeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -197,6 +198,43 @@ Route::middleware([
             ->whereNumber('maHD')
             ->name('hoadon.thanh-toan');
     });
+
+    /*
+|--------------------------------------------------------------------------
+| XE CỦA KHÁCH HÀNG
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:USER'])->group(function () {
+    Route::get('/xe-cua-toi', [XeController::class, 'index'])
+        ->name('public.xe.index');
+
+    Route::get('/xe-cua-toi/them', [XeController::class, 'create'])
+        ->name('public.xe.create');
+
+    Route::post('/xe-cua-toi', [XeController::class, 'store'])
+        ->name('public.xe.store');
+
+    Route::get('/xe-cua-toi/{maXe}/sua', [XeController::class, 'edit'])
+        ->whereNumber('maXe')
+        ->name('public.xe.edit');
+
+    Route::patch('/xe-cua-toi/{maXe}', [XeController::class, 'update'])
+        ->whereNumber('maXe')
+        ->name('public.xe.update');
+
+    Route::patch('/xe-cua-toi/{maXe}/trang-thai', [XeController::class, 'updateStatus'])
+        ->whereNumber('maXe')
+        ->name('public.xe.status');
+
+    Route::get('/danh-muc-xe/hang', [XeController::class, 'makes'])
+        ->middleware('throttle:30,1')
+        ->name('public.xe.catalog.makes');
+
+    Route::get('/danh-muc-xe/dong', [XeController::class, 'models'])
+        ->middleware('throttle:30,1')
+        ->name('public.xe.catalog.models');
+});
 
     /*
     |--------------------------------------------------------------------------
