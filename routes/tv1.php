@@ -10,12 +10,13 @@ use App\Http\Controllers\HoSoController;
 use App\Http\Controllers\XeController;
 use App\Http\Controllers\XeDanhMucController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\LichHenController;
 /*
 |--------------------------------------------------------------------------
 | TV1 - M01 Auth
 |--------------------------------------------------------------------------
 */
+
 Route::middleware('guest')->group(function () {
     Route::get('/dang-nhap', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/dang-nhap', [AuthController::class, 'login'])->middleware('throttle:5,1')->name('login.xu-ly');
@@ -53,7 +54,14 @@ Route::middleware(['auth', 'hoat-dong'])->group(function () {
         // M03 - Xe của tôi
         Route::resource('xe', XeController::class)->except('show');
 
-        // M06 (nhóm đặt lịch) thêm route lichhen.* vào đây
+        // M06 - Đặt lịch
+        Route::prefix('lich-hen')->name('lichhen.')->group(function () {
+            Route::get('/', [LichHenController::class, 'index'])->name('index');
+            Route::get('/dat-lich', [LichHenController::class, 'create'])->name('create');
+            Route::post('/dat-lich', [LichHenController::class, 'store'])->middleware('throttle:5,1')->name('store');
+            Route::get('/{yeuCau}', [LichHenController::class, 'show'])->whereNumber('yeuCau')->name('show');
+            Route::post('/{yeuCau}/huy', [LichHenController::class, 'huy'])->whereNumber('yeuCau')->name('huy');
+        });
     });
 
     // M02 - Admin
@@ -75,6 +83,17 @@ Route::middleware(['auth', 'hoat-dong'])->group(function () {
         Route::put('xe/{xe}', [AdminXeController::class, 'update'])->whereNumber('xe')->name('xe.update');
         Route::patch('xe/{xe}/trang-thai', [AdminXeController::class, 'doiTrangThai'])->whereNumber('xe')->name('xe.trang-thai');
 
-        // M07, M08 (nhóm lịch hẹn) thêm route admin.lichhen.* vào đây
+        // M07, M08 - Phân công KTV, tiếp nhận xe
+        Route::prefix('lich-hen')->name('lichhen.')->group(function () {
+            // Route tĩnh đặt trước route có tham số
+            Route::get('/cho-phan-cong', [LichHenController::class, 'danhSachChoPhanCong'])->name('cho-phan-cong');
+            Route::get('/tiep-nhan', [LichHenController::class, 'timTiepNhan'])->name('tiep-nhan');
+            Route::post('/tiep-nhan-truc-tiep', [LichHenController::class, 'taoTiepNhanTrucTiep'])->name('tiep-nhan-truc-tiep');
+
+            Route::get('/{yeuCau}/phan-cong', [LichHenController::class, 'formPhanCong'])->whereNumber('yeuCau')->name('phan-cong');
+            Route::post('/{yeuCau}/phan-cong', [LichHenController::class, 'luuPhanCong'])->whereNumber('yeuCau')->name('luu-phan-cong');
+            Route::post('/{yeuCau}/tiep-nhan', [LichHenController::class, 'tiepNhan'])->whereNumber('yeuCau')->name('xu-ly-tiep-nhan');
+        });
     });
 });
+?>
