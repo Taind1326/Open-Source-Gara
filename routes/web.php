@@ -14,6 +14,7 @@ use App\Http\Controllers\ThongKeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaiKhoanController;
 use App\Http\Controllers\XeController;
+use App\Http\Controllers\DatLichController;
 
 /*
 |--------------------------------------------------------------------------
@@ -378,4 +379,43 @@ Route::middleware(['auth', 'role:USER'])->group(function () {
             ->whereNumber('maYC')
             ->name('suachua.complete');
     });
+
+    /*
+|--------------------------------------------------------------------------
+| ĐẶT LỊCH KHÁCH HÀNG
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:USER'])->group(function () {
+    Route::get(
+        '/lich-hen',
+        [DatLichController::class, 'index']
+    )->name('public.datlich.index');
+
+    Route::get(
+        '/dat-lich',
+        [DatLichController::class, 'create']
+    )->name('public.datlich.create');
+
+    Route::get(
+        '/dat-lich/khung-gio',
+        [DatLichController::class, 'slots']
+    )
+        ->middleware('throttle:30,1')
+        ->name('public.datlich.slots');
+
+    Route::post(
+        '/dat-lich',
+        [DatLichController::class, 'store']
+    )
+        ->middleware('throttle:5,1')
+        ->name('public.datlich.store');
+
+    Route::patch(
+        '/lich-hen/{maYC}/huy',
+        [DatLichController::class, 'cancel']
+    )
+        ->whereNumber('maYC')
+        ->name('public.datlich.cancel');
+});
 });

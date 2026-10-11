@@ -80,7 +80,16 @@
                     </li>
                 </ul>
 
-                <div class="d-flex align-items-center gap-2 mt-3 mt-lg-0">
+                <div class="d-flex flex-wrap align-items-center gap-2 mt-3 mt-lg-0">
+                    @if(!auth()->check() || auth()->user()->VaiTro === 'USER')
+                        <a class="btn btn-primary"
+                           href="{{ route('public.datlich.create') }}">
+                            <i class="bi bi-calendar-plus me-1"
+                               aria-hidden="true"></i>
+                            Đặt lịch
+                        </a>
+                    @endif
+
                     @auth
                         <div class="dropdown">
                             <button class="btn btn-light dropdown-toggle account-button"
@@ -88,46 +97,79 @@
                                     id="accountMenu"
                                     data-bs-toggle="dropdown"
                                     aria-expanded="false">
-                                <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
+                                <i class="bi bi-person-circle me-1"
+                                   aria-hidden="true"></i>
+
                                 {{ auth()->user()->HoTen }}
                             </button>
 
                             <ul class="dropdown-menu dropdown-menu-end"
                                 aria-labelledby="accountMenu">
+                                <li>
+                                    <a class="dropdown-item"
+                                       href="{{ route('public.taikhoan.edit') }}">
+                                        <i class="bi bi-person me-2"
+                                           aria-hidden="true"></i>
+                                        Tài khoản của tôi
+                                    </a>
+                                </li>
+
                                 @if(auth()->user()->VaiTro === 'ADMIN')
                                     <li>
                                         <a class="dropdown-item"
                                            href="{{ route('admin.dashboard') }}">
-                                            <i class="bi bi-grid me-2" aria-hidden="true"></i>
+                                            <i class="bi bi-grid me-2"
+                                               aria-hidden="true"></i>
                                             Trang quản trị
                                         </a>
                                     </li>
-
-                                    <li><hr class="dropdown-divider"></li>
                                 @endif
 
                                 @if(auth()->user()->VaiTro === 'USER')
-                                <li>
-                                    <a class="dropdown-item" href="{{ route('public.xe.index') }}">
-                                        <i class="bi bi-car-front me-2" aria-hidden="true"></i>
-                                        Xe của tôi
-                                    </a>
-                                </li>
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{{ route('public.datlich.index') }}">
+                                            <i class="bi bi-calendar-check me-2"
+                                               aria-hidden="true"></i>
+                                            Lịch hẹn của tôi
+                                        </a>
+                                    </li>
 
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{{ route('public.datlich.create') }}">
+                                            <i class="bi bi-calendar-plus me-2"
+                                               aria-hidden="true"></i>
+                                            Đặt lịch sửa chữa
+                                        </a>
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item"
+                                           href="{{ route('public.xe.index') }}">
+                                            <i class="bi bi-car-front me-2"
+                                               aria-hidden="true"></i>
+                                            Xe của tôi
+                                        </a>
+                                    </li>
 
                                     <li>
                                         <a class="dropdown-item"
                                            href="{{ route('hoadon.index') }}">
-                                            <i class="bi bi-receipt me-2" aria-hidden="true"></i>
+                                            <i class="bi bi-receipt me-2"
+                                               aria-hidden="true"></i>
                                             Hóa đơn của tôi
                                         </a>
                                     </li>
-
-                                    <li><hr class="dropdown-divider"></li>
                                 @endif
 
                                 <li>
-                                    <form method="POST" action="{{ route('logout') }}">
+                                    <hr class="dropdown-divider">
+                                </li>
+
+                                <li>
+                                    <form method="POST"
+                                          action="{{ route('logout') }}">
                                         @csrf
 
                                         <button class="dropdown-item text-danger"
@@ -138,23 +180,16 @@
                                         </button>
                                     </form>
                                 </li>
-
-                                <li>
-    <a class="dropdown-item" href="{{ route('public.taikhoan.edit') }}">
-        <i class="bi bi-person me-2" aria-hidden="true"></i>
-        Tài khoản của tôi
-    </a>
-</li>
                             </ul>
-
-
                         </div>
                     @else
-                        <a class="btn btn-light" href="{{ route('login') }}">
+                        <a class="btn btn-light"
+                           href="{{ route('login') }}">
                             Đăng nhập
                         </a>
 
-                        <a class="btn btn-primary" href="{{ route('register') }}">
+                        <a class="btn btn-outline-primary"
+                           href="{{ route('register') }}">
                             Đăng ký
                         </a>
                     @endauth
@@ -163,7 +198,7 @@
         </div>
     </nav>
 
-    <main class="flex-grow-1">
+    <main class="flex-grow-1 flex-shrink-0">
         @if(session('success') || session('error') || $errors->any())
             <div class="container pt-4">
                 @if(session('success'))
@@ -209,7 +244,7 @@
         @yield('content')
     </main>
 
-    <footer class="site-footer pt-5 pb-3">
+    <footer class="site-footer flex-shrink-0 pt-5 pb-3">
         <div class="container">
             <div class="row g-4 pb-4">
                 <div class="col-lg-5">
@@ -224,13 +259,22 @@
 
                     <p class="footer-description mb-0">
                         Chăm sóc, bảo dưỡng và sửa chữa ô tô.
-                        Theo dõi quá trình sửa chữa và thông tin thanh toán
-                        ngay trên website.
+                        Theo dõi quá trình sửa chữa và thông tin
+                        thanh toán ngay trên website.
                     </p>
+
+                    @if(config('garage.address'))
+                        <p class="small mt-3 mb-0">
+                            <i class="bi bi-geo-alt me-1" aria-hidden="true"></i>
+                            {{ config('garage.address') }}
+                        </p>
+                    @endif
                 </div>
 
                 <div class="col-6 col-lg-3">
-                    <h6 class="footer-title mb-3">Khám phá</h6>
+                    <h6 class="footer-title mb-3">
+                        Khám phá
+                    </h6>
 
                     <div class="d-flex flex-column gap-2">
                         <a href="{{ url('/') }}">Trang chủ</a>
@@ -241,16 +285,30 @@
                 </div>
 
                 <div class="col-6 col-lg-4">
-                    <h6 class="footer-title mb-3">Dành cho khách hàng</h6>
+                    <h6 class="footer-title mb-3">
+                        Dành cho khách hàng
+                    </h6>
 
                     <div class="d-flex flex-column gap-2">
                         @guest
+                            <a href="{{ route('public.datlich.create') }}">
+                                Đặt lịch sửa chữa
+                            </a>
+
                             <a href="{{ route('login') }}">Đăng nhập</a>
                             <a href="{{ route('register') }}">Tạo tài khoản</a>
                         @endguest
 
                         @auth
+                            <a href="{{ route('public.taikhoan.edit') }}">
+                                Tài khoản của tôi
+                            </a>
+
                             @if(auth()->user()->VaiTro === 'USER')
+                                <a href="{{ route('public.datlich.index') }}">
+                                    Lịch hẹn của tôi
+                                </a>
+
                                 <a href="{{ route('public.xe.index') }}">
                                     Xe của tôi
                                 </a>
@@ -260,8 +318,6 @@
                                 </a>
                             @endif
                         @endauth
-
-                        <span>Thông tin rõ ràng trong từng bước sửa chữa.</span>
                     </div>
                 </div>
             </div>
