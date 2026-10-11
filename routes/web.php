@@ -9,8 +9,12 @@ use App\Http\Controllers\KiemTraXeController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\PhuTungController;
 use App\Http\Controllers\SuaChuaController;
+use App\Http\Controllers\ThanhToanController;
 use App\Http\Controllers\ThongKeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TaiKhoanController;
+use App\Http\Controllers\XeController;
+use App\Http\Controllers\DatLichController;
 
 /*
 |--------------------------------------------------------------------------
@@ -18,9 +22,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-Route::get('/', function () {
-    return redirect()->route('public.dichvu.index');
-});
+Route::view('/', 'public.home')->name('public.home');
+Route::view('/gioi-thieu', 'public.about')->name('public.about');
+Route::view('/lien-he', 'public.contact')->name('public.contact');
 
 Route::get(
     '/dich-vu',
@@ -73,13 +77,31 @@ Route::post(
     ->middleware('auth')
     ->name('logout');
 
+    Route::middleware(['auth', 'role:ADMIN,TECHNICIAN,USER'])
+    ->group(function () {
+        Route::get('/tai-khoan', [TaiKhoanController::class, 'edit'])
+            ->name('public.taikhoan.edit');
+
+        Route::patch('/tai-khoan', [TaiKhoanController::class, 'update'])
+            ->name('public.taikhoan.update');
+
+        Route::patch('/tai-khoan/mat-khau', [TaiKhoanController::class, 'updatePassword'])
+            ->middleware('throttle:5,1')
+            ->name('public.taikhoan.password');
+    });
+
 /*
 |--------------------------------------------------------------------------
-| QUẢN TRỊ: DANH MỤC, HÓA ĐƠN & THỐNG KÊ
+| QUẢN TRỊ
 |--------------------------------------------------------------------------
 */
 
 Route::middleware(['auth', 'role:ADMIN'])->group(function () {
+    Route::view(
+        '/admin',
+        'admin.dashboard'
+    )->name('admin.dashboard');
+
     Route::resource(
         'loaidichvu',
         LoaiDichVuController::class
@@ -108,6 +130,20 @@ Route::middleware(['auth', 'role:ADMIN'])->group(function () {
         ->name('hoadon.admin.tao');
 
     Route::get(
+        '/admin/hoadon/{maHD}',
+        [ThanhToanController::class, 'adminShow']
+    )
+        ->whereNumber('maHD')
+        ->name('hoadon.admin.show');
+
+    Route::post(
+        '/admin/hoadon/{maHD}/xac-nhan-thanh-toan',
+        [ThanhToanController::class, 'confirmPayment']
+    )
+        ->whereNumber('maHD')
+        ->name('hoadon.admin.confirm');
+
+    Route::get(
         '/admin/thongke',
         [ThongKeController::class, 'index']
     )->name('thongke.admin.index');
@@ -115,7 +151,7 @@ Route::middleware(['auth', 'role:ADMIN'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| NGHIỆP VỤ: YÊU CẦU ĐĂNG NHẬP
+| NGHIỆP VỤ: TÀI KHOẢN ĐANG HOẠT ĐỘNG
 |--------------------------------------------------------------------------
 */
 
@@ -129,38 +165,77 @@ Route::middleware([
     |--------------------------------------------------------------------------
     */
 
-    Route::get(
-        '/hoadon',
-        [HoaDonController::class, 'index']
-    )->name('hoadon.index');
+    Route::middleware('role:USER')->group(function () {
+        Route::get(
+            '/hoadon',
+            [HoaDonController::class, 'index']
+        )->name('hoadon.index');
 
-    Route::get(
-        '/hoadon/{maHD}',
-        [HoaDonController::class, 'show']
-    )
-        ->whereNumber('maHD')
-        ->name('hoadon.show');
+        Route::get(
+            '/hoadon/{maHD}',
+            [HoaDonController::class, 'show']
+        )
+            ->whereNumber('maHD')
+            ->name('hoadon.show');
 
-    Route::post(
-        '/hoadon/{maHD}/ap-dung-diem',
-        [HoaDonController::class, 'apDungDiem']
-    )
-        ->whereNumber('maHD')
-        ->name('hoadon.ap-dung-diem');
+        Route::post(
+            '/hoadon/{maHD}/ap-dung-diem',
+            [HoaDonController::class, 'apDungDiem']
+        )
+            ->whereNumber('maHD')
+            ->name('hoadon.ap-dung-diem');
 
-    Route::post(
-        '/hoadon/{maHD}/bo-diem',
-        [HoaDonController::class, 'boDiem']
-    )
-        ->whereNumber('maHD')
-        ->name('hoadon.bo-diem');
+        Route::post(
+            '/hoadon/{maHD}/bo-diem',
+            [HoaDonController::class, 'boDiem']
+        )
+            ->whereNumber('maHD')
+            ->name('hoadon.bo-diem');
 
-    Route::post(
-        '/hoadon/{maHD}/thanh-toan',
-        [HoaDonController::class, 'thanhToan']
-    )
-        ->whereNumber('maHD')
-        ->name('hoadon.thanh-toan');
+        Route::post(
+            '/hoadon/{maHD}/thanh-toan',
+            [ThanhToanController::class, 'requestPayment']
+        )
+            ->whereNumber('maHD')
+            ->name('hoadon.thanh-toan');
+    });
+
+    /*
+|--------------------------------------------------------------------------
+| XE CỦA KHÁCH HÀNG
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:USER'])->group(function () {
+    Route::get('/xe-cua-toi', [XeController::class, 'index'])
+        ->name('public.xe.index');
+
+    Route::get('/xe-cua-toi/them', [XeController::class, 'create'])
+        ->name('public.xe.create');
+
+    Route::post('/xe-cua-toi', [XeController::class, 'store'])
+        ->name('public.xe.store');
+
+    Route::get('/xe-cua-toi/{maXe}/sua', [XeController::class, 'edit'])
+        ->whereNumber('maXe')
+        ->name('public.xe.edit');
+
+    Route::patch('/xe-cua-toi/{maXe}', [XeController::class, 'update'])
+        ->whereNumber('maXe')
+        ->name('public.xe.update');
+
+    Route::patch('/xe-cua-toi/{maXe}/trang-thai', [XeController::class, 'updateStatus'])
+        ->whereNumber('maXe')
+        ->name('public.xe.status');
+
+    Route::get('/danh-muc-xe/hang', [XeController::class, 'makes'])
+        ->middleware('throttle:30,1')
+        ->name('public.xe.catalog.makes');
+
+    Route::get('/danh-muc-xe/dong', [XeController::class, 'models'])
+        ->middleware('throttle:30,1')
+        ->name('public.xe.catalog.models');
+});
 
     /*
     |--------------------------------------------------------------------------
@@ -168,21 +243,21 @@ Route::middleware([
     |--------------------------------------------------------------------------
     */
 
-    Route::get(
-        '/kiem-tra-xe/{maYC}',
-        [KiemTraXeController::class, 'create']
-    )
-        ->whereNumber('maYC')
-        ->middleware('role:ADMIN,TECHNICIAN')
-        ->name('kiemtraxe.create');
+    Route::middleware('role:ADMIN,TECHNICIAN')->group(function () {
+        Route::get(
+            '/kiem-tra-xe/{maYC}',
+            [KiemTraXeController::class, 'create']
+        )
+            ->whereNumber('maYC')
+            ->name('kiemtraxe.create');
 
-    Route::post(
-        '/kiem-tra-xe/{maYC}',
-        [KiemTraXeController::class, 'store']
-    )
-        ->whereNumber('maYC')
-        ->middleware('role:ADMIN,TECHNICIAN')
-        ->name('kiemtraxe.store');
+        Route::post(
+            '/kiem-tra-xe/{maYC}',
+            [KiemTraXeController::class, 'store']
+        )
+            ->whereNumber('maYC')
+            ->name('kiemtraxe.store');
+    });
 
     Route::get(
         '/kiem-tra-xe/{maYC}/ket-qua',
@@ -193,25 +268,25 @@ Route::middleware([
 
     /*
     |--------------------------------------------------------------------------
-    | BÁO GIÁ
+    | LẬP BÁO GIÁ
     |--------------------------------------------------------------------------
     */
 
-    Route::get(
-        '/bao-gia/{maYC}/lap',
-        [BaoGiaController::class, 'create']
-    )
-        ->whereNumber('maYC')
-        ->middleware('role:ADMIN')
-        ->name('baogia.create');
+    Route::middleware('role:ADMIN')->group(function () {
+        Route::get(
+            '/bao-gia/{maYC}/lap',
+            [BaoGiaController::class, 'create']
+        )
+            ->whereNumber('maYC')
+            ->name('baogia.create');
 
-    Route::post(
-        '/bao-gia/{maYC}',
-        [BaoGiaController::class, 'store']
-    )
-        ->whereNumber('maYC')
-        ->middleware('role:ADMIN')
-        ->name('baogia.store');
+        Route::post(
+            '/bao-gia/{maYC}',
+            [BaoGiaController::class, 'store']
+        )
+            ->whereNumber('maYC')
+            ->name('baogia.store');
+    });
 
     Route::get(
         '/bao-gia/{maYC}',
@@ -220,21 +295,27 @@ Route::middleware([
         ->whereNumber('maYC')
         ->name('baogia.show');
 
-    Route::post(
-        '/bao-gia/{maYC}/dong-y',
-        [BaoGiaController::class, 'approve']
-    )
-        ->whereNumber('maYC')
-        ->middleware('role:USER')
-        ->name('baogia.approve');
+    /*
+    |--------------------------------------------------------------------------
+    | KHÁCH DUYỆT BÁO GIÁ
+    |--------------------------------------------------------------------------
+    */
 
-    Route::post(
-        '/bao-gia/{maYC}/tu-choi',
-        [BaoGiaController::class, 'reject']
-    )
-        ->whereNumber('maYC')
-        ->middleware('role:USER')
-        ->name('baogia.reject');
+    Route::middleware('role:USER')->group(function () {
+        Route::post(
+            '/bao-gia/{maYC}/dong-y',
+            [BaoGiaController::class, 'approve']
+        )
+            ->whereNumber('maYC')
+            ->name('baogia.approve');
+
+        Route::post(
+            '/bao-gia/{maYC}/tu-choi',
+            [BaoGiaController::class, 'reject']
+        )
+            ->whereNumber('maYC')
+            ->name('baogia.reject');
+    });
 
     /*
     |--------------------------------------------------------------------------
@@ -298,4 +379,43 @@ Route::middleware([
             ->whereNumber('maYC')
             ->name('suachua.complete');
     });
+
+    /*
+|--------------------------------------------------------------------------
+| ĐẶT LỊCH KHÁCH HÀNG
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth', 'role:USER'])->group(function () {
+    Route::get(
+        '/lich-hen',
+        [DatLichController::class, 'index']
+    )->name('public.datlich.index');
+
+    Route::get(
+        '/dat-lich',
+        [DatLichController::class, 'create']
+    )->name('public.datlich.create');
+
+    Route::get(
+        '/dat-lich/khung-gio',
+        [DatLichController::class, 'slots']
+    )
+        ->middleware('throttle:30,1')
+        ->name('public.datlich.slots');
+
+    Route::post(
+        '/dat-lich',
+        [DatLichController::class, 'store']
+    )
+        ->middleware('throttle:5,1')
+        ->name('public.datlich.store');
+
+    Route::patch(
+        '/lich-hen/{maYC}/huy',
+        [DatLichController::class, 'cancel']
+    )
+        ->whereNumber('maYC')
+        ->name('public.datlich.cancel');
+});
 });

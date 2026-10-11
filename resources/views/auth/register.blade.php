@@ -1,133 +1,263 @@
 @extends('public.layout')
 
-@section('title', 'Đăng ký tài khoản')
+@section('title', 'Đăng ký')
+
+@section('description', 'Tạo tài khoản AutoCare Garage để theo dõi báo giá, tiến độ sửa chữa và hóa đơn.')
 
 @section('content')
-    <div class="row justify-content-center py-4">
-        <div class="col-md-9 col-lg-6">
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-body p-4 p-md-5">
-                    <h1 class="h3 fw-bold mb-2">Tạo tài khoản</h1>
+    <section class="section-space">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-10">
+                    <div class="card border rounded-4 overflow-hidden">
+                        <div class="row g-0">
+                            <div class="col-lg-5">
+                                <div class="hero h-100 p-4 p-lg-5">
+                                    <div class="hero-label mb-4">
+                                        <i class="bi bi-tools" aria-hidden="true"></i>
+                                        AutoCare Garage
+                                    </div>
 
-                    <p class="text-secondary mb-4">
-                        Quản lý xe và theo dõi lịch sửa chữa của m.
-                    </p>
+                                    <h1 class="h2 fw-bold mb-3">
+                                        Bắt đầu hành trình<br>
+                                        chăm sóc chiếc xe.
+                                    </h1>
 
-                    <form method="POST" action="{{ route('register.store') }}">
-                        @csrf
+                                    <p class="hero-panel-description mb-5">
+                                        Tạo tài khoản để theo dõi thông tin
+                                        sửa chữa và thanh toán của bạn.
+                                    </p>
 
-                        <div class="mb-3">
-                            <label for="HoTen" class="form-label">Họ tên</label>
+                                    <div class="hero-step">
+                                        <i class="bi bi-file-earmark-check"
+                                           aria-hidden="true"></i>
 
-                            <input
-                                type="text"
-                                id="HoTen"
-                                name="HoTen"
-                                class="form-control @error('HoTen') is-invalid @enderror"
-                                value="{{ old('HoTen') }}"
-                                maxlength="100"
-                                autocomplete="name"
-                                required
-                                autofocus
-                            >
+                                        <div>
+                                            <div class="fw-semibold">
+                                                Xác nhận báo giá
+                                            </div>
 
-                            @error('HoTen')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                                            <small>
+                                                Xem hạng mục và chi phí
+                                                trước khi quyết định sửa chữa.
+                                            </small>
+                                        </div>
+                                    </div>
 
-                        <div class="mb-3">
-                            <label for="Email" class="form-label">Email</label>
+                                    <div class="hero-step">
+                                        <i class="bi bi-arrow-repeat"
+                                           aria-hidden="true"></i>
 
-                            <input
-                                type="email"
-                                id="Email"
-                                name="Email"
-                                class="form-control @error('Email') is-invalid @enderror"
-                                value="{{ old('Email') }}"
-                                maxlength="100"
-                                autocomplete="email"
-                                required
-                            >
+                                        <div>
+                                            <div class="fw-semibold">
+                                                Theo dõi quá trình
+                                            </div>
 
-                            @error('Email')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
+                                            <small>
+                                                Xem những cập nhật tiến độ
+                                                trong hồ sơ của chiếc xe.
+                                            </small>
+                                        </div>
+                                    </div>
 
-                        <div class="mb-3">
-                            <label for="SoDienThoai" class="form-label">
-                                Số điện thoại
-                            </label>
+                                    <div class="hero-step">
+                                        <i class="bi bi-gift" aria-hidden="true"></i>
 
-                            <input
-                                type="tel"
-                                id="SoDienThoai"
-                                name="SoDienThoai"
-                                class="form-control @error('SoDienThoai') is-invalid @enderror"
-                                value="{{ old('SoDienThoai') }}"
-                                maxlength="10"
-                                pattern="0[0-9]{9}"
-                                autocomplete="tel"
-                                required
-                            >
+                                        <div>
+                                            <div class="fw-semibold">
+                                                Tích lũy điểm
+                                            </div>
 
-                            @error('SoDienThoai')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="MatKhau" class="form-label">
-                                Mật khẩu
-                            </label>
-
-                            <input
-                                type="password"
-                                id="MatKhau"
-                                name="MatKhau"
-                                class="form-control @error('MatKhau') is-invalid @enderror"
-                                minlength="8"
-                                autocomplete="new-password"
-                                required
-                            >
-
-                            <div class="form-text">
-                                Ít nhất 8 ký tự, có chữ cái và chữ số.
+                                            <small>
+                                                Nhận điểm khi hóa đơn được
+                                                xác nhận thanh toán và sử dụng
+                                                khi đủ điều kiện.
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            @error('MatKhau')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="col-lg-7">
+                                <div class="p-4 p-lg-5">
+                                    <p class="section-eyebrow mb-2">
+                                        Khách hàng mới
+                                    </p>
+
+                                    <h2 class="h3 fw-bold mb-2">
+                                        Tạo tài khoản
+                                    </h2>
+
+                                    <p class="text-muted mb-4">
+                                        Điền thông tin bên dưới để đăng ký.
+                                    </p>
+
+                                    <form method="POST"
+                                          action="{{ route('register.store') }}">
+                                        @csrf
+
+                                        <div class="mb-3">
+                                            <label for="registerName"
+                                                   class="form-label fw-semibold">
+                                                Họ và tên
+                                            </label>
+
+                                            <input type="text"
+                                                   id="registerName"
+                                                   name="HoTen"
+                                                   class="form-control @error('HoTen') is-invalid @enderror"
+                                                   value="{{ old('HoTen') }}"
+                                                   placeholder="Nhập họ và tên"
+                                                   maxlength="100"
+                                                   autocomplete="name"
+                                                   required
+                                                   autofocus>
+
+                                            @error('HoTen')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="registerEmail"
+                                                   class="form-label fw-semibold">
+                                                Email
+                                            </label>
+
+                                            <input type="email"
+                                                   id="registerEmail"
+                                                   name="Email"
+                                                   class="form-control @error('Email') is-invalid @enderror"
+                                                   value="{{ old('Email') }}"
+                                                   placeholder="Nhập email của bạn"
+                                                   maxlength="100"
+                                                   autocomplete="email"
+                                                   required>
+
+                                            @error('Email')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="registerPhone"
+                                                   class="form-label fw-semibold">
+                                                Số điện thoại
+                                            </label>
+
+                                            <input type="tel"
+                                                   id="registerPhone"
+                                                   name="SoDienThoai"
+                                                   class="form-control @error('SoDienThoai') is-invalid @enderror"
+                                                   value="{{ old('SoDienThoai') }}"
+                                                   placeholder="Nhập số điện thoại"
+                                                   inputmode="numeric"
+                                                   pattern="0[0-9]{9}"
+                                                   minlength="10"
+                                                   maxlength="10"
+                                                   autocomplete="tel"
+                                                   aria-describedby="phoneHelp"
+                                                   required>
+
+                                            @error('SoDienThoai')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+
+                                            <div id="phoneHelp" class="form-text">
+                                                Gồm 10 chữ số, bắt đầu bằng số 0.
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="registerPassword"
+                                                   class="form-label fw-semibold">
+                                                Mật khẩu
+                                            </label>
+
+                                            <input type="password"
+                                                   id="registerPassword"
+                                                   name="MatKhau"
+                                                   class="form-control @error('MatKhau') is-invalid @enderror"
+                                                   placeholder="Tạo mật khẩu"
+                                                   minlength="8"
+                                                   autocomplete="new-password"
+                                                   aria-describedby="passwordHelp"
+                                                   required>
+
+                                            @error('MatKhau')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+
+                                            <div id="passwordHelp" class="form-text">
+                                                Ít nhất 8 ký tự, gồm chữ và số.
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="registerPasswordConfirmation"
+                                                   class="form-label fw-semibold">
+                                                Xác nhận mật khẩu
+                                            </label>
+
+                                            <input type="password"
+                                                   id="registerPasswordConfirmation"
+                                                   name="MatKhau_confirmation"
+                                                   class="form-control @error('MatKhau_confirmation') is-invalid @enderror"
+                                                   placeholder="Nhập lại mật khẩu"
+                                                   minlength="8"
+                                                   autocomplete="new-password"
+                                                   required>
+
+                                            @error('MatKhau_confirmation')
+                                                <div class="invalid-feedback">
+                                                    {{ $message }}
+                                                </div>
+                                            @enderror
+                                        </div>
+
+                                        <button type="submit"
+                                                class="btn btn-primary btn-lg w-100">
+                                            Tạo tài khoản
+                                            <i class="bi bi-arrow-right ms-2"
+                                               aria-hidden="true"></i>
+                                        </button>
+                                    </form>
+
+                                    <div class="border-top mt-4 pt-4 text-center">
+                                        <p class="text-muted mb-2">
+                                            Bạn đã có tài khoản?
+                                        </p>
+
+                                        <a href="{{ route('login') }}"
+                                           class="fw-semibold">
+                                            Đăng nhập
+                                            <i class="bi bi-arrow-right ms-1"
+                                               aria-hidden="true"></i>
+                                        </a>
+                                    </div>
+
+                                    <div class="text-center mt-4">
+                                        <a href="{{ url('/') }}"
+                                           class="text-muted small">
+                                            <i class="bi bi-arrow-left me-1"
+                                               aria-hidden="true"></i>
+                                            Quay về trang chủ
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="mb-4">
-                            <label for="MatKhau_confirmation" class="form-label">
-                                Xác nhận mật khẩu
-                            </label>
-
-                            <input
-                                type="password"
-                                id="MatKhau_confirmation"
-                                name="MatKhau_confirmation"
-                                class="form-control"
-                                minlength="8"
-                                autocomplete="new-password"
-                                required
-                            >
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100">
-                            Đăng ký
-                        </button>
-                    </form>
-
-                    <p class="text-center text-secondary mt-4 mb-0">
-                        Đã có tài khoản?
-                        <a href="{{ route('login') }}">Đăng nhập</a>
-                    </p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 @endsection

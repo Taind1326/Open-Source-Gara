@@ -15,24 +15,35 @@ class Xe extends Model
     public const NGUNG_SU_DUNG = 'NGUNG_SU_DUNG';
 
     protected $table = 'XE';
+
     protected $primaryKey = 'MaXe';
+
     public $timestamps = false;
 
-    protected $fillable = ['MaTK', 'BienSo', 'HangXe', 'DongXe', 'NamSanXuat', 'MauSac', 'TrangThai'];
+    protected $fillable = [
+        'MaTK',
+        'BienSo',
+        'HangXe',
+        'DongXe',
+        'NamSanXuat',
+        'TrangThai',
+    ];
 
-    protected $casts = ['NgayTao' => 'datetime'];
+    protected $casts = [
+        'MaXe' => 'integer',
+        'MaTK' => 'integer',
+        'NamSanXuat' => 'integer',
+    ];
 
     public function taiKhoan()
     {
-        return $this->belongsTo(TaiKhoan::class, 'MaTK', 'MaTK');
+        return $this->belongsTo(
+            TaiKhoan::class,
+            'MaTK',
+            'MaTK'
+        );
     }
 
-    public function yeuCauSuaChua()
-    {
-        return $this->hasMany(YeuCauSuaChua::class, 'MaXe', 'MaXe');
-    }
-
-    // Tên cũ trong repo chung (bản Xe.php trước đó) - giữ để code cũ không vỡ
     public function yeuCauSuaChuas()
     {
         return $this->yeuCauSuaChua();
