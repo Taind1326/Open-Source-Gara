@@ -130,7 +130,16 @@
                                         </button>
                                     </form>
                                 </li>
+
+                                <li>
+    <a class="dropdown-item" href="{{ route('public.taikhoan.edit') }}">
+        <i class="bi bi-person me-2" aria-hidden="true"></i>
+        Tài khoản của tôi
+    </a>
+</li>
                             </ul>
+
+
                         </div>
                     @else
                         <a class="btn btn-light" href="{{ route('login') }}">

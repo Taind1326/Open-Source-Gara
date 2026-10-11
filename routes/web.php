@@ -12,6 +12,7 @@ use App\Http\Controllers\SuaChuaController;
 use App\Http\Controllers\ThanhToanController;
 use App\Http\Controllers\ThongKeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TaiKhoanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -73,6 +74,19 @@ Route::post(
 )
     ->middleware('auth')
     ->name('logout');
+
+    Route::middleware(['auth', 'role:ADMIN,TECHNICIAN,USER'])
+    ->group(function () {
+        Route::get('/tai-khoan', [TaiKhoanController::class, 'edit'])
+            ->name('public.taikhoan.edit');
+
+        Route::patch('/tai-khoan', [TaiKhoanController::class, 'update'])
+            ->name('public.taikhoan.update');
+
+        Route::patch('/tai-khoan/mat-khau', [TaiKhoanController::class, 'updatePassword'])
+            ->middleware('throttle:5,1')
+            ->name('public.taikhoan.password');
+    });
 
 /*
 |--------------------------------------------------------------------------

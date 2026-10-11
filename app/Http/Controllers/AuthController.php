@@ -43,6 +43,12 @@ class AuthController extends Controller
 
         $request->session()->regenerate();
 
+        if ($request->user()->VaiTro === 'ADMIN') {
+            $request->session()->forget('url.intended');
+
+            return redirect()->route('admin.dashboard');
+        }
+
         return redirect()->intended(route('public.dichvu.index'));
     }
 

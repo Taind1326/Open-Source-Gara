@@ -21,9 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => route('login')
         );
 
-        $middleware->redirectUsersTo(
-            fn (Request $request) => route('public.dichvu.index')
-        );
+        $middleware->redirectUsersTo(function (Request $request) {
+            if ($request->user()?->VaiTro === 'ADMIN') {
+                return route('admin.dashboard');
+            }
+
+            return route('public.dichvu.index');
+        });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->shouldRenderJsonWhen(
