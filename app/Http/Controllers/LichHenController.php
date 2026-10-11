@@ -165,10 +165,13 @@ class LichHenController extends Controller
     // Form tìm kiếm lịch để tiếp nhận
     public function timTiepNhan(Request $request)
     {
-        $tuKhoa = $request->input('tu_khoa');
+        $tuKhoa = trim((string) $request->input('tu_khoa'));
         $ketQua = collect();
+        $xeTimThay = collect();
+        $dichVuList = collect();
 
-        if ($tuKhoa) {
+        if ($tuKhoa !== '') {
+            // A. Lịch đã phân công, khớp mã / biển số / SĐT
             $ketQua = YeuCauSuaChua::where('TrangThai', 'DA_PHAN_CONG')
                 ->where(function ($q) use ($tuKhoa) {
                     $q->where('MaYC', 'like', "%{$tuKhoa}%")
@@ -181,9 +184,22 @@ class LichHenController extends Controller
                 })
                 ->with(['xe.taiKhoan', 'phanCong.ktv'])
                 ->get();
+
+            // B. Xe của khách (cho luồng đến trực tiếp), tìm theo biển số / SĐT
+            $xeTimThay = Xe::with('taiKhoan')
+                ->where('TrangThai', 'HOAT_DONG')
+                ->where(function ($q) use ($tuKhoa) {
+                    $q->where('BienSo', 'like', "%{$tuKhoa}%")
+                        ->orWhereHas('taiKhoan', function ($q2) use ($tuKhoa) {
+                            $q2->where('SoDienThoai', 'like', "%{$tuKhoa}%");
+                        });
+                })
+                ->get();
+
+            $dichVuList = DichVu::where('TrangThai', 'HOAT_DONG')->get();
         }
 
-        return view('admin.lichhen.tiep-nhan', compact('ketQua', 'tuKhoa'));
+        return view('admin.lichhen.tiep-nhan', compact('ketQua', 'xeTimThay', 'dichVuList', 'tuKhoa'));
     }
 
     // Xử lý tiếp nhận xe
