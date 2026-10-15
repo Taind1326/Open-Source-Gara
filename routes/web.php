@@ -419,3 +419,8 @@ Route::middleware(['auth', 'role:USER'])->group(function () {
         ->name('public.datlich.cancel');
 });
 });
+// Form liên hệ Public và hộp thư dành cho Admin.
+Route::post('/lien-he', [\App\Http\Controllers\ContactController::class, 'store'])
+    ->middleware('throttle:5,1')->name('public.contact.store');
+Route::get('/admin/tin-nhan-lien-he', [\App\Http\Controllers\ContactController::class, 'index'])
+    ->middleware(['auth', 'role:ADMIN'])->name('admin.contact.index');

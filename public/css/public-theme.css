@@ -1,0 +1,25 @@
+/* Chỉ dùng chung màu sắc, font và hiệu ứng cuộn. */
+:root {
+    --garage-orange: #f56616;
+    --garage-navy: #10243a;
+    --garage-muted: #4b6077;
+    --garage-cream: #fff8f2;
+    --garage-peach: #ffeadb;
+    --garage-font: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+body { font-family: var(--garage-font); }
+.orange-home, .public-page {
+    --home-orange: var(--garage-orange);
+    --home-text: var(--garage-navy);
+    color: var(--home-text);
+    background: #fff;
+}
+.reveal-ready [data-reveal] {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity .6s ease, transform .6s ease;
+}
+.reveal-ready [data-reveal].is-visible { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) {
+    .reveal-ready [data-reveal] { opacity: 1; transform: none; transition: none; }
+}
