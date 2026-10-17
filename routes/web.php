@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\TaiKhoanController;
 use App\Http\Controllers\XeController;
 use App\Http\Controllers\DatLichController;
+use App\Http\Controllers\DemoPasswordResetController;
 
 /*
 |--------------------------------------------------------------------------
@@ -424,3 +425,12 @@ Route::post('/lien-he', [\App\Http\Controllers\ContactController::class, 'store'
     ->middleware('throttle:5,1')->name('public.contact.store');
 Route::get('/admin/tin-nhan-lien-he', [\App\Http\Controllers\ContactController::class, 'index'])
     ->middleware(['auth', 'role:ADMIN'])->name('admin.contact.index');
+
+    Route::middleware('guest')->group(function () {
+    Route::get('/quen-mat-khau', [DemoPasswordResetController::class, 'show'])->name('password.demo');
+    Route::post('/quen-mat-khau', [DemoPasswordResetController::class, 'start'])->middleware('throttle:5,1')->name('password.demo.start');
+    Route::post('/quen-mat-khau/xac-nhan', [DemoPasswordResetController::class, 'verify'])->middleware('throttle:10,1')->name('password.demo.verify');
+    Route::post('/quen-mat-khau/gui-lai', [DemoPasswordResetController::class, 'resend'])->middleware('throttle:3,1')->name('password.demo.resend');
+    Route::post('/quen-mat-khau/dat-lai', [DemoPasswordResetController::class, 'reset'])->middleware('throttle:5,1')->name('password.demo.reset');
+    Route::post('/quen-mat-khau/bat-dau-lai', [DemoPasswordResetController::class, 'restart'])->middleware('throttle:5,1')->name('password.demo.restart');
+});
