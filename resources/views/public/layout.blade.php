@@ -169,17 +169,7 @@
                                 </li>
 
                                 <li>
-                                    <form method="POST"
-                                          action="{{ route('logout') }}">
-                                        @csrf
-
-                                        <button class="dropdown-item text-danger"
-                                                type="submit">
-                                            <i class="bi bi-box-arrow-right me-2"
-                                               aria-hidden="true"></i>
-                                            Đăng xuất
-                                        </button>
-                                    </form>
+                                    <x-public.logout-button />
                                 </li>
                             </ul>
                         </div>
