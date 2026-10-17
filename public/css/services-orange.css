@@ -1,0 +1,80 @@
+/* Style riêng trang Dịch vụ. Màu và font kế thừa public-theme.css. */
+.services-page {
+    --service-orange: var(--garage-orange, #f56616);
+    --service-navy: var(--garage-navy, #10243a);
+    --service-muted: var(--garage-muted, #4b6077);
+    color: var(--service-navy);
+    background: #fff;
+    font-family: var(--garage-font, system-ui, -apple-system, "Segoe UI", sans-serif);
+}
+.services-page .container { padding-inline:38px; }
+.services-page h1, .services-page h2 { font-weight:750; line-height:1.2; letter-spacing:-.035em; }
+.services-page p { color:var(--service-muted); line-height:1.65; }
+.services-page .btn { min-height:46px; padding:11px 18px; border-radius:9px; font-weight:650; }
+.services-page .btn-primary { --bs-btn-bg:var(--service-orange); --bs-btn-border-color:var(--service-orange); --bs-btn-hover-bg:#cb4806; --bs-btn-hover-border-color:#cb4806; --bs-btn-active-bg:#b94005; --bs-btn-active-border-color:#b94005; }
+.services-page .btn-outline-primary { --bs-btn-color:#bd4806; --bs-btn-border-color:var(--service-orange); --bs-btn-hover-bg:#cb4806; --bs-btn-hover-border-color:#cb4806; --bs-btn-hover-color:#fff; }
+.services-page a:focus-visible, .services-page button:focus-visible { outline:3px solid var(--service-navy); outline-offset:3px; }
+.services-hero { position:relative; isolation:isolate; overflow:hidden; background:#fff8f2; padding:40px 0 46px; }
+.services-hero-image { position:absolute; inset:0 0 0 auto; width:58%; height:100%; object-fit:cover; z-index:-2; }
+.services-hero::after { content:""; position:absolute; inset:0; z-index:-1; background:linear-gradient(90deg,#fff8f2 0%,#fff8f2 39%,#fff8f2db 50%,#fff8f200 74%); }
+.services-hero .breadcrumb { font-size:.95rem; margin-bottom:28px; }
+.services-hero .breadcrumb a { color:var(--service-muted); }
+.services-hero h1 { font-size:clamp(2rem,3.3vw,3.2rem); max-width:680px; margin-bottom:18px; }
+.services-hero p { font-size:1.1rem; max-width:620px; margin:0; }
+.services-catalog { padding:32px 0 12px; }
+.services-search { display:flex; gap:14px; }
+.services-search-field { position:relative; flex:1; }
+.services-search-field > i { position:absolute; left:18px; top:50%; transform:translateY(-50%); color:#77879a; font-size:1.25rem; }
+.services-search .form-control { padding:12px 18px 12px 48px; min-height:50px; border-radius:9px; }
+.services-search > button { min-width:140px; }
+.services-filters { display:flex; flex-wrap:wrap; gap:10px; margin:18px 0 26px; }
+.services-filter { display:inline-flex; align-items:center; min-height:44px; padding:10px 18px; border:1px solid #e5eaf1; border-radius:30px; background:#f7f8fa; color:var(--service-navy); font-weight:550; }
+.services-filter:hover { border-color:var(--service-orange); color:#b94305; }
+.services-filter.is-active { color:#fff; background:var(--service-orange); border-color:var(--service-orange); }
+.services-toolbar { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:22px; }
+.services-sort { display:flex; align-items:center; gap:12px; color:var(--service-muted); }
+.services-sort .form-select { width:auto; min-width:165px; min-height:44px; }
+.catalog-card { display:flex; flex-direction:column; height:100%; overflow:hidden; border:1px solid #e5eaf1; border-radius:14px; box-shadow:0 4px 14px #10243a07; background:#fff; }
+.catalog-photo { display:block; aspect-ratio:1.65; overflow:hidden; background:#fff1e6; }
+.catalog-photo img { display:block; width:100%; height:100%; object-fit:cover; }
+.catalog-photo-placeholder { display:grid; place-items:center; height:100%; color:var(--service-orange); font-size:3.5rem; }
+.catalog-card-body { display:flex; flex-direction:column; flex:1; padding:20px; }
+.catalog-category { align-self:flex-start; padding:4px 9px; border-radius:5px; background:#fff0e5; color:#b94305; font-size:.8rem; margin-bottom:10px; }
+.catalog-card h2 { font-size:1.25rem; margin-bottom:10px; }
+.catalog-card h2 a { color:var(--service-navy); }
+.catalog-card h2 a:hover { color:#b94305; }
+.catalog-description { margin:0 0 24px; font-size:1rem; }
+.catalog-bottom { margin-top:auto; }
+.services-page .catalog-price { margin:0 0 12px; color:var(--service-navy); }
+.catalog-price strong { font-size:1.4rem; color:#c74705; }
+.catalog-actions { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.catalog-actions .btn { padding:10px 8px; font-size:.95rem; }
+.services-pagination { padding:30px 0 20px; }
+.services-pagination ul { display:flex; flex-wrap:wrap; justify-content:center; gap:8px; list-style:none; padding:0; margin:0; }
+.services-pagination a, .services-pagination span { display:grid; place-items:center; width:46px; height:46px; border:1px solid var(--service-orange); border-radius:7px; background:#fff; color:var(--service-navy); font-weight:650; }
+.services-pagination a:hover { background:#fff0e5; }
+.services-pagination .is-current { background:var(--service-orange); color:#fff; }
+.services-pagination .is-disabled { border-color:#e0e5ec; background:#f4f5f7; color:#b6bfcc; }
+.services-empty { padding:50px 20px; text-align:center; }
+.services-empty > i { font-size:2.5rem; color:var(--service-orange); }
+.services-empty h2 { margin-top:20px; font-size:1.5rem; }
+.services-cta-section { padding:12px 0 24px; }
+.services-cta { display:flex; align-items:center; justify-content:space-between; gap:24px; padding:28px; background:#fff0e5; border-radius:16px; }
+.services-cta h2 { font-size:1.8rem; margin-bottom:8px; }
+.services-cta p { margin:0; }
+.services-cta-actions { display:flex; flex-wrap:wrap; gap:14px; flex-shrink:0; }
+.services-secondary { border:1px solid var(--service-navy); color:var(--service-navy); background:#fff; }
+.services-secondary:hover { background:var(--service-navy); color:#fff; }
+@media(min-width:1200px) { .services-page .container { max-width:1320px; } }
+@media(max-width:991px) { .services-cta { flex-direction:column; align-items:flex-start; } .services-hero-image { opacity:.35; } }
+@media(max-width:767px) {
+    .services-page .container { padding-inline:20px; }
+    .services-hero { padding:28px 0; }
+    .services-hero-image { display:none; }
+    .services-search { flex-direction:column; }
+    .services-toolbar { flex-wrap:wrap; }
+    .services-cta { padding:22px; }
+    .services-sort { flex-wrap:wrap; }
+    .services-pagination ul { gap:5px; }
+    .services-pagination a, .services-pagination span { width:38px; height:44px; }
+}
