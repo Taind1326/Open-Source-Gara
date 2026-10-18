@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Xe extends Model
 {
@@ -17,31 +18,24 @@ class Xe extends Model
         'BienSo',
         'HangXe',
         'DongXe',
-        'NamSanXuat',
-        'TrangThai',
+        'NamSX',
+        'MauSac',
     ];
 
-    protected $casts = [
-        'MaXe' => 'integer',
-        'MaTK' => 'integer',
-        'NamSanXuat' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'MaTK' => 'integer',
+            'NamSX' => 'integer',
+        ];
+    }
 
-    public function taiKhoan()
+    public function taiKhoan(): BelongsTo
     {
         return $this->belongsTo(
             TaiKhoan::class,
             'MaTK',
             'MaTK'
-        );
-    }
-
-    public function yeuCauSuaChuas()
-    {
-        return $this->hasMany(
-            YeuCauSuaChua::class,
-            'MaXe',
-            'MaXe'
         );
     }
 }
