@@ -23,7 +23,6 @@ class TaiKhoan extends Authenticatable
         'SoDienThoai',
         'MatKhau',
         'VaiTro',
-        'DiemTichLuy',
         'TrangThai',
     ];
 
@@ -41,6 +40,10 @@ class TaiKhoan extends Authenticatable
 
     public function xes(): HasMany
     {
-        return $this->hasMany(Xe::class, 'MaTK', 'MaTK');
+        return $this->hasMany(
+            Xe::class,
+            'MaTK',
+            'MaTK'
+        );
     }
 }
