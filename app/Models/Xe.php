@@ -38,4 +38,13 @@ class Xe extends Model
             'MaTK'
         );
     }
+
+    public function lichHens(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(
+            LichHen::class,
+            'MaXe',
+            'MaXe'
+        );
+    }
 }
