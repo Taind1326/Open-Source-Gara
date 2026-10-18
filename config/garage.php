@@ -8,9 +8,18 @@ return [
     'email' => null,
 
     'opening_hours' => '07:30 – 20:00 hằng ngày',
+
     'socials' => [
         'Facebook' => env('GARAGE_FACEBOOK_URL'),
         'Zalo' => env('GARAGE_ZALO_URL'),
         'YouTube' => env('GARAGE_YOUTUBE_URL'),
+    ],
+
+    'demo_passwords' => env('GARAGE_DEMO_PASSWORDS', false),
+
+    'demo_accounts' => [
+        'admin@garage.com',
+        'ktv@garage.com',
+        'user@garage.com',
     ],
 ];
