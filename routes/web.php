@@ -228,14 +228,6 @@ Route::middleware(['auth', 'role:USER'])->group(function () {
     Route::patch('/xe-cua-toi/{maXe}/trang-thai', [XeController::class, 'updateStatus'])
         ->whereNumber('maXe')
         ->name('public.xe.status');
-
-    Route::get('/danh-muc-xe/hang', [XeController::class, 'makes'])
-        ->middleware('throttle:30,1')
-        ->name('public.xe.catalog.makes');
-
-    Route::get('/danh-muc-xe/dong', [XeController::class, 'models'])
-        ->middleware('throttle:30,1')
-        ->name('public.xe.catalog.models');
 });
 
     /*
