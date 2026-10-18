@@ -17,7 +17,7 @@ class DichVu extends Model
         'MaLoaiDV',
         'TenDV',
         'MoTa',
-        'GiaTienCong',
+        'Gia',
         'HinhAnh',
         'HoatDong',
     ];
@@ -26,7 +26,7 @@ class DichVu extends Model
     {
         return [
             'MaLoaiDV' => 'integer',
-            'GiaTienCong' => 'decimal:0',
+            'Gia' => 'decimal:0',
             'HoatDong' => 'boolean',
         ];
     }

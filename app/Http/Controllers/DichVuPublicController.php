@@ -21,33 +21,45 @@ class DichVuPublicController extends Controller
         $maLoai = $data['ma_loai'] ?? null;
         $sapXep = $data['sap_xep'] ?? 'mac_dinh';
 
-        $loaiDichVus = LoaiDichVu::where(
-            'TrangThai',
-            'HOAT_DONG'
-        )
+        $loaiDichVus = LoaiDichVu::where('HoatDong', true)
             ->orderBy('TenLoaiDV')
             ->get();
 
-        $dichVus = DichVu::with('loaiDichVu')
-            ->where('TrangThai', 'HOAT_DONG')
+        $query = DichVu::with('loaiDichVu')
+            ->where('HoatDong', true)
             ->whereHas('loaiDichVu', function ($query) {
-                $query->where('TrangThai', 'HOAT_DONG');
+                $query->where('HoatDong', true);
             })
             ->when($tuKhoa !== '', function ($query) use ($tuKhoa) {
                 $query->where('TenDV', 'like', "%{$tuKhoa}%");
             })
             ->when($maLoai, function ($query) use ($maLoai) {
                 $query->where('MaLoaiDV', $maLoai);
-            })
-            ->when($sapXep === 'gia_tang', fn ($query) => $query->orderBy('Gia'))
-            ->when($sapXep === 'gia_giam', fn ($query) => $query->orderByDesc('Gia'))
-            ->when($sapXep === 'ten', fn ($query) => $query->orderBy('TenDV'))
+            });
+
+        switch ($sapXep) {
+            case 'gia_tang':
+                $query->orderBy('Gia');
+                break;
+
+            case 'gia_giam':
+                $query->orderByDesc('Gia');
+                break;
+
+            case 'ten':
+                $query->orderBy('TenDV');
+                break;
+        }
+
+        $dichVus = $query
             ->orderBy('MaDV')
             ->paginate(6)
             ->withQueryString();
 
         if ($dichVus->currentPage() > $dichVus->lastPage()) {
-            return redirect()->to($dichVus->url($dichVus->lastPage()));
+            return redirect()->to(
+                $dichVus->url($dichVus->lastPage())
+            );
         }
 
         return view('public.dichvu.index', compact(
@@ -59,19 +71,17 @@ class DichVuPublicController extends Controller
         ));
     }
 
-    public function show($maDV)
+    public function show(int $maDV)
     {
         $dichVu = DichVu::with('loaiDichVu')
-            ->where('TrangThai', 'HOAT_DONG')
+            ->where('HoatDong', true)
             ->whereHas('loaiDichVu', function ($query) {
-                $query->where('TrangThai', 'HOAT_DONG');
+                $query->where('HoatDong', true);
             })
             ->findOrFail($maDV);
 
-        $dichVuLienQuan = DichVu::where(
-            'TrangThai',
-            'HOAT_DONG'
-        )
+        $dichVuLienQuan = DichVu::with('loaiDichVu')
+            ->where('HoatDong', true)
             ->where('MaLoaiDV', $dichVu->MaLoaiDV)
             ->where('MaDV', '!=', $dichVu->MaDV)
             ->orderBy('TenDV')
