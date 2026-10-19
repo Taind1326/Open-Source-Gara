@@ -110,30 +110,48 @@ class PhuTungController extends Controller
     }
 
     public function destroy($id)
-    {
-        $phuTung = PhuTung::findOrFail($id);
+{
+    try {
+        $daXoa = DB::transaction(function () use ($id) {
+            $phuTung = PhuTung::query()
+                ->where('MaPT', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-        $daCoBaoGia = DB::table('CHITIETBAOGIA')
-            ->where('MaPT', $id)
-            ->exists();
+            $daDuocSuDung = DB::table('CHITIETLICHHEN')
+                ->where('MaPT', $phuTung->MaPT)
+                ->exists();
 
-        $daCoSuaChua = DB::table('CHITIETSUACHUA')
-            ->where('MaPT', $id)
-            ->exists();
+            if ($daDuocSuDung) {
+                return false;
+            }
 
-        if ($daCoBaoGia || $daCoSuaChua) {
-            return redirect()
-                ->route('phutung.index')
-                ->with(
-                    'error',
-                    'Không thể xóa phụ tùng này vì đã được sử dụng trong báo giá hoặc sửa chữa.'
-                );
+            $phuTung->delete();
+
+            return true;
+        });
+    } catch (\Illuminate\Database\QueryException $exception) {
+        // Trường hợp phát sinh liên kết mới ngay lúc xóa.
+        if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
+            throw $exception;
         }
 
-        $phuTung->delete();
+        $daXoa = false;
+    }
 
+    if (!$daXoa) {
         return redirect()
             ->route('phutung.index')
-            ->with('success', 'Xóa phụ tùng thành công.');
+            ->with(
+                'error',
+                'Không thể xóa phụ tùng đã có trong lịch hẹn. '
+                . 'Bạn có thể sửa và chuyển sang ngừng sử dụng '
+                . 'để giữ lại lịch sử.'
+            );
     }
+
+    return redirect()
+        ->route('phutung.index')
+        ->with('success', 'Đã xóa phụ tùng.');
+}
 }
