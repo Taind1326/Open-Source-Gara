@@ -19,6 +19,7 @@ use App\Http\Controllers\DemoPasswordResetController;
 use App\Http\Controllers\AdminLichHenController;
 use App\Http\Controllers\KtvLichHenController;
 use App\Http\Controllers\KtvKiemTraController;
+use App\Http\Controllers\XacNhanSuaChuaController;
 
 /*
 |--------------------------------------------------------------------------
@@ -477,4 +478,20 @@ Route::middleware(['auth', 'role:ADMIN'])
     )
         ->whereNumber('maLH')
         ->name('ktv.kiemtra.save');
+});
+
+Route::middleware(['auth', 'role:TECHNICIAN'])->group(function () {
+    Route::get('/ktv/lich-hen/{maLH}/xac-nhan', [XacNhanSuaChuaController::class, 'preview'])
+        ->whereNumber('maLH')->name('ktv.kiemtra.preview');
+    Route::post('/ktv/lich-hen/{maLH}/gui-xac-nhan', [XacNhanSuaChuaController::class, 'send'])
+        ->whereNumber('maLH')->name('ktv.kiemtra.send');
+});
+
+Route::middleware(['auth', 'role:USER'])->group(function () {
+    Route::get('/lich-hen/{maLH}/xac-nhan', [XacNhanSuaChuaController::class, 'show'])
+        ->whereNumber('maLH')->name('public.xacnhan.show');
+    Route::post('/lich-hen/{maLH}/xac-nhan/dong-y', [XacNhanSuaChuaController::class, 'approve'])
+        ->whereNumber('maLH')->name('public.xacnhan.approve');
+    Route::post('/lich-hen/{maLH}/xac-nhan/tu-choi', [XacNhanSuaChuaController::class, 'reject'])
+        ->whereNumber('maLH')->name('public.xacnhan.reject');
 });

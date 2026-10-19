@@ -338,6 +338,12 @@
                                 Lưu nháp phiếu kiểm tra
                             </button>
 
+                            <a class="btn btn-outline-primary w-100 mt-2"
+                            href="{{ route('ktv.kiemtra.preview', $lichHen->MaLH) }}">
+                                Xem lại và gửi khách
+                            </a>
+                            <p class="small text-muted mt-2">Lưu nháp trước khi xem lại và gửi khách.</p>
+
                             <a
                                 href="{{ route('ktv.lichhen.show', $lichHen->MaLH) }}"
                                 class="btn btn-light w-100 mt-2"

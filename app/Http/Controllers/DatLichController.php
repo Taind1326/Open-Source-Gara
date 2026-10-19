@@ -24,6 +24,7 @@ class DatLichController extends Controller
             ->with([
                 'xe',
                 'chiTietLichHens.dichVu',
+                'phieuKiemTra',
             ])
             ->where('MaTK', $request->user()->MaTK)
             ->orderByDesc('MaLH')
