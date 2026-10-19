@@ -44,7 +44,9 @@
                         >
 
                         @error('tu_khoa')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                         @enderror
                     </div>
 
@@ -73,11 +75,25 @@
                 <table class="table align-middle">
                     <thead class="table-light">
                         <tr>
-                            <th scope="col">Kỹ thuật viên</th>
-                            <th scope="col">Liên hệ</th>
-                            <th scope="col">Công việc chưa kết thúc</th>
-                            <th scope="col">Trạng thái</th>
-                            <th scope="col" class="text-end">Thao tác</th>
+                            <th scope="col" class="text-nowrap">
+                                Kỹ thuật viên
+                            </th>
+
+                            <th scope="col">
+                                Liên hệ
+                            </th>
+
+                            <th scope="col" class="text-nowrap">
+                                Công việc chưa kết thúc
+                            </th>
+
+                            <th scope="col" class="text-nowrap">
+                                Trạng thái
+                            </th>
+
+                            <th scope="col" class="text-end">
+                                Thao tác
+                            </th>
                         </tr>
                     </thead>
 
@@ -85,6 +101,8 @@
                         @forelse($ktvs as $ktv)
                             @php
                                 $hoatDong = $ktv->TrangThai === 'HOAT_DONG';
+                                $loiKtv = 'ktv_' . $ktv->MaTK;
+                                $statusFormId = 'ktv-status-' . $ktv->MaTK;
                             @endphp
 
                             <tr>
@@ -92,6 +110,7 @@
                                     <div class="fw-semibold">
                                         {{ $ktv->HoTen }}
                                     </div>
+
                                     <small class="text-secondary">
                                         #{{ $ktv->MaTK }}
                                     </small>
@@ -99,12 +118,13 @@
 
                                 <td>
                                     <div>{{ $ktv->Email }}</div>
+
                                     <small class="text-secondary">
                                         {{ $ktv->SoDienThoai }}
                                     </small>
                                 </td>
 
-                                <td>
+                                <td class="text-nowrap">
                                     {{ $ktv->SoCongViec }} lịch
                                 </td>
 
@@ -115,44 +135,26 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <div class="d-flex flex-wrap justify-content-end gap-2">
+                                    <div class="d-flex flex-nowrap justify-content-end align-items-start gap-2">
                                         <a
                                             href="{{ route('admin.ktv.edit', $ktv->MaTK) }}"
-                                            class="btn btn-outline-primary btn-sm"
+                                            class="btn btn-outline-primary btn-sm text-nowrap"
                                         >
                                             Sửa
                                         </a>
 
-                                        <form
-                                            method="POST"
-                                            action="{{ route('admin.ktv.status', $ktv->MaTK) }}"
-                                            novalidate
-                                            data-confirm-title="{{ $hoatDong ? 'Khóa tài khoản KTV' : 'Mở khóa tài khoản KTV' }}"
-                                            data-confirm="{{ $hoatDong
-                                                ? 'Khóa tài khoản của ' . $ktv->HoTen . '? KTV sẽ không thể đăng nhập và nhận phân công mới.'
-                                                : 'Mở lại tài khoản của ' . $ktv->HoTen . '?' }}"
-                                            data-confirm-accept="{{ $hoatDong ? 'Khóa tài khoản' : 'Mở khóa' }}"
+                                        <button
+                                            type="submit"
+                                            form="{{ $statusFormId }}"
+                                            class="btn {{ $hoatDong ? 'btn-outline-danger' : 'btn-outline-success' }} btn-sm text-nowrap"
                                         >
-                                            @csrf
-                                            @method('PATCH')
-
-                                            <input
-                                                type="hidden"
-                                                name="TrangThai"
-                                                value="{{ $hoatDong ? 'KHOA' : 'HOAT_DONG' }}"
-                                            >
-
-                                            <button
-                                                type="submit"
-                                                class="btn {{ $hoatDong ? 'btn-outline-danger' : 'btn-outline-success' }} btn-sm"
-                                            >
-                                                {{ $hoatDong ? 'Khóa' : 'Mở khóa' }}
-                                            </button>
-                                        </form>
+                                            {{ $hoatDong ? 'Khóa' : 'Mở khóa' }}
+                                        </button>
 
                                         <form
                                             method="POST"
                                             action="{{ route('admin.ktv.reset-password', $ktv->MaTK) }}"
+                                            class="m-0"
                                             novalidate
                                             data-confirm-title="Đặt lại mật khẩu KTV"
                                             data-confirm="Đặt lại mật khẩu của {{ $ktv->HoTen }} thành Ktv@123?"
@@ -169,11 +171,38 @@
                                         </form>
                                     </div>
 
-                                    @error('ktv_' . $ktv->MaTK)
-                                        <div class="text-danger small mt-2" role="alert">
-                                            {{ $message }}
-                                        </div>
-                                    @enderror
+                                    <form
+                                        id="{{ $statusFormId }}"
+                                        method="POST"
+                                        action="{{ route('admin.ktv.status', $ktv->MaTK) }}"
+                                        class="m-0 text-start"
+                                        novalidate
+                                        data-confirm-title="{{ $hoatDong ? 'Khóa tài khoản KTV' : 'Mở khóa tài khoản KTV' }}"
+                                        data-confirm="{{ $hoatDong
+                                            ? 'Khóa tài khoản của ' . $ktv->HoTen . '? KTV sẽ không thể đăng nhập và nhận phân công mới.'
+                                            : 'Mở lại tài khoản của ' . $ktv->HoTen . '?' }}"
+                                        data-confirm-accept="{{ $hoatDong ? 'Khóa tài khoản' : 'Mở khóa' }}"
+                                    >
+                                        @csrf
+                                        @method('PATCH')
+
+                                        <input
+                                            type="hidden"
+                                            name="TrangThai"
+                                            value="{{ $hoatDong ? 'KHOA' : 'HOAT_DONG' }}"
+                                        >
+
+                                        @error($loiKtv)
+                                            <div
+                                                class="garage-field-error text-danger small mt-2"
+                                                data-form-error
+                                                tabindex="-1"
+                                                role="alert"
+                                            >
+                                                {{ $message }}
+                                            </div>
+                                        @enderror
+                                    </form>
                                 </td>
                             </tr>
                         @empty
