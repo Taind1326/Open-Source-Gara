@@ -99,7 +99,11 @@
             else if (el.value && el.validity.patternMismatch) message = el.dataset.patternMessage || `Vui lòng nhập ${title} đúng định dạng.`;
             else if (el.validity.badInput || el.validity.stepMismatch) message = `Vui lòng nhập ${title} hợp lệ.`;
             else if (el.value && el.min && el.validity.rangeUnderflow) message = `${title} phải từ ${el.min} trở lên.`;
-            else if (el.value && el.max && el.validity.rangeOverflow) message = `${title} không được vượt quá ${el.max}.`;
+            else if (el.value && el.max && el.validity.rangeOverflow) {
+    message = el.hasAttribute('data-stock')
+        ? `Số lượng không được vượt quá tồn kho hiện tại (${el.dataset.stock}).`
+        : `${title} không được vượt quá ${el.max}.`;
+}
             else if (el.value && el.minLength > 0 && el.value.length < el.minLength) message = `${title} phải có ít nhất ${el.minLength} ký tự.`;
             else if (el.value && el.maxLength > 0 && el.value.length > el.maxLength) message = `${title} không được vượt quá ${el.maxLength} ký tự.`;
             if (el.name.endsWith('_confirmation')) {

@@ -218,8 +218,12 @@ class AdminLichHenController extends Controller
             ]);
         }, 3);
 
-        return redirect()
-            ->route('admin.lichhen.show', $maLH)
-            ->with('success', 'Đã phân công kỹ thuật viên. Lịch đang chờ nhận xe.');
+        return redirect()->route(
+            match ($taiKhoan->VaiTro) {
+                'ADMIN' => 'admin.dashboard',
+                'TECHNICIAN' => 'ktv.lichhen.index',
+                default => 'public.home',
+            }
+        );
     }
 }

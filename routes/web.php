@@ -18,6 +18,7 @@ use App\Http\Controllers\DatLichController;
 use App\Http\Controllers\DemoPasswordResetController;
 use App\Http\Controllers\AdminLichHenController;
 use App\Http\Controllers\KtvLichHenController;
+use App\Http\Controllers\KtvKiemTraController;
 
 /*
 |--------------------------------------------------------------------------
@@ -461,3 +462,19 @@ Route::middleware(['auth', 'role:ADMIN'])
             ->whereNumber('maLH')
             ->name('receive');
     });
+
+    Route::middleware(['auth', 'role:TECHNICIAN'])->group(function () {
+    Route::get(
+        '/ktv/lich-hen/{maLH}/kiem-tra',
+        [KtvKiemTraController::class, 'edit']
+    )
+        ->whereNumber('maLH')
+        ->name('ktv.kiemtra.edit');
+
+    Route::post(
+        '/ktv/lich-hen/{maLH}/kiem-tra',
+        [KtvKiemTraController::class, 'save']
+    )
+        ->whereNumber('maLH')
+        ->name('ktv.kiemtra.save');
+});

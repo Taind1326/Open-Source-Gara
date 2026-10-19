@@ -195,6 +195,14 @@
                                     Việc sửa chữa chỉ bắt đầu sau khi
                                     khách xác nhận các hạng mục và chi phí.
                                 </div>
+
+                                <a
+                                    href="{{ route('ktv.kiemtra.edit', $lichHen->MaLH) }}"
+                                    class="btn btn-primary w-100 mt-3"
+                                >
+                                    Lập / cập nhật phiếu kiểm tra
+                                </a>
+                                
                             @elseif($lichHen->TrangThai === 'DA_HUY')
                                 <div class="alert alert-secondary mb-0">
                                     Lịch đã hủy.
