@@ -218,9 +218,47 @@
                                     trước khi sửa chữa.
                                 </div>
                             @elseif($lichHen->TrangThai === 'CHO_SUA_CHUA')
-                                <div class="alert alert-success mb-0">
+                                <div class="alert alert-success mb-3">
                                     Khách đã đồng ý các hạng mục và chi phí.
-                                    Xe đang chờ bắt đầu sửa chữa.
+                                    Bạn có thể bắt đầu sửa chữa.
+                                </div>
+
+                                <form
+                                    method="POST"
+                                    action="{{ route('ktv.suachua.start', $lichHen->MaLH) }}"
+                                    novalidate
+                                    data-confirm-title="Bắt đầu sửa chữa"
+                                    data-confirm="Bắt đầu sửa xe theo các hạng mục khách đã đồng ý? Phụ tùng sử dụng sẽ được trừ khỏi tồn kho."
+                                    data-confirm-accept="Bắt đầu sửa"
+                                    data-confirm-cancel="Để sau"
+                                >
+                                    @csrf
+
+                                    @error('sua_chua')
+                                        <div class="text-danger small mb-3" role="alert">
+                                            {{ $message }}
+                                        </div>
+                                    @enderror
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-primary w-100"
+                                    >
+                                        <i class="bi bi-tools me-2" aria-hidden="true"></i>
+                                        Bắt đầu sửa chữa
+                                    </button>
+                                </form>
+
+                            @elseif($lichHen->TrangThai === 'DANG_SUA_CHUA')
+                                @error('sua_chua')
+                                    <div class="text-danger small mb-3" role="alert">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
+
+                                <div class="alert alert-info mb-0">
+                                    Xe đang được sửa theo các hạng mục khách đã đồng ý.
+                                    Phụ tùng đã được trừ kho khi bắt đầu sửa.
                                 </div>
                             @elseif($lichHen->TrangThai === 'DA_HUY')
                                 <div class="alert alert-secondary mb-0">

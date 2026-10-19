@@ -19,6 +19,7 @@ use App\Http\Controllers\DemoPasswordResetController;
 use App\Http\Controllers\AdminLichHenController;
 use App\Http\Controllers\KtvLichHenController;
 use App\Http\Controllers\KtvKiemTraController;
+use App\Http\Controllers\KtvSuaChuaController;
 use App\Http\Controllers\XacNhanSuaChuaController;
 
 /*
@@ -494,4 +495,13 @@ Route::middleware(['auth', 'role:USER'])->group(function () {
         ->whereNumber('maLH')->name('public.xacnhan.approve');
     Route::post('/lich-hen/{maLH}/xac-nhan/tu-choi', [XacNhanSuaChuaController::class, 'reject'])
         ->whereNumber('maLH')->name('public.xacnhan.reject');
+});
+
+Route::middleware(['auth', 'role:TECHNICIAN'])->group(function () {
+    Route::post(
+        '/ktv/lich-hen/{maLH}/bat-dau-sua',
+        [KtvSuaChuaController::class, 'start']
+    )
+        ->whereNumber('maLH')
+        ->name('ktv.suachua.start');
 });
