@@ -250,16 +250,93 @@
                                 </form>
 
                             @elseif($lichHen->TrangThai === 'DANG_SUA_CHUA')
-                                @error('sua_chua')
-                                    <div class="text-danger small mb-3" role="alert">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
+    <div class="alert alert-info mb-3">
+        Xe đang được sửa theo các hạng mục khách đã đồng ý.
+        Chỉ xác nhận hoàn thành sau khi đã kiểm tra xe lần cuối.
+    </div>
 
-                                <div class="alert alert-info mb-0">
-                                    Xe đang được sửa theo các hạng mục khách đã đồng ý.
-                                    Phụ tùng đã được trừ kho khi bắt đầu sửa.
-                                </div>
+    <form
+        method="POST"
+        action="{{ route('ktv.suachua.finish', $lichHen->MaLH) }}"
+        novalidate
+        data-confirm-title="Hoàn thành sửa chữa"
+        data-confirm="Xác nhận đã sửa xong và kiểm tra xe lần cuối? Hệ thống sẽ tạo hóa đơn theo chi phí khách đã đồng ý."
+        data-confirm-accept="Hoàn thành sửa chữa"
+        data-confirm-cancel="Tiếp tục sửa"
+    >
+        @csrf
+
+        <div class="mb-3">
+            <label for="repair-note" class="form-label">
+                Ghi chú sau sửa chữa
+            </label>
+
+            <textarea
+                id="repair-note"
+                name="GhiChu"
+                rows="3"
+                maxlength="2000"
+                class="form-control @error('GhiChu') is-invalid @enderror"
+                placeholder="Lưu ý vận hành, bảo dưỡng sau sửa chữa..."
+            >{{ old('GhiChu') }}</textarea>
+
+            @error('GhiChu')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        <div class="form-check mb-3">
+            <input
+                type="checkbox"
+                id="final-check"
+                name="DaKiemTraCuoi"
+                value="1"
+                class="form-check-input @error('DaKiemTraCuoi') is-invalid @enderror"
+                required
+                @checked(old('DaKiemTraCuoi'))
+            >
+
+            <label class="form-check-label" for="final-check">
+                Tôi đã sửa xong và kiểm tra xe lần cuối.
+            </label>
+
+            @error('DaKiemTraCuoi')
+                <div class="invalid-feedback">
+                    {{ $message }}
+                </div>
+            @enderror
+        </div>
+
+        @error('sua_chua')
+            <div class="text-danger small mb-3" role="alert">
+                {{ $message }}
+            </div>
+        @enderror
+
+        <button type="submit" class="btn btn-primary w-100">
+            <i class="bi bi-check2-circle me-2" aria-hidden="true"></i>
+            Hoàn thành sửa chữa
+        </button>
+    </form>
+
+@elseif($lichHen->TrangThai === 'CHO_THANH_TOAN')
+    @error('sua_chua')
+        <div class="text-danger small mb-3" role="alert">
+            {{ $message }}
+        </div>
+    @enderror
+
+    <div class="alert alert-success mb-0">
+        Đã hoàn thành sửa chữa và kiểm tra cuối.
+        Hóa đơn đã được tạo, đang chờ thanh toán.
+    </div>
+
+@elseif($lichHen->TrangThai === 'HOAN_TAT')
+    <div class="alert alert-success mb-0">
+        Khách đã thanh toán. Đơn sửa chữa đã hoàn tất.
+    </div>
                             @elseif($lichHen->TrangThai === 'DA_HUY')
                                 <div class="alert alert-secondary mb-0">
                                     Lịch đã hủy.

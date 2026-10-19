@@ -504,4 +504,11 @@ Route::middleware(['auth', 'role:TECHNICIAN'])->group(function () {
     )
         ->whereNumber('maLH')
         ->name('ktv.suachua.start');
+
+    Route::post(
+        '/ktv/lich-hen/{maLH}/hoan-thanh-sua',
+        [KtvSuaChuaController::class, 'finish']
+    )
+        ->whereNumber('maLH')
+        ->name('ktv.suachua.finish');
 });
