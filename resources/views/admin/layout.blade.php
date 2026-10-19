@@ -266,20 +266,6 @@
         </header>
 
         <main class="admin-content">
-            @if (session('success'))
-                <div class="alert alert-success" role="alert">
-                    {{ session('success') }}
-                </div>
-            @endif
-
-            @if (session('error'))
-                <div class="alert alert-danger" role="alert">
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            
-
             @yield('content')
         </main>
     </div>
@@ -290,5 +276,6 @@
 
     @stack('scripts')
 @include('shared.form-ui')
+@include('shared.flash-popup')
 </body>
 </html>

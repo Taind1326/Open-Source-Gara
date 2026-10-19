@@ -202,36 +202,6 @@
     </nav>
 
     <main class="flex-grow-1 flex-shrink-0">
-        @if(session('success') || session('error'))
-            <div class="container pt-4">
-                @if(session('success'))
-                    <div class="alert alert-success alert-dismissible fade show"
-                         role="status">
-                        {{ session('success') }}
-
-                        <button class="btn-close"
-                                type="button"
-                                data-bs-dismiss="alert"
-                                aria-label="Đóng thông báo"></button>
-                    </div>
-                @endif
-
-                @if(session('error'))
-                    <div class="alert alert-danger alert-dismissible fade show"
-                         role="alert">
-                        {{ session('error') }}
-
-                        <button class="btn-close"
-                                type="button"
-                                data-bs-dismiss="alert"
-                                aria-label="Đóng thông báo"></button>
-                    </div>
-                @endif
-
-                
-            </div>
-        @endif
-
         @yield('content')
     </main>
 
@@ -325,5 +295,6 @@
     <script src="{{ asset('js/public-reveal.js') }}" defer></script>
     @stack('scripts')
 @include('shared.form-ui')
+@include('shared.flash-popup')
 </body>
 </html>
