@@ -5,184 +5,117 @@
 @section('content')
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h1 class="h4 fw-bold mb-1">Phụ tùng</h1>
+            <h1 class="h3 fw-bold mb-2">
+                Quản lý phụ tùng
+            </h1>
+
             <p class="text-secondary mb-0">
-                Quản lý đơn giá và số lượng phụ tùng trong kho.
+                Quản lý giá bán, số lượng tồn và trạng thái sử dụng.
             </p>
         </div>
 
         <a href="{{ route('phutung.create') }}" class="btn btn-primary">
-            + Thêm phụ tùng
+            Thêm phụ tùng
         </a>
     </div>
 
-    <div class="card">
-        <div class="card-body p-4 border-bottom">
-            <div class="fw-semibold">
-                Danh sách phụ tùng
-                <span class="badge bg-primary-subtle text-primary ms-2">
-                    {{ $danhSach->count() }}
-                </span>
-            </div>
-        </div>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <p class="text-secondary small mb-3">
+                {{ $danhSach->count() }} phụ tùng
+            </p>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">Mã</th>
-                        <th>Tên phụ tùng</th>
-                        <th>Đơn vị tính</th>
-                        <th>Đơn giá</th>
-                        <th>Tồn kho</th>
-                        <th>Trạng thái</th>
-                        <th class="text-end pe-4">Thao tác</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @forelse ($danhSach as $phuTung)
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <td class="ps-4">#{{ $phuTung->MaPT }}</td>
-
-                            <td class="fw-semibold">
-                                {{ $phuTung->TenPT }}
-                            </td>
-
-                            <td>{{ $phuTung->DonViTinh }}</td>
-
-                            <td class="text-nowrap">
-                                {{ number_format($phuTung->Gia, 0, ',', '.') }} đ
-                            </td>
-
-                            <td>
-                                @if ($phuTung->SoLuongTon == 0)
-                                    <span class="badge bg-danger-subtle text-danger">
-                                        Hết hàng
-                                    </span>
-                                @else
-                                    <span class="fw-semibold">
-                                        {{ $phuTung->SoLuongTon }}
-                                    </span>
-                                @endif
-                            </td>
-
-                            <td>
-                                @if ($phuTung->TrangThai === 'DANG_SU_DUNG')
-                                    <span class="badge bg-success-subtle text-success">
-                                        Đang sử dụng
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary">
-                                        Ngừng sử dụng
-                                    </span>
-                                @endif
-                            </td>
-
-                            <td class="pe-4">
-                                <div class="d-flex justify-content-end gap-2">
-                                    <a
-                                        href="{{ route('phutung.edit', $phuTung->MaPT) }}"
-                                        class="btn btn-outline-primary btn-sm"
-                                    >
-                                        Sửa
-                                    </a>
-
-                                    <button
-                                        type="button"
-                                        class="btn btn-outline-danger btn-sm"
-                                        data-bs-toggle="modal"
-                                        data-bs-target="#deleteModal"
-                                        data-action="{{ route('phutung.destroy', $phuTung->MaPT) }}"
-                                        data-name="{{ $phuTung->TenPT }}"
-                                    >
-                                        Xóa
-                                    </button>
-                                </div>
-                            </td>
+                            <th scope="col">Mã</th>
+                            <th scope="col">Tên phụ tùng</th>
+                            <th scope="col" class="text-nowrap">Đơn vị tính</th>
+                            <th scope="col" class="text-end text-nowrap">Giá bán</th>
+                            <th scope="col" class="text-end text-nowrap">Tồn kho</th>
+                            <th scope="col" class="text-nowrap">Trạng thái</th>
+                            <th scope="col" class="text-end">Thao tác</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center text-secondary py-5">
-                                Chưa có phụ tùng. Thêm phụ tùng để bắt đầu quản lý kho.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-    </div>
+                    </thead>
 
-    <div
-        class="modal fade"
-        id="deleteModal"
-        tabindex="-1"
-        aria-labelledby="deleteModalTitle"
-        aria-hidden="true"
-    >
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title fs-5" id="deleteModalTitle">
-                        Xác nhận xóa phụ tùng
-                    </h2>
+                    <tbody>
+                        @forelse($danhSach as $phuTung)
+                            <tr>
+                                <td class="text-secondary">
+                                    #{{ $phuTung->MaPT }}
+                                </td>
 
-                    <button
-                        type="button"
-                        class="btn-close"
-                        data-bs-dismiss="modal"
-                        aria-label="Đóng"
-                    ></button>
-                </div>
+                                <td class="fw-semibold">
+                                    {{ $phuTung->TenPT }}
+                                </td>
 
-                <div class="modal-body">
-                    <p>
-                        Bạn muốn xóa phụ tùng
-                        <strong id="deletePartName"></strong>?
-                    </p>
+                                <td>
+                                    {{ $phuTung->DonViTinh }}
+                                </td>
 
-                    <p class="small text-secondary mb-0">
-                        Phụ tùng đã dùng trong nghiệp vụ nên được chuyển
-                        sang trạng thái ngừng sử dụng để giữ lịch sử.
-                    </p>
-                </div>
+                                <td class="text-end text-nowrap">
+                                    {{ number_format($phuTung->GiaBan, 0, ',', '.') }} đ
+                                </td>
 
-                <div class="modal-footer">
-                    <button
-                        type="button"
-                        class="btn btn-outline-secondary"
-                        data-bs-dismiss="modal"
-                    >
-                        Hủy
-                    </button>
+                                <td class="text-end">
+                                    <span class="{{ $phuTung->SoLuongTon === 0 ? 'text-danger fw-semibold' : '' }}">
+                                        {{ number_format($phuTung->SoLuongTon, 0, ',', '.') }}
+                                    </span>
+                                </td>
 
-                    <form novalidate id="deleteForm" method="POST" class="m-0">
-                        @csrf
-                        @method('DELETE')
+                                <td class="text-nowrap">
+                                    <span class="badge {{ $phuTung->HoatDong ? 'text-bg-success' : 'text-bg-secondary' }}">
+                                        {{ $phuTung->HoatDong ? 'Đang sử dụng' : 'Ngừng sử dụng' }}
+                                    </span>
+                                </td>
 
-                        <button type="submit" class="btn btn-danger">
-                            Xóa phụ tùng
-                        </button>
-                    </form>
-                </div>
+                                <td>
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a
+                                            href="{{ route('phutung.edit', $phuTung->MaPT) }}"
+                                            class="btn btn-outline-primary btn-sm text-nowrap"
+                                        >
+                                            Sửa
+                                        </a>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('phutung.destroy', $phuTung->MaPT) }}"
+                                            class="m-0"
+                                            novalidate
+                                            data-confirm-title="Xóa phụ tùng"
+                                            data-confirm="Bạn muốn xóa phụ tùng {{ $phuTung->TenPT }}? Phụ tùng đã có trong lịch hẹn sẽ không thể xóa."
+                                            data-confirm-accept="Xóa phụ tùng"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-outline-danger btn-sm"
+                                            >
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="7" class="text-center text-secondary py-5">
+                                    Chưa có phụ tùng.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+
+    <p class="text-secondary small mt-3 mb-0">
+        Phụ tùng đã có trong lịch hẹn được giữ lại để bảo toàn lịch sử.
+        Chuyển sang ngừng sử dụng nếu không còn cung cấp.
+    </p>
 @endsection
-
-@push('scripts')
-    <script>
-        const deleteModal = document.getElementById('deleteModal');
-
-        deleteModal.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-
-            if (!button) {
-                return;
-            }
-
-            document.getElementById('deleteForm').action = button.dataset.action;
-            document.getElementById('deletePartName').textContent = button.dataset.name;
-        });
-    </script>
-@endpush
