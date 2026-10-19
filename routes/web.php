@@ -21,6 +21,7 @@ use App\Http\Controllers\KtvLichHenController;
 use App\Http\Controllers\KtvKiemTraController;
 use App\Http\Controllers\KtvSuaChuaController;
 use App\Http\Controllers\XacNhanSuaChuaController;
+use App\Http\Controllers\KhachHoaDonController;
 
 /*
 |--------------------------------------------------------------------------
@@ -172,39 +173,18 @@ Route::middleware([
     */
 
     Route::middleware('role:USER')->group(function () {
-        Route::get(
-            '/hoadon',
-            [HoaDonController::class, 'index']
-        )->name('hoadon.index');
+    Route::get(
+        '/hoadon',
+        [KhachHoaDonController::class, 'index']
+    )->name('hoadon.index');
 
-        Route::get(
-            '/hoadon/{maHD}',
-            [HoaDonController::class, 'show']
-        )
-            ->whereNumber('maHD')
-            ->name('hoadon.show');
-
-        Route::post(
-            '/hoadon/{maHD}/ap-dung-diem',
-            [HoaDonController::class, 'apDungDiem']
-        )
-            ->whereNumber('maHD')
-            ->name('hoadon.ap-dung-diem');
-
-        Route::post(
-            '/hoadon/{maHD}/bo-diem',
-            [HoaDonController::class, 'boDiem']
-        )
-            ->whereNumber('maHD')
-            ->name('hoadon.bo-diem');
-
-        Route::post(
-            '/hoadon/{maHD}/thanh-toan',
-            [ThanhToanController::class, 'requestPayment']
-        )
-            ->whereNumber('maHD')
-            ->name('hoadon.thanh-toan');
-    });
+    Route::get(
+        '/hoadon/{maHD}',
+        [KhachHoaDonController::class, 'show']
+    )
+        ->whereNumber('maHD')
+        ->name('hoadon.show');
+});
 
     /*
 |--------------------------------------------------------------------------
