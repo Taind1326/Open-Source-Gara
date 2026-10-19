@@ -16,6 +16,7 @@ use App\Http\Controllers\TaiKhoanController;
 use App\Http\Controllers\XeController;
 use App\Http\Controllers\DatLichController;
 use App\Http\Controllers\DemoPasswordResetController;
+use App\Http\Controllers\AdminLichHenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -426,3 +427,19 @@ Route::get('/admin/tin-nhan-lien-he', [\App\Http\Controllers\ContactController::
     Route::post('/quen-mat-khau/dat-lai', [DemoPasswordResetController::class, 'reset'])->middleware('throttle:5,1')->name('password.demo.reset');
     Route::post('/quen-mat-khau/bat-dau-lai', [DemoPasswordResetController::class, 'restart'])->middleware('throttle:5,1')->name('password.demo.restart');
 });
+
+Route::middleware(['auth', 'role:ADMIN'])
+    ->prefix('admin/lich-hen')
+    ->name('admin.lichhen.')
+    ->group(function () {
+        Route::get('/', [AdminLichHenController::class, 'index'])
+            ->name('index');
+
+        Route::get('/{maLH}', [AdminLichHenController::class, 'show'])
+            ->whereNumber('maLH')
+            ->name('show');
+
+        Route::post('/{maLH}/phan-cong', [AdminLichHenController::class, 'assign'])
+            ->whereNumber('maLH')
+            ->name('assign');
+    });

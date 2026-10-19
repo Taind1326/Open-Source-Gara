@@ -201,6 +201,12 @@
             </a>
 
             <div class="menu-caption">Kinh doanh</div>
+            <a
+                href="{{ route('admin.lichhen.index') }}"
+                class="sidebar-link {{ request()->routeIs('admin.lichhen.*') ? 'active' : '' }}"
+            >
+                Lịch hẹn và phân công
+            </a>
 
             <a
                 href="{{ route('hoadon.admin.index') }}"
