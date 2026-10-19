@@ -405,11 +405,11 @@ Route::middleware(['auth', 'role:USER'])->group(function () {
         ->name('public.datlich.store');
 
     Route::patch(
-        '/lich-hen/{maYC}/huy',
-        [DatLichController::class, 'cancel']
-    )
-        ->whereNumber('maYC')
-        ->name('public.datlich.cancel');
+    '/lich-hen/{maLH}/huy',
+    [DatLichController::class, 'cancel']
+)
+    ->whereNumber('maLH')
+    ->name('public.datlich.cancel');
 });
 });
 // Form liên hệ Public và hộp thư dành cho Admin.
