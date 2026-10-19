@@ -17,6 +17,7 @@ use App\Http\Controllers\XeController;
 use App\Http\Controllers\DatLichController;
 use App\Http\Controllers\DemoPasswordResetController;
 use App\Http\Controllers\AdminLichHenController;
+use App\Http\Controllers\KtvLichHenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -442,4 +443,21 @@ Route::middleware(['auth', 'role:ADMIN'])
         Route::post('/{maLH}/phan-cong', [AdminLichHenController::class, 'assign'])
             ->whereNumber('maLH')
             ->name('assign');
+    });
+
+
+    Route::middleware(['auth', 'role:TECHNICIAN'])
+    ->prefix('ktv/lich-hen')
+    ->name('ktv.lichhen.')
+    ->group(function () {
+        Route::get('/', [KtvLichHenController::class, 'index'])
+            ->name('index');
+
+        Route::get('/{maLH}', [KtvLichHenController::class, 'show'])
+            ->whereNumber('maLH')
+            ->name('show');
+
+        Route::post('/{maLH}/nhan-xe', [KtvLichHenController::class, 'receive'])
+            ->whereNumber('maLH')
+            ->name('receive');
     });

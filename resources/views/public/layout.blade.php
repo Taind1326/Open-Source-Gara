@@ -126,6 +126,18 @@
                                     </li>
                                 @endif
 
+                                @if(auth()->user()->VaiTro === 'TECHNICIAN')
+                                    <li>
+                                        <a
+                                            class="dropdown-item"
+                                            href="{{ route('ktv.lichhen.index') }}"
+                                        >
+                                            <i class="bi bi-tools me-2" aria-hidden="true"></i>
+                                            Công việc của tôi
+                                        </a>
+                                    </li>
+                                @endif
+
                                 @if(auth()->user()->VaiTro === 'USER')
                                     <li>
                                         <a class="dropdown-item"
