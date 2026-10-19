@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PhanCong extends Model
 {
@@ -53,6 +54,15 @@ class PhanCong extends Model
             TaiKhoan::class,
             'MaAdmin',
             'MaTK'
+        );
+    }
+
+    public function phieuKiemTra(): HasOne
+    {
+        return $this->hasOne(
+            PhieuKiemTra::class,
+            'MaPC',
+            'MaPC'
         );
     }
 }

@@ -113,4 +113,13 @@ class LichHen extends Model
             'MaLH'
         );
     }
+
+    public function phieuKiemTra(): HasOne
+    {
+        return $this->hasOne(
+            PhieuKiemTra::class,
+            'MaLH',
+            'MaLH'
+        );
+    }
 }
