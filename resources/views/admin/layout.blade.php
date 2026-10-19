@@ -230,6 +230,14 @@
             >
                 Xem trang khách hàng
             </a>
+
+
+            <a
+    href="{{ route('admin.ktv.index') }}"
+    class="sidebar-link {{ request()->routeIs('admin.ktv.*') ? 'active' : '' }}"
+>
+    Kỹ thuật viên
+</a>
         </nav>
     </aside>
 

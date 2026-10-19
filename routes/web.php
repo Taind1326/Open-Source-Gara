@@ -23,6 +23,7 @@ use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\XacNhanSuaChuaController;
 use App\Http\Controllers\XeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AdminKtvController;
 
 /*
 |--------------------------------------------------------------------------
@@ -629,3 +630,40 @@ Route::middleware([
             ->name('suachua.complete');
     });
 });
+
+
+Route::middleware(['auth', 'role:ADMIN'])
+    ->prefix('admin/ky-thuat-vien')
+    ->name('admin.ktv.')
+    ->group(function () {
+        Route::get('/', [AdminKtvController::class, 'index'])
+            ->name('index');
+
+        Route::get('/them', [AdminKtvController::class, 'create'])
+            ->name('create');
+
+        Route::post('/', [AdminKtvController::class, 'store'])
+            ->name('store');
+
+        Route::get('/{maTK}/sua', [AdminKtvController::class, 'edit'])
+            ->whereNumber('maTK')
+            ->name('edit');
+
+        Route::patch('/{maTK}', [AdminKtvController::class, 'update'])
+            ->whereNumber('maTK')
+            ->name('update');
+
+        Route::patch(
+            '/{maTK}/trang-thai',
+            [AdminKtvController::class, 'updateStatus']
+        )
+            ->whereNumber('maTK')
+            ->name('status');
+
+        Route::post(
+            '/{maTK}/dat-lai-mat-khau',
+            [AdminKtvController::class, 'resetPassword']
+        )
+            ->whereNumber('maTK')
+            ->name('reset-password');
+    });
