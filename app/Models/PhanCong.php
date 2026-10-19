@@ -3,30 +3,56 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class PhanCong extends Model
 {
     protected $table = 'PHANCONG';
+
     protected $primaryKey = 'MaPC';
+
     public $timestamps = false;
 
     protected $fillable = [
-        'MaYC',
+        'MaLH',
         'MaKTV',
-        'TrangThai',
+        'MaAdmin',
+        'NgayPhanCong',
+        'GhiChu',
     ];
 
     protected $casts = [
+        'MaPC' => 'integer',
+        'MaLH' => 'integer',
+        'MaKTV' => 'integer',
+        'MaAdmin' => 'integer',
         'NgayPhanCong' => 'datetime',
     ];
 
-    public function yeuCau()
+    public function lichHen(): BelongsTo
     {
-        return $this->belongsTo(YeuCauSuaChua::class, 'MaYC', 'MaYC');
+        return $this->belongsTo(
+            LichHen::class,
+            'MaLH',
+            'MaLH'
+        );
     }
 
-    public function ktv()
+    public function ktv(): BelongsTo
     {
-        return $this->belongsTo(TaiKhoan::class, 'MaKTV', 'MaTK');
+        return $this->belongsTo(
+            TaiKhoan::class,
+            'MaKTV',
+            'MaTK'
+        );
+    }
+
+    public function admin(): BelongsTo
+    {
+        return $this->belongsTo(
+            TaiKhoan::class,
+            'MaAdmin',
+            'MaTK'
+        );
     }
 }
