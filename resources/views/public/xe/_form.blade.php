@@ -31,9 +31,10 @@
                         name="BienSo"
                         class="form-control @error('BienSo') is-invalid @enderror"
                         value="{{ old('BienSo', $editingVehicle ? $xe->BienSo : '') }}"
-                        placeholder="Ví dụ: 51A-123.45"
-                        maxlength="20"
-                        pattern="[A-Za-z0-9.\-]+"
+                        placeholder="Ví dụ: 51A-12345"
+                        maxlength="10"
+                        pattern="[0-9]{2}[A-Za-z][A-Za-z0-9]?-[0-9]{4,5}"
+                        data-pattern-message="Biển số không đúng định dạng. Ví dụ: 51A-12345 hoặc 51A1-1234."
                         spellcheck="false"
                         autocapitalize="characters"
                         aria-describedby="vehiclePlateHelp"
@@ -54,26 +55,34 @@
                         Hãng xe
                     </label>
 
+                    <div class="garage-combobox" data-vehicle-combo="make">
                     <input
                         type="text"
                         id="vehicleMake"
                         name="HangXe"
-                        list="vehicleMakeOptions"
                         data-vehicle-make
                         class="form-control @error('HangXe') is-invalid @enderror"
                         value="{{ old('HangXe', $editingVehicle ? $xe->HangXe : '') }}"
                         placeholder="Gõ tên hãng xe để tìm..."
                         maxlength="50"
                         autocomplete="off"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="vehicleMakeMenu"
                         aria-describedby="vehicleMakeHelp"
                         required
                     >
+                        <button type="button" class="garage-combobox-toggle" data-combo-toggle
+                                aria-label="Mở danh sách hãng xe" aria-expanded="false"
+                                aria-controls="vehicleMakeMenu">
+                            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div id="vehicleMakeMenu" data-combo-menu class="garage-combobox-menu"
+                             role="listbox" aria-label="Hãng xe" hidden></div>
+                    </div>
 
-                    <datalist id="vehicleMakeOptions">
-                        @foreach($vehicleCatalog as $make => $models)
-                            <option value="{{ $make }}"></option>
-                        @endforeach
-                    </datalist>
+                    
 
                     @error('HangXe')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -89,25 +98,34 @@
                         Dòng xe
                     </label>
 
+                    <div class="garage-combobox" data-vehicle-combo="model">
                     <input
                         type="text"
                         id="vehicleModel"
                         name="DongXe"
-                        list="vehicleModelOptions"
                         data-vehicle-model
                         class="form-control @error('DongXe') is-invalid @enderror"
                         value="{{ old('DongXe', $editingVehicle ? $xe->DongXe : '') }}"
                         placeholder="Chọn hãng rồi gõ tên dòng xe..."
                         maxlength="70"
                         autocomplete="off"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="vehicleModelMenu"
                         aria-describedby="vehicleModelHelp"
                         required
                     >
+                        <button type="button" class="garage-combobox-toggle" data-combo-toggle
+                                aria-label="Mở danh sách dòng xe" aria-expanded="false"
+                                aria-controls="vehicleModelMenu">
+                            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div id="vehicleModelMenu" data-combo-menu class="garage-combobox-menu"
+                             role="listbox" aria-label="Dòng xe" hidden></div>
+                    </div>
 
-                    <datalist
-                        id="vehicleModelOptions"
-                        data-vehicle-model-options
-                    ></datalist>
+                    
 
                     @error('DongXe')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -141,15 +159,10 @@
                         min="1900"
                         max="{{ $currentYear }}"
                         step="1"
-                        list="vehicleYearOptions"
                         aria-describedby="vehicleYearHelp"
                     >
 
-                    <datalist id="vehicleYearOptions">
-                        @for($year = $currentYear; $year >= 1990; $year--)
-                            <option value="{{ $year }}"></option>
-                        @endfor
-                    </datalist>
+                    
 
                     @error('NamSX')
                         <div class="invalid-feedback">{{ $message }}</div>

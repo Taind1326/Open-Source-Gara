@@ -19,7 +19,7 @@
 
     <div class="card mb-4">
         <div class="card-body p-4">
-            <form method="GET" action="{{ route('loaidichvu.index') }}">
+            <form novalidate method="GET" action="{{ route('loaidichvu.index') }}">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-8">
                         <label for="tu_khoa" class="form-label">

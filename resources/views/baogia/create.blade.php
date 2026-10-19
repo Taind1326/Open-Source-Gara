@@ -37,19 +37,7 @@
 
 
     {{-- THÔNG BÁO LỖI --}}
-    @if ($errors->any())
-
-        <div class="alert alert-danger">
-
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-
-        </div>
-
-    @endif
+    
 
 
     {{-- ================================================== --}}
@@ -464,7 +452,7 @@
     {{-- FORM LẬP BÁO GIÁ --}}
     {{-- ================================================== --}}
 
-    <form
+    <form novalidate
         action="{{ route('baogia.store', $yeuCau->MaYC) }}"
         method="POST"
     >
@@ -535,5 +523,6 @@
     src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
 </script>
 
+@include('shared.form-ui')
 </body>
 </html>

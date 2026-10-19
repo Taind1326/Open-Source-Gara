@@ -25,7 +25,7 @@
                 <p class="garage-auth-eyebrow">Chào mừng bạn quay trở lại</p>
                 <h2>Đăng nhập</h2>
                 <p class="garage-auth-intro">Nhập email và mật khẩu để tiếp tục.</p>
-                <form action="{{ route('login.store') }}" method="POST">
+                <form novalidate action="{{ route('login.store') }}" method="POST">
                     @csrf
                     <div class="garage-auth-field">
                         <label for="loginEmail">Email</label>

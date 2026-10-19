@@ -155,10 +155,10 @@
                     </div>
 
                     @if ($hoaDon->TrangThaiThanhToan !== 'DA_THANH_TOAN')
-                        <form
+                        <form novalidate
                             method="POST"
                             action="{{ route('hoadon.admin.confirm', $hoaDon->MaHD) }}"
-                            onsubmit="return confirm('Xác nhận đã nhận đủ tiền? Hóa đơn sẽ được đánh dấu đã thanh toán.');"
+                            data-confirm="Xác nhận đã nhận đủ tiền? Hóa đơn sẽ được đánh dấu đã thanh toán."
                         >
                             @csrf
 

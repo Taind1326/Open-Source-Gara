@@ -38,7 +38,7 @@
         >
             <option value="">Chọn loại dịch vụ</option>
 
-            @if ($isEdit && ! $loaiDichVuList->contains('MaLoaiDV', $dichvu->MaLoaiDV))
+            @if($isEdit && ! $loaiDichVuList->contains('MaLoaiDV', $dichvu->MaLoaiDV))
                 <option
                     value="{{ $dichvu->MaLoaiDV }}"
                     @selected((string) $selectedLoai === (string) $dichvu->MaLoaiDV)
@@ -48,7 +48,7 @@
                 </option>
             @endif
 
-            @foreach ($loaiDichVuList as $loai)
+            @foreach($loaiDichVuList as $loai)
                 <option
                     value="{{ $loai->MaLoaiDV }}"
                     @selected((string) $selectedLoai === (string) $loai->MaLoaiDV)
@@ -86,7 +86,7 @@
         @enderror
     </div>
 
-    @if ($isEdit)
+    @if($isEdit)
         <div class="col-md-6">
             <label for="TrangThai" class="form-label fw-semibold">
                 Trạng thái
@@ -120,7 +120,9 @@
     @endif
 
     <div class="col-12">
-        <label for="MoTa" class="form-label fw-semibold">Mô tả</label>
+        <label for="MoTa" class="form-label fw-semibold">
+            Mô tả
+        </label>
 
         <textarea
             id="MoTa"
@@ -135,7 +137,9 @@
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
 
-        <div class="form-text">Tối đa 500 ký tự.</div>
+        <div class="form-text">
+            Tối đa 500 ký tự.
+        </div>
     </div>
 
     <div class="col-12">
@@ -157,12 +161,13 @@
 
         <div class="form-text">
             JPG, JPEG, PNG hoặc WEBP. Dung lượng tối đa 2 MB.
-            @if ($isEdit)
+
+            @if($isEdit)
                 Để trống để giữ ảnh hiện tại.
             @endif
         </div>
 
-        @if ($isEdit && $dichvu->HinhAnh)
+        @if($isEdit && $dichvu->HinhAnh)
             <div class="mt-3">
                 <div class="small text-secondary mb-2">
                     Hình ảnh hiện tại
@@ -186,7 +191,10 @@
         {{ $isEdit ? 'Lưu thay đổi' : 'Lưu dịch vụ' }}
     </button>
 
-    <a href="{{ route('dichvu.index') }}" class="btn btn-outline-secondary">
+    <a
+        href="{{ route('dichvu.index') }}"
+        class="btn btn-outline-secondary"
+    >
         Hủy
     </a>
 </div>

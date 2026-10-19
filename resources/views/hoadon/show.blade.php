@@ -189,7 +189,7 @@
                                     {{ number_format($hoaDon->PhanTramGiam, 0) }}%.
                                 </div>
 
-                                <form method="POST"
+                                <form novalidate method="POST"
                                       action="{{ route('hoadon.bo-diem', $hoaDon->MaHD) }}">
                                     @csrf
 
@@ -198,7 +198,7 @@
                                     </button>
                                 </form>
                             @elseif($hoaDon->DiemTichLuy >= 500)
-                                <form method="POST"
+                                <form novalidate method="POST"
                                       action="{{ route('hoadon.ap-dung-diem', $hoaDon->MaHD) }}">
                                     @csrf
 
@@ -338,7 +338,7 @@
                                 Phương thức thanh toán
                             </h2>
 
-                            <form method="POST"
+                            <form novalidate method="POST"
                                   action="{{ route('hoadon.thanh-toan', $hoaDon->MaHD) }}">
                                 @csrf
 

@@ -381,5 +381,6 @@
 <a class="btn btn-primary mb-3" href="{{ route('baogia.show', $yeuCau->MaYC) }}">Xem báo giá</a>
 @endif
 
+@include('shared.form-ui')
 </body>
 </html>

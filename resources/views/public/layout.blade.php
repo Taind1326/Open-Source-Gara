@@ -190,7 +190,7 @@
     </nav>
 
     <main class="flex-grow-1 flex-shrink-0">
-        @if(session('success') || session('error') || $errors->any())
+        @if(session('success') || session('error'))
             <div class="container pt-4">
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show"
@@ -216,19 +216,7 @@
                     </div>
                 @endif
 
-                @if($errors->any())
-                    <div class="alert alert-danger" role="alert">
-                        <div class="fw-semibold mb-2">
-                            Vui lòng kiểm tra lại thông tin:
-                        </div>
-
-                        <ul class="mb-0">
-                            @foreach($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
-                    </div>
-                @endif
+                
             </div>
         @endif
 
@@ -324,5 +312,6 @@
 
     <script src="{{ asset('js/public-reveal.js') }}" defer></script>
     @stack('scripts')
+@include('shared.form-ui')
 </body>
 </html>

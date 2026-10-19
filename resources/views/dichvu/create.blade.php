@@ -30,7 +30,7 @@
             <div class="col-xl-9">
                 <div class="card">
                     <div class="card-body p-4">
-                        <form
+                        <form novalidate
                             action="{{ route('dichvu.store') }}"
                             method="POST"
                             enctype="multipart/form-data"

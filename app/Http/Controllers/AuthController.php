@@ -99,11 +99,12 @@ class AuthController extends Controller
                 'regex:/^0[0-9]{9}$/',
                 'unique:TAIKHOAN,SoDienThoai',
             ],
+            'MatKhau_confirmation' => ['bail', 'required', 'string', 'same:MatKhau'],
+
             'MatKhau' => [
                 'required',
                 'string',
                 'max:255',
-                'confirmed',
                 Password::min(8)->letters()->numbers(),
             ],
         ], [
@@ -120,7 +121,8 @@ class AuthController extends Controller
             'SoDienThoai.unique' => 'Số điện thoại đã được sử dụng.',
 
             'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
-            'MatKhau.confirmed' => 'Mật khẩu xác nhận không khớp.',
+            'MatKhau_confirmation.required' => 'Vui lòng nhập xác nhận mật khẩu.',
+            'MatKhau_confirmation.same' => 'Mật khẩu xác nhận không khớp.',
             'MatKhau.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'MatKhau.letters' => 'Mật khẩu phải có chữ cái.',
             'MatKhau.numbers' => 'Mật khẩu phải có chữ số.',

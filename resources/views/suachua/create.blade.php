@@ -15,17 +15,7 @@
                     {{ session('success') }}
                 </div>
             @endif
-            @if($errors->any())
-                <div class="alert alert-danger">
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>
-                                {{ $error }}
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            
             <h2>
                 Sửa chữa xe {{ $yeuCau->xe->BienSo }}
             </h2>
@@ -47,7 +37,7 @@
                         {{ number_format($yeuCau->baoGia->TongTien, 0, ',', '.') }}đ
                     </strong>
                 </p>
-                <form method="POST" action="{{ route('suachua.store', $yeuCau->MaYC) }}">
+                <form novalidate method="POST" action="{{ route('suachua.store', $yeuCau->MaYC) }}">
                     @csrf
                     <button class="btn btn-primary">
                         Bắt đầu sửa chữa
@@ -55,5 +45,7 @@
                 </form>
             </section>
         </main>
-    </body>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@include('shared.form-ui')
+</body>
 </html>

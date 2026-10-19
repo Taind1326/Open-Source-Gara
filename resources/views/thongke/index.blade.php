@@ -27,7 +27,7 @@
 
     <div class="card mb-4">
         <div class="card-body p-4">
-            <form method="GET" action="{{ route('thongke.admin.index') }}">
+            <form novalidate method="GET" action="{{ route('thongke.admin.index') }}">
                 <div class="row g-3 align-items-end">
                     <div class="col-md-4">
                         <label for="tu_ngay" class="form-label">Từ ngày</label>

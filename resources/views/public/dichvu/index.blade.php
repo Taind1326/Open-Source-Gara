@@ -61,7 +61,7 @@
 
         <section class="services-catalog">
             <div class="container">
-                <form
+                <form novalidate
                     method="GET"
                     action="{{ route('public.dichvu.index') }}"
                     class="services-search"
@@ -150,7 +150,7 @@
                         {{ $dichVus->total() }} dịch vụ
                     </strong>
 
-                    <form
+                    <form novalidate
                         method="GET"
                         action="{{ route('public.dichvu.index') }}"
                         class="services-sort"

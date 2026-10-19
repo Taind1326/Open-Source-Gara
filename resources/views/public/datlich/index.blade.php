@@ -392,7 +392,7 @@
                                 Giữ lịch hẹn
                             </button>
 
-                            <form
+                            <form novalidate
                                 method="POST"
                                 action="{{ route('public.datlich.cancel', $lichHen->MaLH) }}"
                             >

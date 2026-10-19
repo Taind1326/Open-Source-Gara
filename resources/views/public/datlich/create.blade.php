@@ -47,19 +47,7 @@
 
     <section class="section-space">
         <div class="container">
-            @if($errors->any())
-                <div class="alert alert-danger" role="alert">
-                    <p class="fw-semibold mb-2">
-                        Vui lòng kiểm tra lại thông tin:
-                    </p>
-
-                    <ul class="mb-0">
-                        @foreach($errors->all() as $message)
-                            <li>{{ $message }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            
 
             @if($xes->isEmpty())
                 <div class="feature-card h-auto text-center py-5">
@@ -113,7 +101,7 @@
                     </a>
                 </div>
             @else
-                <form
+                <form novalidate
                     method="POST"
                     action="{{ route('public.datlich.store') }}"
                     data-booking-form
@@ -285,19 +273,7 @@
                                     với bạn sau khi kiểm tra xe.
                                 </p>
 
-                                @error('dich_vus')
-                                    <div class="alert alert-danger" role="alert">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-
-                                @error('dich_vus.*')
-                                    <div class="alert alert-danger" role="alert">
-                                        {{ $message }}
-                                    </div>
-                                @enderror
-
-                                <div class="row g-3">
+                                <div class="row g-3" data-validation-group="dich_vus" data-min-selected="1" data-max-selected="20">
                                     @foreach($dichVus as $dichVu)
                                         <div class="col-md-6">
                                             <div class="border rounded-3 p-3 h-100">
@@ -337,6 +313,9 @@
                                             </div>
                                         </div>
                                     @endforeach
+                                </div>
+                                <div class="invalid-feedback {{ $errors->has('dich_vus') || $errors->has('dich_vus.*') ? 'd-block' : '' }}">
+                                    {{ $errors->first('dich_vus') ?: $errors->first('dich_vus.*') }}
                                 </div>
                             </section>
 
@@ -444,7 +423,6 @@
                                     type="submit"
                                     data-booking-submit
                                     class="btn btn-primary w-100"
-                                    disabled
                                 >
                                     Gửi lịch hẹn
 

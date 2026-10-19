@@ -109,11 +109,11 @@
                                         Hồ sơ
                                     </a>
 
-                                    <form
+                                    <form novalidate
                                         method="POST"
                                         action="{{ route('hoadon.admin.tao', $phieu->MaPSC) }}"
                                         class="m-0"
-                                        onsubmit="return confirm('Lập hóa đơn từ các dịch vụ và phụ tùng thực tế của phiếu này?');"
+                                        data-confirm="Lập hóa đơn từ các dịch vụ và phụ tùng thực tế của phiếu này?"
                                     >
                                         @csrf
 

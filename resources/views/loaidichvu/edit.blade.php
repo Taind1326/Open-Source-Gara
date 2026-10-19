@@ -22,7 +22,7 @@
         <div class="col-xl-8">
             <div class="card">
                 <div class="card-body p-4">
-                    <form
+                    <form novalidate
                         action="{{ route('loaidichvu.update', $loaidichvu->MaLoaiDV) }}"
                         method="POST"
                         enctype="multipart/form-data"

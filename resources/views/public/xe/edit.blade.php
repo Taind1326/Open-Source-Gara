@@ -39,7 +39,7 @@
 
     <section class="section-space">
         <div class="container">
-            <form method="POST"
+            <form novalidate method="POST"
                   action="{{ route('public.xe.update', $xe->MaXe) }}">
                 @csrf
                 @method('PATCH')

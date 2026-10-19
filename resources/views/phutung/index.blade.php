@@ -156,7 +156,7 @@
                         Hủy
                     </button>
 
-                    <form id="deleteForm" method="POST" class="m-0">
+                    <form novalidate id="deleteForm" method="POST" class="m-0">
                         @csrf
                         @method('DELETE')
 

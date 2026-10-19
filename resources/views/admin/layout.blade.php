@@ -248,7 +248,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('logout') }}" class="m-0">
+                    <form novalidate method="POST" action="{{ route('logout') }}" class="m-0" data-confirm-title="Đăng xuất" data-confirm-accept="Đăng xuất" data-confirm-cancel="Ở lại" data-confirm="Bạn muốn đăng xuất khỏi tài khoản?">
                         @csrf
 
                         <button type="submit" class="btn btn-outline-secondary btn-sm">
@@ -272,19 +272,7 @@
                 </div>
             @endif
 
-            @if ($errors->any())
-                <div class="alert alert-danger" role="alert">
-                    <div class="fw-semibold mb-2">
-                        Vui lòng kiểm tra lại thông tin:
-                    </div>
-
-                    <ul class="mb-0">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+            
 
             @yield('content')
         </main>
@@ -295,5 +283,6 @@
     ></script>
 
     @stack('scripts')
+@include('shared.form-ui')
 </body>
 </html>

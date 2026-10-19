@@ -26,17 +26,7 @@
         </div>
     @endif
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-
-        </div>
-    @endif
+    
 
 
     {{-- ================================================== --}}
@@ -645,7 +635,7 @@
                 </button>
 
 
-                <form
+                <form novalidate
                     action="{{ route(
                         'baogia.approve',
                         $yeuCau->MaYC
@@ -729,7 +719,7 @@
                 </button>
 
 
-                <form
+                <form novalidate
                     action="{{ route(
                         'baogia.reject',
                         $yeuCau->MaYC
@@ -767,5 +757,6 @@
 <a class="btn btn-primary mb-3" href="{{ route('suachua.show', $yeuCau->MaYC) }}">Phiếu sửa chữa và tiến độ</a>
 @endif
 
+@include('shared.form-ui')
 </body>
 </html>

@@ -97,7 +97,7 @@
                             Sử dụng email và số điện thoại bạn đang dùng.
                         </p>
 
-                        <form method="POST"
+                        <form novalidate method="POST"
                               action="{{ route('public.taikhoan.update') }}">
                             @csrf
                             @method('PATCH')
@@ -206,8 +206,8 @@
                             </div>
                         @endif
 
-                        <form method="POST"
-                              action="{{ route('public.taikhoan.password') }}">
+                        <form novalidate method="POST"
+                              action="{{ route('public.taikhoan.password') }}" data-error-bag="password">
                             @csrf
                             @method('PATCH')
 

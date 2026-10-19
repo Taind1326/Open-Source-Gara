@@ -48,15 +48,7 @@
         </div>
     @endif
 
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul class="mb-0">
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    
 
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
@@ -158,7 +150,7 @@
                     </div>
 
                     <div class="card-body">
-                        <form
+                        <form novalidate
                             method="POST"
                             action="{{ route('suachua.service', $yeuCau->MaYC) }}"
                         >
@@ -203,7 +195,7 @@
                     </div>
 
                     <div class="card-body">
-                        <form
+                        <form novalidate
                             method="POST"
                             action="{{ route('suachua.part', $yeuCau->MaYC) }}"
                         >
@@ -368,8 +360,8 @@
 
                 <h5 class="mb-3">Cập nhật tiến độ</h5>
 
-                <form
-                    id="progressForm"
+                <form novalidate
+                    id="progressForm" data-confirm="Xác nhận hoàn thành kỹ thuật? Sau bước này không thể ghi thêm vật tư hoặc tiến độ." data-confirm-title="Hoàn thành kỹ thuật" data-confirm-accept="Hoàn thành" data-confirm-when="TrangThai" data-confirm-value="HOAN_THANH_KY_THUAT"
                     method="POST"
                     action="{{ route('suachua.progress', $yeuCau->MaYC) }}"
                 >
@@ -437,26 +429,9 @@
 
 </main>
 
-<script>
-    const progressForm = document.getElementById('progressForm');
 
-    if (progressForm) {
-        progressForm.addEventListener('submit', function (event) {
-            const status = document.getElementById('TrangThai').value;
 
-            if (status === 'HOAN_THANH_KY_THUAT') {
-                const confirmed = confirm(
-                    'Xác nhận hoàn thành kỹ thuật? '
-                    + 'Sau bước này không thể ghi thêm vật tư hoặc tiến độ.'
-                );
-
-                if (!confirmed) {
-                    event.preventDefault();
-                }
-            }
-        });
-    }
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+@include('shared.form-ui')
 </body>
 </html>

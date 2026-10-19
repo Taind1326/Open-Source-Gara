@@ -46,7 +46,7 @@
     <section class="section-space">
         <div class="container">
             <div class="feature-card h-auto mb-4">
-                <form method="GET" action="{{ route('public.xe.index') }}">
+                <form novalidate method="GET" action="{{ route('public.xe.index') }}">
                     <div class="row align-items-end g-3">
                         <div class="col-lg-5">
                             <label for="vehicleKeyword"
@@ -202,7 +202,7 @@
                                         Ngừng sử dụng
                                     </button>
                                 @else
-                                    <form method="POST"
+                                    <form novalidate method="POST"
                                           action="{{ route('public.xe.status', $xe->MaXe) }}">
                                         @csrf
                                         @method('PATCH')
@@ -322,7 +322,7 @@
                                 Hủy
                             </button>
 
-                            <form method="POST"
+                            <form novalidate method="POST"
                                   action="{{ route('public.xe.status', $xe->MaXe) }}">
                                 @csrf
                                 @method('PATCH')

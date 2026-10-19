@@ -92,7 +92,7 @@
                                         Điền thông tin bên dưới để đăng ký.
                                     </p>
 
-                                    <form method="POST"
+                                    <form novalidate method="POST"
                                           action="{{ route('register.store') }}">
                                         @csrf
 
