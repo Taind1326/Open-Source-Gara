@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\AdminLichHenController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\BaoGiaController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DatLichController;
 use App\Http\Controllers\DemoPasswordResetController;
@@ -11,13 +10,11 @@ use App\Http\Controllers\DichVuPublicController;
 use App\Http\Controllers\HoaDonController;
 use App\Http\Controllers\KhachHoaDonController;
 use App\Http\Controllers\KhachThanhToanController;
-use App\Http\Controllers\KiemTraXeController;
 use App\Http\Controllers\KtvKiemTraController;
 use App\Http\Controllers\KtvLichHenController;
 use App\Http\Controllers\KtvSuaChuaController;
 use App\Http\Controllers\LoaiDichVuController;
 use App\Http\Controllers\PhuTungController;
-use App\Http\Controllers\SuaChuaController;
 use App\Http\Controllers\TaiKhoanController;
 use App\Http\Controllers\ThongKeController;
 use App\Http\Controllers\XacNhanSuaChuaController;
@@ -292,13 +289,6 @@ Route::middleware(['auth', 'role:USER'])->group(function () {
         ->whereNumber('maXe')
         ->name('public.xe.update');
 
-    Route::patch(
-        '/xe-cua-toi/{maXe}/trang-thai',
-        [XeController::class, 'updateStatus']
-    )
-        ->whereNumber('maXe')
-        ->name('public.xe.status');
-
     /*
     | Đặt lịch và xem lịch hẹn.
     */
@@ -492,145 +482,6 @@ Route::middleware(['auth', 'role:TECHNICIAN'])->group(function () {
         ->whereNumber('maLH')
         ->name('ktv.suachua.finish');
 });
-
-/*
-|--------------------------------------------------------------------------
-| CÁC ROUTE NGHIỆP VỤ CŨ ĐANG CÒN TRONG PROJECT
-|--------------------------------------------------------------------------
-| Giữ nguyên để không làm mất các liên kết cũ.
-| Luồng mới sử dụng lịch hẹn, phiếu kiểm tra và KtvSuaChuaController.
-*/
-
-Route::middleware([
-    'auth',
-    'role:ADMIN,TECHNICIAN,USER',
-])->group(function () {
-    /*
-    | Kiểm tra xe theo luồng cũ.
-    */
-
-    Route::middleware('role:ADMIN,TECHNICIAN')->group(function () {
-        Route::get(
-            '/kiem-tra-xe/{maYC}',
-            [KiemTraXeController::class, 'create']
-        )
-            ->whereNumber('maYC')
-            ->name('kiemtraxe.create');
-
-        Route::post(
-            '/kiem-tra-xe/{maYC}',
-            [KiemTraXeController::class, 'store']
-        )
-            ->whereNumber('maYC')
-            ->name('kiemtraxe.store');
-    });
-
-    Route::get(
-        '/kiem-tra-xe/{maYC}/ket-qua',
-        [KiemTraXeController::class, 'show']
-    )
-        ->whereNumber('maYC')
-        ->name('kiemtraxe.show');
-
-    /*
-    | Báo giá theo luồng cũ.
-    */
-
-    Route::middleware('role:ADMIN')->group(function () {
-        Route::get(
-            '/bao-gia/{maYC}/lap',
-            [BaoGiaController::class, 'create']
-        )
-            ->whereNumber('maYC')
-            ->name('baogia.create');
-
-        Route::post(
-            '/bao-gia/{maYC}',
-            [BaoGiaController::class, 'store']
-        )
-            ->whereNumber('maYC')
-            ->name('baogia.store');
-    });
-
-    Route::get(
-        '/bao-gia/{maYC}',
-        [BaoGiaController::class, 'show']
-    )
-        ->whereNumber('maYC')
-        ->name('baogia.show');
-
-    Route::middleware('role:USER')->group(function () {
-        Route::post(
-            '/bao-gia/{maYC}/dong-y',
-            [BaoGiaController::class, 'approve']
-        )
-            ->whereNumber('maYC')
-            ->name('baogia.approve');
-
-        Route::post(
-            '/bao-gia/{maYC}/tu-choi',
-            [BaoGiaController::class, 'reject']
-        )
-            ->whereNumber('maYC')
-            ->name('baogia.reject');
-    });
-
-    /*
-    | Sửa chữa và tiến độ theo luồng cũ.
-    */
-
-    Route::get(
-        '/sua-chua/{maYC}',
-        [SuaChuaController::class, 'show']
-    )
-        ->whereNumber('maYC')
-        ->name('suachua.show');
-
-    Route::middleware('role:ADMIN,TECHNICIAN')->group(function () {
-        Route::get(
-            '/sua-chua/{maYC}/bat-dau',
-            [SuaChuaController::class, 'create']
-        )
-            ->whereNumber('maYC')
-            ->name('suachua.create');
-
-        Route::post(
-            '/sua-chua/{maYC}/bat-dau',
-            [SuaChuaController::class, 'store']
-        )
-            ->whereNumber('maYC')
-            ->name('suachua.store');
-
-        Route::post(
-            '/sua-chua/{maYC}/dich-vu',
-            [SuaChuaController::class, 'addService']
-        )
-            ->whereNumber('maYC')
-            ->name('suachua.service');
-
-        Route::post(
-            '/sua-chua/{maYC}/phu-tung',
-            [SuaChuaController::class, 'addPart']
-        )
-            ->whereNumber('maYC')
-            ->name('suachua.part');
-
-        Route::post(
-            '/sua-chua/{maYC}/tien-do',
-            [SuaChuaController::class, 'addProgress']
-        )
-            ->whereNumber('maYC')
-            ->name('suachua.progress');
-
-        Route::post(
-            '/sua-chua/{maYC}/hoan-thanh',
-            [SuaChuaController::class, 'complete']
-        )
-            ->whereNumber('maYC')
-            ->name('suachua.complete');
-    });
-});
-
 
 Route::middleware(['auth', 'role:ADMIN'])
     ->prefix('admin/ky-thuat-vien')
