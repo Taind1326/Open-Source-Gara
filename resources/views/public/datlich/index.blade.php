@@ -52,7 +52,10 @@
                         href="{{ route('public.datlich.create') }}"
                         class="btn btn-primary btn-lg"
                     >
-                        <i class="bi bi-calendar-plus me-2" aria-hidden="true"></i>
+                        <i
+                            class="bi bi-calendar-plus me-2"
+                            aria-hidden="true"
+                        ></i>
                         Đặt lịch mới
                     </a>
                 </div>
@@ -88,7 +91,10 @@
                         href="{{ route('public.xe.index') }}"
                         class="btn btn-outline-primary"
                     >
-                        <i class="bi bi-car-front me-1" aria-hidden="true"></i>
+                        <i
+                            class="bi bi-car-front me-1"
+                            aria-hidden="true"
+                        ></i>
                         Xe của tôi
                     </a>
                 </div>
@@ -152,6 +158,18 @@
                                                 Xem lịch hẹn
                                             </button>
 
+                                            @if(
+                                                $lichHen->phieuKiemTra
+                                                && $lichHen->phieuKiemTra->TrangThaiXacNhan !== 'NHAP'
+                                            )
+                                                <a
+                                                    href="{{ route('public.xacnhan.show', $lichHen->MaLH) }}"
+                                                    class="btn {{ $lichHen->TrangThai === 'CHO_XAC_NHAN' ? 'btn-primary' : 'btn-outline-secondary' }} btn-sm text-nowrap mt-1 mt-xl-0"
+                                                >
+                                                    {{ $lichHen->TrangThai === 'CHO_XAC_NHAN' ? 'Xác nhận sửa chữa' : 'Xem phiếu kiểm tra' }}
+                                                </a>
+                                            @endif
+
                                             @if(in_array(
                                                 $lichHen->TrangThai,
                                                 config('booking.customer_cancel_statuses', []),
@@ -181,7 +199,10 @@
                 @else
                     <div class="text-center py-5">
                         <span class="feature-icon">
-                            <i class="bi bi-calendar-check" aria-hidden="true"></i>
+                            <i
+                                class="bi bi-calendar-check"
+                                aria-hidden="true"
+                            ></i>
                         </span>
 
                         <h3 class="h5 fw-bold">
@@ -241,7 +262,9 @@
 
                     <div class="modal-body">
                         <dl class="row mb-4">
-                            <dt class="col-sm-4 text-muted fw-normal">Xe</dt>
+                            <dt class="col-sm-4 text-muted fw-normal">
+                                Xe
+                            </dt>
                             <dd class="col-sm-8 fw-semibold">
                                 {{ $lichHen->xe->BienSo }}
                             </dd>
@@ -281,6 +304,7 @@
                                 <li class="mb-2">
                                     {{ $chiTiet->dichVu?->TenDV ?? 'Dịch vụ không còn trong danh mục' }}
                                     — {{ number_format($chiTiet->DonGia, 0, ',', '.') }} ₫
+
                                     @if($chiTiet->SoLuong > 1)
                                         × {{ $chiTiet->SoLuong }}
                                     @endif
@@ -292,7 +316,9 @@
                             @endforelse
                         </ul>
 
-                        <h3 class="h6 fw-bold">Mô tả nhu cầu</h3>
+                        <h3 class="h6 fw-bold">
+                            Mô tả nhu cầu
+                        </h3>
 
                         @forelse(
                             array_filter(
@@ -320,16 +346,45 @@
                                     </div>
                                 @endif
                             </div>
-                        @else
+                        @elseif($lichHen->TrangThai === 'CHO_XAC_NHAN')
+                            <div class="alert alert-warning small mb-0">
+                                Kỹ thuật viên đã gửi phiếu kiểm tra.
+                                Vui lòng xem các hạng mục và tổng chi phí,
+                                sau đó đồng ý hoặc từ chối sửa chữa.
+                            </div>
+                        @elseif(in_array(
+                            $lichHen->TrangThai,
+                            ['CHO_PHAN_CONG', 'CHO_NHAN_XE', 'DANG_KIEM_TRA'],
+                            true
+                        ))
                             <div class="alert alert-info small mb-0">
                                 Sau khi kiểm tra xe, kỹ thuật viên sẽ gửi
                                 các hạng mục và tổng chi phí để bạn xác nhận
                                 trước khi sửa chữa.
                             </div>
+                        @else
+                            <div class="alert alert-info small mb-0">
+                                Bạn có thể xem lại phiếu kiểm tra
+                                và chi phí đã xác nhận.
+                                Theo dõi trạng thái hiện tại
+                                trong danh sách lịch hẹn.
+                            </div>
                         @endif
                     </div>
 
                     <div class="modal-footer">
+                        @if(
+                            $lichHen->phieuKiemTra
+                            && $lichHen->phieuKiemTra->TrangThaiXacNhan !== 'NHAP'
+                        )
+                            <a
+                                href="{{ route('public.xacnhan.show', $lichHen->MaLH) }}"
+                                class="btn btn-primary"
+                            >
+                                {{ $lichHen->TrangThai === 'CHO_XAC_NHAN' ? 'Xác nhận sửa chữa' : 'Xem phiếu kiểm tra' }}
+                            </a>
+                        @endif
+
                         <button
                             type="button"
                             class="btn btn-light"
@@ -392,14 +447,18 @@
                                 Giữ lịch hẹn
                             </button>
 
-                            <form novalidate
+                            <form
                                 method="POST"
                                 action="{{ route('public.datlich.cancel', $lichHen->MaLH) }}"
+                                novalidate
                             >
                                 @csrf
                                 @method('PATCH')
 
-                                <button type="submit" class="btn btn-danger">
+                                <button
+                                    type="submit"
+                                    class="btn btn-danger"
+                                >
                                     Xác nhận hủy
                                 </button>
                             </form>

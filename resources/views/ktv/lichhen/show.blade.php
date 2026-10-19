@@ -121,7 +121,10 @@
                             Mô tả của khách
                         </h2>
 
-                        <p class="text-muted text-break mb-0" style="white-space: pre-line;">{{ $lichHen->MoTaBanDau ?: 'Không có mô tả thêm.' }}</p>
+                        <p
+                            class="text-muted text-break mb-0"
+                            style="white-space: pre-line;"
+                        >{{ $lichHen->MoTaBanDau ?: 'Không có mô tả thêm.' }}</p>
 
                         @if($lichHen->phanCong?->GhiChu)
                             <div class="border-top mt-4 pt-3">
@@ -129,7 +132,10 @@
                                     Ghi chú từ admin
                                 </h3>
 
-                                <p class="text-muted text-break mb-0" style="white-space: pre-line;">{{ $lichHen->phanCong->GhiChu }}</p>
+                                <p
+                                    class="text-muted text-break mb-0"
+                                    style="white-space: pre-line;"
+                                >{{ $lichHen->phanCong->GhiChu }}</p>
                             </div>
                         @endif
                     </div>
@@ -169,7 +175,10 @@
                                     </div>
                                 @enderror
 
-                                <button type="submit" class="btn btn-primary w-100">
+                                <button
+                                    type="submit"
+                                    class="btn btn-primary w-100"
+                                >
                                     Nhận xe
                                 </button>
                             </form>
@@ -202,7 +211,17 @@
                                 >
                                     Lập / cập nhật phiếu kiểm tra
                                 </a>
-                                
+                            @elseif($lichHen->TrangThai === 'CHO_XAC_NHAN')
+                                <div class="alert alert-info mb-0">
+                                    Đã gửi phiếu kiểm tra, đang chờ khách
+                                    xác nhận các hạng mục và chi phí
+                                    trước khi sửa chữa.
+                                </div>
+                            @elseif($lichHen->TrangThai === 'CHO_SUA_CHUA')
+                                <div class="alert alert-success mb-0">
+                                    Khách đã đồng ý các hạng mục và chi phí.
+                                    Xe đang chờ bắt đầu sửa chữa.
+                                </div>
                             @elseif($lichHen->TrangThai === 'DA_HUY')
                                 <div class="alert alert-secondary mb-0">
                                     Lịch đã hủy.
