@@ -1,239 +1,253 @@
 @extends('admin.layout')
 
-@section('title', 'Chi tiết hóa đơn')
+@section('title', 'Hóa đơn #' . $hoaDon->MaHD)
 
 @section('content')
-    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
-        <div>
-            <a
-                href="{{ route('hoadon.admin.index') }}"
-                class="text-decoration-none"
-            >
-                ← Danh sách hóa đơn
-            </a>
+    <a
+        href="{{ route('hoadon.admin.index') }}"
+        class="btn btn-outline-primary mb-4"
+    >
+        Quay lại danh sách hóa đơn
+    </a>
 
-            <h1 class="h4 fw-bold mt-3 mb-0">
-                Hóa đơn #{{ $hoaDon->MaHD }}
-            </h1>
-        </div>
-
-        @if ($hoaDon->TrangThaiThanhToan === 'DA_THANH_TOAN')
-            <span class="badge bg-success-subtle text-success p-3">
-                Đã thanh toán
-            </span>
-        @else
-            <span class="badge bg-warning-subtle text-warning-emphasis p-3">
-                Chưa thanh toán
-            </span>
-        @endif
-    </div>
-
-    <div class="row g-4">
+    <div class="row g-4 align-items-start">
         <div class="col-xl-8">
-            <div class="card mb-4">
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-body p-4">
-                    <h2 class="h5 fw-bold mb-3">Thông tin khách hàng</h2>
+                    <h1 class="h3 fw-bold mb-4">
+                        Hóa đơn #{{ $hoaDon->MaHD }}
+                    </h1>
 
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <div class="small text-secondary">Khách hàng</div>
-                            <div class="fw-semibold">{{ $hoaDon->HoTen }}</div>
-                        </div>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-4 text-secondary fw-normal">
+                            Khách hàng
+                        </dt>
+                        <dd class="col-sm-8">
+                            {{ $hoaDon->HoTen }}
+                        </dd>
 
-                        <div class="col-md-6">
-                            <div class="small text-secondary">Số điện thoại</div>
-                            <div>{{ $hoaDon->SoDienThoai }}</div>
-                        </div>
+                        <dt class="col-sm-4 text-secondary fw-normal">
+                            Điện thoại
+                        </dt>
+                        <dd class="col-sm-8">
+                            {{ $hoaDon->SoDienThoai ?: 'Chưa cập nhật' }}
+                        </dd>
 
-                        <div class="col-md-6">
-                            <div class="small text-secondary">Biển số</div>
-                            <div class="fw-semibold">{{ $hoaDon->BienSo }}</div>
-                        </div>
+                        <dt class="col-sm-4 text-secondary fw-normal">
+                            Xe
+                        </dt>
+                        <dd class="col-sm-8">
+                            <strong>{{ $hoaDon->BienSo }}</strong>
+                            — {{ $hoaDon->HangXe }} {{ $hoaDon->DongXe }}
+                        </dd>
 
-                        <div class="col-md-6">
-                            <div class="small text-secondary">Xe</div>
-                            <div>
-                                {{ $hoaDon->HangXe }} {{ $hoaDon->DongXe }}
-                            </div>
-                        </div>
-                    </div>
+                        <dt class="col-sm-4 text-secondary fw-normal">
+                            Lịch hẹn
+                        </dt>
+                        <dd class="col-sm-8">
+                            #{{ $hoaDon->MaLH }}
+                        </dd>
 
-                    <a
-    href="{{ route('hoadon.admin.show', $hoaDon->MaHD) }}"
-    class="btn btn-outline-primary btn-sm text-nowrap"
->
-    Xem hóa đơn
-</a>
+                        <dt class="col-sm-4 text-secondary fw-normal">
+                            Ngày lập
+                        </dt>
+                        <dd class="col-sm-8">
+                            {{ \Carbon\Carbon::parse($hoaDon->NgayLap)->format('d/m/Y H:i') }}
+                        </dd>
+
+                        <dt class="col-sm-4 text-secondary fw-normal">
+                            Bảo hành đến
+                        </dt>
+                        <dd class="col-sm-8">
+                            {{ $hoaDon->BaoHanhDen
+                                ? \Carbon\Carbon::parse($hoaDon->BaoHanhDen)->format('d/m/Y H:i')
+                                : 'Chưa có thông tin' }}
+                        </dd>
+                    </dl>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-body p-4 border-bottom">
-                    <h2 class="h5 fw-bold mb-0">Hạng mục thực tế</h2>
-                </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 fw-bold mb-3">Chi tiết chi phí</h2>
 
-                <div class="table-responsive">
-                    <table class="table align-middle mb-0">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-4">Hạng mục</th>
-                                <th>Số lượng</th>
-                                <th>Đơn giá</th>
-                                <th class="text-end pe-4">Thành tiền</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            @forelse ($chiTiet as $item)
+                    <div class="table-responsive">
+                        <table class="table align-middle mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td class="ps-4">
-                                        <div class="fw-semibold">
-                                            {{ $item->TenDV ?? $item->TenPT ?? 'Hạng mục không còn trong danh mục' }}
-                                        </div>
-
-                                        <div class="small text-secondary">
-                                            {{ $item->MaDV ? 'Dịch vụ' : 'Phụ tùng' }}
-                                        </div>
-                                    </td>
-
-                                    <td>{{ $item->SoLuong }}</td>
-
-                                    <td class="text-nowrap">
-                                        {{ number_format($item->DonGia, 0, ',', '.') }} đ
-                                    </td>
-
-                                    <td class="text-end pe-4 text-nowrap">
-                                        {{ number_format($item->SoLuong * $item->DonGia, 0, ',', '.') }} đ
-                                    </td>
+                                    <th>Hạng mục</th>
+                                    <th>Số lượng</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-end">Giảm giá</th>
+                                    <th class="text-end">Thành tiền</th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="4" class="text-center text-secondary py-4">
-                                        Chưa có hạng mục.
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+
+                            <tbody>
+                                @foreach($chiTiets as $chiTiet)
+                                    <tr>
+                                        <td>
+                                            <div>{{ $chiTiet->TenHangMuc }}</div>
+                                            <small class="text-muted">
+                                                {{ $chiTiet->LoaiHangMuc === 'DICH_VU' ? 'Dịch vụ' : 'Phụ tùng' }}
+                                            </small>
+                                        </td>
+
+                                        <td class="text-nowrap">
+                                            {{ $chiTiet->SoLuong }}
+                                            {{ $chiTiet->DonViTinh }}
+                                        </td>
+
+                                        <td class="text-end text-nowrap">
+                                            {{ number_format($chiTiet->DonGia, 0, ',', '.') }} ₫
+                                        </td>
+
+                                        <td class="text-end text-nowrap">
+                                            {{ number_format($chiTiet->TienGiam, 0, ',', '.') }} ₫
+                                        </td>
+
+                                        <td class="text-end text-nowrap">
+                                            {{ number_format($chiTiet->ThanhTien, 0, ',', '.') }} ₫
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
 
         <div class="col-xl-4">
-            <div class="card">
+            <div class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <h2 class="h5 fw-bold mb-4">Thanh toán</h2>
 
                     <div class="d-flex justify-content-between gap-3 mb-3">
-                        <span class="text-secondary">Tổng tiền gốc</span>
-                        <span>
-                            {{ number_format($hoaDon->TongTienGoc, 0, ',', '.') }} đ
-                        </span>
+                        <span>Trước giảm</span>
+                        <strong class="text-nowrap">
+                            {{ number_format($hoaDon->TongTruocGiam, 0, ',', '.') }} ₫
+                        </strong>
                     </div>
 
                     <div class="d-flex justify-content-between gap-3 mb-3">
-                        <span class="text-secondary">Điểm sử dụng</span>
-                        <span>{{ $hoaDon->DiemDaDung }} điểm</span>
-                    </div>
-
-                    <div class="d-flex justify-content-between gap-3 mb-3">
-                        <span class="text-secondary">
-                            Giảm {{ $hoaDon->PhanTramGiam }}%
-                        </span>
-
-                        <span class="text-success">
-                            {{ number_format($hoaDon->SoTienGiam, 0, ',', '.') }} đ
-                        </span>
+                        <span>Giảm giá</span>
+                        <strong class="text-nowrap">
+                            {{ number_format($hoaDon->TienGiam, 0, ',', '.') }} ₫
+                        </strong>
                     </div>
 
                     <div class="border-top pt-3 mb-4">
-                        <div class="text-secondary mb-1">Cần thanh toán</div>
-
-                        <div class="h3 fw-bold text-primary mb-0">
-                            {{ number_format($hoaDon->TongThanhToan, 0, ',', '.') }} đ
-                        </div>
+                        <div>Tổng thanh toán</div>
+                        <strong class="fs-4 text-primary">
+                            {{ number_format($hoaDon->TongTien, 0, ',', '.') }} ₫
+                        </strong>
                     </div>
 
-                    @if ($hoaDon->TrangThaiThanhToan !== 'DA_THANH_TOAN')
-                        <form novalidate
+                    @if($hoaDon->TrangThai === 'DA_THANH_TOAN')
+                        @error('thanh_toan')
+                            <p class="text-danger small" role="alert">
+                                {{ $message }}
+                            </p>
+                        @enderror
+
+                        <div class="alert alert-success">
+                            Đã thanh toán và cập nhật điểm tích lũy.
+                        </div>
+
+                        @if($thanhToan)
+                            <p class="small mb-2">
+                                Phương thức:
+                                <strong>
+                                    {{ $thanhToan->PhuongThuc === 'TIEN_MAT' ? 'Tiền mặt' : 'Chuyển khoản' }}
+                                </strong>
+                            </p>
+
+                            <p class="small mb-2">
+                                Thời điểm:
+                                {{ \Carbon\Carbon::parse($thanhToan->NgayThanhToan)->format('d/m/Y H:i') }}
+                            </p>
+
+                            @if($thanhToan->GhiChu)
+                                <p class="small text-muted text-break mb-0">
+                                    {{ $thanhToan->GhiChu }}
+                                </p>
+                            @endif
+                        @endif
+                    @elseif($yeuCauTienMat || (int) $hoaDon->TongTien === 0)
+                        <div class="alert alert-warning">
+                            {{ (int) $hoaDon->TongTien === 0
+                                ? 'Hóa đơn không phát sinh tiền cần thu.'
+                                : 'Khách chọn tiền mặt, đang chờ gara xác nhận đã thu.' }}
+                        </div>
+
+                        <form
                             method="POST"
                             action="{{ route('hoadon.admin.confirm', $hoaDon->MaHD) }}"
-                            data-confirm="Xác nhận đã nhận đủ tiền? Hóa đơn sẽ được đánh dấu đã thanh toán."
+                            novalidate
+                            data-confirm-title="Xác nhận thanh toán tiền mặt"
+                            data-confirm="Xác nhận đã thu đủ tiền hoặc hóa đơn không phát sinh tiền cần thu? Hệ thống sẽ cập nhật điểm và hoàn tất đơn."
+                            data-confirm-accept="Xác nhận"
+                            data-confirm-cancel="Chưa xác nhận"
                         >
                             @csrf
 
-                            <div class="mb-3">
-                                <label for="PhuongThucThanhToan" class="form-label">
-                                    Phương thức thực tế
-                                </label>
+                            <input
+                                type="hidden"
+                                name="MaTT"
+                                value="{{ $yeuCauTienMat?->MaTT ?? 0 }}"
+                            >
 
-                                <select
-                                    id="PhuongThucThanhToan"
-                                    name="PhuongThucThanhToan"
-                                    class="form-select"
-                                    required
-                                >
-                                    <option value="">Chọn phương thức</option>
-
-                                    <option
-                                        value="TIEN_MAT"
-                                        @selected(old('PhuongThucThanhToan', $hoaDon->PhuongThucThanhToan) === 'TIEN_MAT')
-                                    >
-                                        Tiền mặt
-                                    </option>
-
-                                    <option
-                                        value="CHUYEN_KHOAN_QR"
-                                        @selected(old('PhuongThucThanhToan', $hoaDon->PhuongThucThanhToan) === 'CHUYEN_KHOAN_QR')
-                                    >
-                                        Chuyển khoản QR
-                                    </option>
-                                </select>
-                            </div>
-
-                            <div class="form-check mb-4">
+                            <div class="form-check mb-3">
                                 <input
                                     type="checkbox"
-                                    id="DaNhanTien"
-                                    name="DaNhanTien"
+                                    id="cash-confirm"
+                                    name="XacNhan"
                                     value="1"
-                                    class="form-check-input"
+                                    class="form-check-input @error('XacNhan') is-invalid @enderror"
                                     required
+                                    @checked(old('XacNhan'))
                                 >
 
-                                <label for="DaNhanTien" class="form-check-label">
-                                    Tôi đã kiểm tra và nhận đủ tiền.
+                                <label class="form-check-label" for="cash-confirm">
+                                    {{ (int) $hoaDon->TongTien === 0
+                                        ? 'Tôi xác nhận hóa đơn không phát sinh tiền cần thu.'
+                                        : 'Tôi đã nhận đủ tiền mặt.' }}
                                 </label>
+
+                                @error('XacNhan')
+                                    <div class="invalid-feedback">
+                                        {{ $message }}
+                                    </div>
+                                @enderror
                             </div>
+
+                            @error('MaTT')
+                                <p class="text-danger small">{{ $message }}</p>
+                            @enderror
+
+                            @error('thanh_toan')
+                                <p class="text-danger small" role="alert">
+                                    {{ $message }}
+                                </p>
+                            @enderror
 
                             <button type="submit" class="btn btn-primary w-100">
                                 Xác nhận thanh toán
                             </button>
-
-                            <p class="small text-secondary mt-3 mb-0">
-                                Xác nhận sau khi nhận tiền mặt hoặc kiểm tra tiền
-                                đã vào tài khoản gara.
-                            </p>
                         </form>
                     @else
-                        <div class="alert alert-success mb-3">
-                            Hóa đơn đã thanh toán. Hồ sơ đã hoàn thành.
-                        </div>
+                        @error('thanh_toan')
+                            <p class="text-danger small" role="alert">
+                                {{ $message }}
+                            </p>
+                        @enderror
 
-                        <div class="small text-secondary">
-                            Phương thức:
-                            {{ $hoaDon->PhuongThucThanhToan === 'TIEN_MAT' ? 'Tiền mặt' : 'Chuyển khoản QR' }}
+                        <div class="alert alert-info mb-0">
+                            Chưa có yêu cầu thanh toán tiền mặt.
+                            Khách chọn phương thức tại trang hóa đơn.
+                            Chuyển khoản demo được hoàn tất tại màn hình QR.
                         </div>
-
-                        @if ($hoaDon->NgayThanhToan)
-                            <div class="small text-secondary mt-2">
-                                Thời gian:
-                                {{ \Illuminate\Support\Carbon::parse(
-                                    $hoaDon->NgayThanhToan,
-                                    config('app.timezone')
-                                )->setTimezone('Asia/Ho_Chi_Minh')->format('d/m/Y H:i') }}
-                            </div>
-                        @endif
                     @endif
                 </div>
             </div>

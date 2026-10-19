@@ -53,6 +53,40 @@ class KhachHoaDonController extends Controller
         ));
     }
 
+    public function printInvoice(Request $request, $maHD)
+{
+    $hoaDon = $this->queryFor($request)
+        ->where('hd.MaHD', $maHD)
+        ->first();
+
+    abort_unless($hoaDon, 404);
+
+    abort_unless(
+        $hoaDon->TrangThai === 'DA_THANH_TOAN'
+            && $hoaDon->DaXuLyDiem,
+        403,
+        'Chỉ được in hóa đơn sau khi thanh toán thành công.'
+    );
+
+    $chiTiets = DB::table('CTHOADON')
+        ->where('MaHD', $maHD)
+        ->orderBy('MaCTHD')
+        ->get();
+
+    $thanhToan = DB::table('THANHTOAN')
+        ->where('MaHD', $maHD)
+        ->where('TrangThai', 'THANH_CONG')
+        ->first();
+
+    return response()
+        ->view('public.hoadon.print', compact(
+            'hoaDon',
+            'chiTiets',
+            'thanhToan'
+        ))
+        ->header('Cache-Control', 'private, no-store');
+}
+
     private function queryFor(Request $request)
     {
         return DB::table('HOADON as hd')

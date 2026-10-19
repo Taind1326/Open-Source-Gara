@@ -16,6 +16,7 @@ return [
     ],
 
     'demo_passwords' => env('GARAGE_DEMO_PASSWORDS', false),
+    'payment_demo' => env('PAYMENT_DEMO', false),
 
     'demo_accounts' => [
         'admin@garage.com',

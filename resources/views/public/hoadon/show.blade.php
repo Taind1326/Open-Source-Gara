@@ -35,6 +35,18 @@
                 Quay lại hóa đơn của tôi
             </a>
 
+            @if($daThanhToan && $hoaDon->DaXuLyDiem)
+    <a
+        href="{{ route('hoadon.print', $hoaDon->MaHD) }}"
+        class="btn btn-primary mb-4 ms-2"
+        target="_blank"
+        rel="noopener"
+    >
+        <i class="bi bi-printer me-2" aria-hidden="true"></i>
+        In hóa đơn
+    </a>
+@endif
+
             <div class="row g-4 align-items-start">
                 <div class="col-lg-8">
                     <div class="feature-card h-auto mb-4">
@@ -281,4 +293,118 @@
             </div>
         </div>
     </section>
+
+    @if(!$daThanhToan)
+    <div class="container pb-4">
+        @error('thanh_toan')
+            <div class="text-danger mb-3" role="alert">
+                {{ $message }}
+            </div>
+        @enderror
+
+        <button
+            type="button"
+            class="btn btn-primary"
+            data-bs-toggle="modal"
+            data-bs-target="#paymentModal"
+        >
+            <i class="bi bi-credit-card me-2" aria-hidden="true"></i>
+            Thanh toán
+        </button>
+    </div>
+
+    <div
+        class="modal fade"
+        id="paymentModal"
+        tabindex="-1"
+        aria-labelledby="paymentModalTitle"
+        aria-hidden="true"
+    >
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title fs-5" id="paymentModalTitle">
+                        Chọn phương thức thanh toán
+                    </h2>
+
+                    <button
+                        type="button"
+                        class="btn-close"
+                        data-bs-dismiss="modal"
+                        aria-label="Đóng"
+                    ></button>
+                </div>
+
+                <form
+                    method="POST"
+                    action="{{ route('hoadon.payment.choose', $hoaDon->MaHD) }}"
+                    novalidate
+                >
+                    @csrf
+
+                    <div class="modal-body">
+                        <p>
+                            Tổng thanh toán:
+                            <strong class="text-primary">
+                                {{ number_format($hoaDon->TongTien, 0, ',', '.') }} ₫
+                            </strong>
+                        </p>
+
+                        <label for="customer-payment-method" class="form-label">
+                            Phương thức thanh toán
+                        </label>
+
+                        <select
+                            id="customer-payment-method"
+                            name="PhuongThuc"
+                            class="form-select @error('PhuongThuc') is-invalid @enderror"
+                            required
+                        >
+                            <option value="">Vui lòng chọn</option>
+
+                            <option
+                                value="TIEN_MAT"
+                                @selected(old('PhuongThuc') === 'TIEN_MAT')
+                            >
+                                Tiền mặt tại gara
+                            </option>
+
+                            @if(app()->environment('local') && config('garage.payment_demo'))
+                                <option
+                                    value="CHUYEN_KHOAN"
+                                    @selected(old('PhuongThuc') === 'CHUYEN_KHOAN')
+                                >
+                                    Chuyển khoản — demo
+                                </option>
+                            @endif
+                        </select>
+
+                        @error('PhuongThuc')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                        <p class="small text-muted mt-3 mb-0">
+                            Tiền mặt được gara xác nhận sau khi thu.
+                            Chuyển khoản mở màn hình QR mô phỏng.
+                        </p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button
+                            type="button"
+                            class="btn btn-light"
+                            data-bs-dismiss="modal"
+                        >
+                            Đóng
+                        </button>
+
+                        <button type="submit" class="btn btn-primary">
+                            Tiếp tục thanh toán
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@endif
 @endsection
