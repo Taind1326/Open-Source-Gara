@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\DichVu;
 use App\Models\LoaiDichVu;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class DichVuController extends Controller
@@ -78,12 +79,8 @@ class DichVuController extends Controller
         $newImage = null;
 
         try {
-            if ($request->hasFile('HinhAnh')) {
-                $newImage = $request->file('HinhAnh')
-                    ->store('dich-vu', 'public');
-
-                $data['HinhAnh'] = $newImage;
-            }
+            $newImage = $this->storeImage($request);
+            $data['HinhAnh'] = $newImage;
 
             DichVu::create($data);
         } catch (Throwable $exception) {
@@ -111,18 +108,16 @@ class DichVuController extends Controller
 
     public function update(Request $request, DichVu $dichvu)
     {
-        $data = $this->validateService($request);
+        $data = $this->validateService($request, $dichvu);
         $newImage = null;
 
         try {
             if ($request->hasFile('HinhAnh')) {
-                $newImage = $request->file('HinhAnh')
-                    ->store('dich-vu', 'public');
-
+                $newImage = $this->storeImage($request);
                 $data['HinhAnh'] = $newImage;
             }
 
-            // Không chọn ảnh mới thì giữ nguyên ảnh hiện tại.
+            // Không chọn ảnh mới thì giữ nguyên đường dẫn ảnh hiện tại.
             $dichvu->update($data);
         } catch (Throwable $exception) {
             if ($newImage) {
@@ -138,51 +133,53 @@ class DichVuController extends Controller
     }
 
     public function destroy(DichVu $dichvu)
-{
-    try {
-        $daXoa = DB::transaction(function () use ($dichvu) {
-            $service = DichVu::query()
-                ->where('MaDV', $dichvu->MaDV)
-                ->lockForUpdate()
-                ->firstOrFail();
+    {
+        try {
+            $daXoa = DB::transaction(function () use ($dichvu) {
+                $service = DichVu::query()
+                    ->where('MaDV', $dichvu->MaDV)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-            $daDuocSuDung = DB::table('CHITIETLICHHEN')
-                ->where('MaDV', $service->MaDV)
-                ->exists();
+                $daDuocSuDung = DB::table('CHITIETLICHHEN')
+                    ->where('MaDV', $service->MaDV)
+                    ->exists();
 
-            if ($daDuocSuDung) {
-                return false;
+                if ($daDuocSuDung) {
+                    return false;
+                }
+
+                $service->delete();
+
+                return true;
+            });
+        } catch (QueryException $exception) {
+            if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
+                throw $exception;
             }
 
-            $service->delete();
-
-            return true;
-        });
-    } catch (QueryException $exception) {
-        if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
-            throw $exception;
+            $daXoa = false;
         }
 
-        $daXoa = false;
-    }
+        if (!$daXoa) {
+            return redirect()
+                ->route('dichvu.index')
+                ->with(
+                    'error',
+                    'Dịch vụ đã có trong lịch hẹn nên không thể xóa. '
+                    . 'Hãy chuyển sang ngừng hoạt động để giữ lịch sử.'
+                );
+        }
 
-    if (!$daXoa) {
         return redirect()
             ->route('dichvu.index')
-            ->with(
-                'error',
-                'Dịch vụ đã có trong lịch hẹn nên không thể xóa. '
-                . 'Hãy chuyển sang ngừng hoạt động để giữ lịch sử.'
-            );
+            ->with('success', 'Đã xóa dịch vụ.');
     }
 
-    return redirect()
-        ->route('dichvu.index')
-        ->with('success', 'Đã xóa dịch vụ.');
-}
-
-    private function validateService(Request $request): array
-    {
+    private function validateService(
+        Request $request,
+        ?DichVu $dichvu = null
+    ): array {
         $normalized = [];
 
         foreach (['TenDV', 'MoTa'] as $field) {
@@ -195,6 +192,9 @@ class DichVuController extends Controller
 
         $request->merge($normalized);
 
+        // Thêm mới hoặc dịch vụ chưa có ảnh thì bắt buộc chọn ảnh.
+        $canChonAnh = $dichvu === null || blank($dichvu->HinhAnh);
+
         $data = $request->validate([
             'MaLoaiDV' => [
                 'bail',
@@ -202,8 +202,17 @@ class DichVuController extends Controller
                 'integer',
                 Rule::exists('LOAIDICHVU', 'MaLoaiDV'),
             ],
-            'TenDV' => ['bail', 'required', 'string', 'max:150'],
-            'MoTa' => ['nullable', 'string', 'max:10000'],
+            'TenDV' => [
+                'bail',
+                'required',
+                'string',
+                'max:150',
+            ],
+            'MoTa' => [
+                'nullable',
+                'string',
+                'max:10000',
+            ],
             'Gia' => [
                 'bail',
                 'required',
@@ -213,12 +222,17 @@ class DichVuController extends Controller
             ],
             'HinhAnh' => [
                 'bail',
+                Rule::requiredIf($canChonAnh),
                 'nullable',
                 'image',
                 'mimes:jpg,jpeg,png,webp',
                 'max:2048',
             ],
-            'HoatDong' => ['bail', 'required', 'boolean'],
+            'HoatDong' => [
+                'bail',
+                'required',
+                'boolean',
+            ],
         ], [
             'MaLoaiDV.required' => 'Vui lòng chọn loại dịch vụ.',
             'MaLoaiDV.integer' => 'Loại dịch vụ không hợp lệ.',
@@ -236,16 +250,17 @@ class DichVuController extends Controller
             'Gia.min' => 'Giá dịch vụ không được nhỏ hơn 0.',
             'Gia.max' => 'Giá dịch vụ vượt quá giới hạn cho phép.',
 
+            'HinhAnh.required' => 'Vui lòng chọn ảnh dịch vụ.',
             'HinhAnh.uploaded' => 'Không tải được ảnh. Vui lòng kiểm tra dung lượng file.',
             'HinhAnh.image' => 'Vui lòng chọn file hình ảnh.',
-            'HinhAnh.mimes' => 'Ảnh phải có định dạng JPG, JPEG, PNG hoặc WEBP.',
+            'HinhAnh.mimes' => 'Ảnh phải có định dạng JPG, JPEG, PNG hoặc WebP.',
             'HinhAnh.max' => 'Ảnh không được vượt quá 2 MB.',
 
             'HoatDong.required' => 'Vui lòng chọn trạng thái.',
             'HoatDong.boolean' => 'Trạng thái không hợp lệ.',
         ]);
 
-        // File ảnh được xử lý riêng, không đưa UploadedFile vào model.
+        // UploadedFile được lưu riêng, không đưa trực tiếp vào model.
         unset($data['HinhAnh']);
 
         $data['MaLoaiDV'] = (int) $data['MaLoaiDV'];
@@ -253,5 +268,19 @@ class DichVuController extends Controller
         $data['HoatDong'] = (bool) $data['HoatDong'];
 
         return $data;
+    }
+
+    private function storeImage(Request $request): string
+    {
+        $path = $request->file('HinhAnh')
+            ->store('dich-vu', 'public');
+
+        if ($path === false) {
+            throw ValidationException::withMessages([
+                'HinhAnh' => 'Không lưu được ảnh. Vui lòng thử lại.',
+            ]);
+        }
+
+        return $path;
     }
 }

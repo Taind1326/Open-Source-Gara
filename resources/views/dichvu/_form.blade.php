@@ -1,5 +1,6 @@
 @php
     $isEdit = isset($dichvu) && $dichvu->exists;
+    $hasImage = $isEdit && filled($dichvu->HinhAnh);
 @endphp
 
 <div class="row g-3">
@@ -19,7 +20,10 @@
             @foreach($loaiDichVuList as $loai)
                 <option
                     value="{{ $loai->MaLoaiDV }}"
-                    @selected((string) old('MaLoaiDV', $isEdit ? $dichvu->MaLoaiDV : '') === (string) $loai->MaLoaiDV)
+                    @selected(
+                        (string) old('MaLoaiDV', $isEdit ? $dichvu->MaLoaiDV : '')
+                        === (string) $loai->MaLoaiDV
+                    )
                 >
                     {{ $loai->TenLoaiDV }}{{ $loai->HoatDong ? '' : ' — Ngừng hoạt động' }}
                 </option>
@@ -96,14 +100,20 @@
 
             <option
                 value="1"
-                @selected((string) old('HoatDong', $isEdit ? (int) $dichvu->HoatDong : 1) === '1')
+                @selected(
+                    (string) old('HoatDong', $isEdit ? (int) $dichvu->HoatDong : 1)
+                    === '1'
+                )
             >
                 Hoạt động
             </option>
 
             <option
                 value="0"
-                @selected((string) old('HoatDong', $isEdit ? (int) $dichvu->HoatDong : 1) === '0')
+                @selected(
+                    (string) old('HoatDong', $isEdit ? (int) $dichvu->HoatDong : 1)
+                    === '0'
+                )
             >
                 Ngừng hoạt động
             </option>
@@ -134,7 +144,11 @@
 
     <div class="col-12">
         <label for="HinhAnh" class="form-label fw-semibold">
-            Hình ảnh
+            Hình ảnh dịch vụ
+
+            @unless($hasImage)
+                <span class="text-danger">*</span>
+            @endunless
         </label>
 
         <input
@@ -143,26 +157,39 @@
             name="HinhAnh"
             class="form-control @error('HinhAnh') is-invalid @enderror"
             accept="image/jpeg,image/png,image/webp"
+            aria-describedby="HinhAnhHelp"
+            @if(!$hasImage) required @endif
         >
 
         @error('HinhAnh')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
 
-        <div class="form-text">
-            JPG, PNG hoặc WEBP, tối đa 2 MB.
-            Khi sửa, không chọn ảnh mới để giữ ảnh hiện tại.
+        <div id="HinhAnhHelp" class="form-text">
+            JPG, JPEG, PNG hoặc WebP, tối đa 2 MB.
+
+            @if($hasImage)
+                Không chọn ảnh mới nếu muốn giữ ảnh hiện tại.
+            @else
+                Vui lòng chọn ảnh cho dịch vụ.
+            @endif
         </div>
 
-        @if($isEdit && $dichvu->HinhAnh)
-            <img
-                src="{{ asset('storage/' . $dichvu->HinhAnh) }}"
-                alt="Ảnh hiện tại của {{ $dichvu->TenDV }}"
-                class="rounded-3 border mt-3"
-                width="200"
-                height="120"
-                style="object-fit: cover; max-width: 100%;"
-            >
+        @if($hasImage)
+            <div class="mt-3">
+                <p class="small text-secondary mb-2">
+                    Ảnh hiện tại
+                </p>
+
+                <img
+                    src="{{ asset('storage/' . $dichvu->HinhAnh) }}"
+                    alt="Ảnh hiện tại của {{ $dichvu->TenDV }}"
+                    class="rounded-3 border"
+                    width="280"
+                    height="168"
+                    style="object-fit: cover; max-width: 100%;"
+                >
+            </div>
         @endif
     </div>
 </div>
