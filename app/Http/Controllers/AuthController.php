@@ -23,31 +23,29 @@ class AuthController extends Controller
         Request $request,
         GaragePassword $garagePassword
     ): RedirectResponse {
-        $request->merge([
-            'Email' => trim((string) $request->input('Email')),
-        ]);
+        $this->trimFields($request, ['Email']);
 
         $data = $request->validate([
-            'Email' => ['required', 'email', 'max:100'],
-            'MatKhau' => ['required', 'string', 'max:255'],
+            'Email' => ['bail', 'required', 'email', 'max:100'],
+            'MatKhau' => ['bail', 'required', 'string', 'max:255'],
         ], [
             'Email.required' => 'Vui lòng nhập email.',
             'Email.email' => 'Email không đúng định dạng.',
+            'Email.max' => 'Email không được vượt quá 100 ký tự.',
+
             'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
+            'MatKhau.string' => 'Mật khẩu không hợp lệ.',
+            'MatKhau.max' => 'Mật khẩu không được vượt quá 255 ký tự.',
         ]);
 
-        $taiKhoan = TaiKhoan::where(
-            'Email',
-            $data['Email']
-        )->first();
+        $taiKhoan = TaiKhoan::query()
+            ->where('Email', $data['Email'])
+            ->first();
 
         if (
-            ! $taiKhoan
+            !$taiKhoan
             || $taiKhoan->TrangThai !== 'HOAT_DONG'
-            || ! $garagePassword->check(
-                $taiKhoan,
-                $data['MatKhau']
-            )
+            || !$garagePassword->check($taiKhoan, $data['MatKhau'])
         ) {
             throw ValidationException::withMessages([
                 'Email' => 'Email hoặc mật khẩu không đúng, hoặc tài khoản đã bị khóa.',
@@ -59,11 +57,13 @@ class AuthController extends Controller
         $request->session()->regenerate();
         $request->session()->forget('url.intended');
 
-        return redirect()->route(
-            $taiKhoan->VaiTro === 'ADMIN'
-                ? 'admin.dashboard'
-                : 'public.home'
-        );
+        $trangDich = match ($taiKhoan->VaiTro) {
+            'ADMIN' => 'admin.dashboard',
+            'TECHNICIAN' => 'ktv.lichhen.index',
+            default => 'public.home',
+        };
+
+        return redirect()->route($trangDich);
     }
 
     public function showRegister(): View
@@ -73,42 +73,49 @@ class AuthController extends Controller
 
     public function register(Request $request): RedirectResponse
     {
-        $request->merge([
-            'HoTen' => trim((string) $request->input('HoTen')),
-            'Email' => trim((string) $request->input('Email')),
-            'SoDienThoai' => trim(
-                (string) $request->input('SoDienThoai')
-            ),
+        $this->trimFields($request, [
+            'HoTen',
+            'Email',
+            'SoDienThoai',
         ]);
 
         $data = $request->validate([
             'HoTen' => [
+                'bail',
                 'required',
                 'string',
                 'max:100',
             ],
             'Email' => [
+                'bail',
                 'required',
                 'email',
                 'max:100',
                 'unique:TAIKHOAN,Email',
             ],
             'SoDienThoai' => [
+                'bail',
                 'required',
                 'string',
                 'regex:/^0[0-9]{9}$/',
                 'unique:TAIKHOAN,SoDienThoai',
             ],
-            'MatKhau_confirmation' => ['bail', 'required', 'string', 'same:MatKhau'],
-
             'MatKhau' => [
+                'bail',
                 'required',
                 'string',
                 'max:255',
                 Password::min(8)->letters()->numbers(),
             ],
+            'MatKhau_confirmation' => [
+                'bail',
+                'required',
+                'string',
+                'same:MatKhau',
+            ],
         ], [
             'HoTen.required' => 'Vui lòng nhập họ tên.',
+            'HoTen.string' => 'Họ tên không hợp lệ.',
             'HoTen.max' => 'Họ tên không được vượt quá 100 ký tự.',
 
             'Email.required' => 'Vui lòng nhập email.',
@@ -117,15 +124,20 @@ class AuthController extends Controller
             'Email.unique' => 'Email đã được sử dụng.',
 
             'SoDienThoai.required' => 'Vui lòng nhập số điện thoại.',
+            'SoDienThoai.string' => 'Số điện thoại không hợp lệ.',
             'SoDienThoai.regex' => 'Số điện thoại gồm 10 chữ số và bắt đầu bằng 0.',
             'SoDienThoai.unique' => 'Số điện thoại đã được sử dụng.',
 
             'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
-            'MatKhau_confirmation.required' => 'Vui lòng nhập xác nhận mật khẩu.',
-            'MatKhau_confirmation.same' => 'Mật khẩu xác nhận không khớp.',
+            'MatKhau.string' => 'Mật khẩu không hợp lệ.',
+            'MatKhau.max' => 'Mật khẩu không được vượt quá 255 ký tự.',
             'MatKhau.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'MatKhau.letters' => 'Mật khẩu phải có chữ cái.',
             'MatKhau.numbers' => 'Mật khẩu phải có chữ số.',
+
+            'MatKhau_confirmation.required' => 'Vui lòng nhập xác nhận mật khẩu.',
+            'MatKhau_confirmation.string' => 'Mật khẩu xác nhận không hợp lệ.',
+            'MatKhau_confirmation.same' => 'Mật khẩu xác nhận không khớp.',
         ]);
 
         $taiKhoan = TaiKhoan::create([
@@ -137,7 +149,6 @@ class AuthController extends Controller
             'TrangThai' => 'HOAT_DONG',
         ]);
 
-        // Database tự đặt DiemTichLuy = 0 cho tài khoản mới.
         Auth::login($taiKhoan);
 
         $request->session()->regenerate();
@@ -156,5 +167,20 @@ class AuthController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('public.home');
+    }
+
+    private function trimFields(Request $request, array $fields): void
+    {
+        $normalized = [];
+
+        foreach ($fields as $field) {
+            $value = $request->input($field);
+
+            if (is_string($value)) {
+                $normalized[$field] = trim($value);
+            }
+        }
+
+        $request->merge($normalized);
     }
 }
