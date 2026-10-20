@@ -218,7 +218,7 @@
 
             @if($ktvs->hasPages())
                 <div class="mt-4">
-                    {{ $ktvs->links('pagination::bootstrap-5') }}
+                    {{ $ktvs->links('shared.pagination') }}
                 </div>
             @endif
         </div>
