@@ -24,13 +24,6 @@
     <link rel="stylesheet" href="{{ asset('css/public.css') }}">
     <link rel="stylesheet" href="{{ asset('css/public-theme.css') }}">
 
-    @if(auth()->user()?->VaiTro === 'USER')
-        <link
-            rel="stylesheet"
-            href="{{ asset('css/customer-header.css') }}"
-        >
-    @endif
-
     @stack('styles')
 </head>
 

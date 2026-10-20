@@ -1,33 +1,27 @@
 @php
-    $vaiTro = auth()->user()?->VaiTro;
-    $laKhachHang = $vaiTro === 'USER';
-
     $dangQuanLyXe = request()->routeIs(
         'public.xe.*',
         'public.datlich.index',
-        'public.xacnhan.*'
+        'public.xacnhan.*',
+        'hoadon.*'
     );
-
-    $dangThanhToan = request()->routeIs('hoadon.*');
 @endphp
 
 <nav
-    id="customerNavigation"
-    class="navbar sticky-top"
+    class="navbar navbar-expand-lg site-navbar sticky-top"
     aria-label="Điều hướng chính"
 >
-    <div class="customer-header-container">
+    <div class="container py-2">
         <a
-            class="customer-brand"
+            class="navbar-brand d-flex align-items-center gap-2"
             href="{{ route('public.home') }}"
-            aria-label="AutoCare Garage — Trang chủ"
         >
-            <span class="customer-brand-icon">
+            <span class="brand-icon">
                 <i class="bi bi-tools" aria-hidden="true"></i>
             </span>
 
             <span>
-                AutoCare<span class="customer-brand-accent">Garage</span>
+                AutoCare<span class="text-primary">Garage</span>
             </span>
         </a>
 
@@ -35,16 +29,16 @@
             class="navbar-toggler"
             type="button"
             data-bs-toggle="collapse"
-            data-bs-target="#customerMenu"
-            aria-controls="customerMenu"
+            data-bs-target="#customerMainNavigation"
+            aria-controls="customerMainNavigation"
             aria-expanded="false"
             aria-label="Mở hoặc đóng menu"
         >
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="customerMenu">
-            <ul class="navbar-nav customer-main-menu">
+        <div class="collapse navbar-collapse" id="customerMainNavigation">
+            <ul class="navbar-nav mx-auto">
                 <li class="nav-item">
                     <a
                         class="nav-link {{ request()->routeIs('public.home') ? 'active' : '' }}"
@@ -85,156 +79,99 @@
                     </a>
                 </li>
 
-                @if($laKhachHang)
-                    <li class="nav-item dropdown">
-                        <button
-                            class="nav-link dropdown-toggle {{ $dangQuanLyXe ? 'active' : '' }}"
-                            id="customerVehicleMenu"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            Quản lý xe
-                        </button>
+                <li class="nav-item dropdown">
+                    <a
+                        class="nav-link dropdown-toggle {{ $dangQuanLyXe ? 'active' : '' }}"
+                        href="#"
+                        id="customerVehicleMenu"
+                        role="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                    >
+                        Quản lý xe
+                    </a>
 
-                        <ul
-                            class="dropdown-menu"
-                            aria-labelledby="customerVehicleMenu"
-                        >
-                            <li>
-                                <a
-                                    class="dropdown-item {{ request()->routeIs('public.xe.*') ? 'active' : '' }}"
-                                    href="{{ route('public.xe.index') }}"
-                                >
-                                    <i class="bi bi-car-front" aria-hidden="true"></i>
-                                    Xe của tôi
-                                </a>
-                            </li>
+                    <ul
+                        class="dropdown-menu"
+                        aria-labelledby="customerVehicleMenu"
+                    >
+                        <li>
+                            <a
+                                class="dropdown-item {{ request()->routeIs('public.xe.*') ? 'active' : '' }}"
+                                href="{{ route('public.xe.index') }}"
+                            >
+                                <i class="bi bi-car-front me-2" aria-hidden="true"></i>
+                                Xe của tôi
+                            </a>
+                        </li>
 
-                            <li>
-                                <a
-                                    class="dropdown-item {{ request()->routeIs('public.datlich.index', 'public.xacnhan.*') ? 'active' : '' }}"
-                                    href="{{ route('public.datlich.index') }}"
-                                >
-                                    <i class="bi bi-calendar-check" aria-hidden="true"></i>
-                                    Lịch hẹn của tôi
-                                </a>
-                            </li>
-                        </ul>
-                    </li>
+                        <li>
+                            <a
+                                class="dropdown-item {{ request()->routeIs('public.datlich.index', 'public.xacnhan.*') ? 'active' : '' }}"
+                                href="{{ route('public.datlich.index') }}"
+                            >
+                                <i class="bi bi-calendar-check me-2" aria-hidden="true"></i>
+                                Lịch hẹn của tôi
+                            </a>
+                        </li>
 
-                    <li class="nav-item">
-                        <a
-                            class="nav-link {{ $dangThanhToan ? 'active' : '' }}"
-                            href="{{ route('hoadon.index') }}"
-                            @if($dangThanhToan) aria-current="page" @endif
-                        >
-                            Thanh toán
-                        </a>
-                    </li>
-                @elseif($vaiTro === 'TECHNICIAN')
-                    <li class="nav-item">
-                        <a
-                            class="nav-link {{ request()->routeIs('ktv.*') ? 'active' : '' }}"
-                            href="{{ route('ktv.lichhen.index') }}"
-                        >
-                            Công việc của tôi
-                        </a>
-                    </li>
-                @elseif($vaiTro === 'ADMIN')
-                    <li class="nav-item">
-                        <a
-                            class="nav-link"
-                            href="{{ route('admin.dashboard') }}"
-                        >
-                            Trang quản trị
-                        </a>
-                    </li>
-                @endif
+                        <li>
+                            <a
+                                class="dropdown-item {{ request()->routeIs('hoadon.*') ? 'active' : '' }}"
+                                href="{{ route('hoadon.index') }}"
+                            >
+                                <i class="bi bi-receipt me-2" aria-hidden="true"></i>
+                                Hóa đơn và thanh toán
+                            </a>
+                        </li>
+                    </ul>
+                </li>
             </ul>
 
-            <div class="customer-header-actions">
-                @if(!auth()->check() || $laKhachHang)
-                    <a
-                        class="btn customer-booking-button"
-                        href="{{ route('public.datlich.create') }}"
+            <div class="d-flex flex-wrap align-items-center gap-2 mt-3 mt-lg-0">
+                <a
+                    class="btn btn-primary"
+                    href="{{ route('public.datlich.create') }}"
+                >
+                    <i class="bi bi-calendar-plus me-1" aria-hidden="true"></i>
+                    Đặt lịch
+                </a>
+
+                <div class="dropdown">
+                    <button
+                        class="btn btn-light dropdown-toggle account-button"
+                        type="button"
+                        id="customerAccountMenu"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
                     >
-                        Đặt lịch
-                    </a>
-                @endif
+                        <i class="bi bi-person-circle me-1" aria-hidden="true"></i>
+                        {{ auth()->user()->HoTen }}
+                    </button>
 
-                @auth
-                    <div class="dropdown customer-account">
-                        <button
-                            class="customer-account-toggle dropdown-toggle"
-                            id="customerAccountMenu"
-                            type="button"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        >
-                            <span class="customer-account-avatar">
-                                <i class="bi bi-person-fill" aria-hidden="true"></i>
-                            </span>
-
-                            <span class="customer-account-name">
-                                {{ auth()->user()->HoTen }}
-                            </span>
-                        </button>
-
-                        <ul
-                            class="dropdown-menu dropdown-menu-end"
-                            aria-labelledby="customerAccountMenu"
-                        >
-                            <li>
-                                <a
-                                    class="dropdown-item"
-                                    href="{{ route('public.taikhoan.edit') }}"
-                                >
-                                    <i class="bi bi-person-gear" aria-hidden="true"></i>
-                                    Tài khoản của tôi
-                                </a>
-                            </li>
-
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-
-                            <li>
-                                <form
-                                    method="POST"
-                                    action="{{ route('logout') }}"
-                                    data-confirm-title="Đăng xuất"
-                                    data-confirm="Bạn có muốn đăng xuất khỏi tài khoản?"
-                                    data-confirm-accept="Đăng xuất"
-                                >
-                                    @csrf
-
-                                    <button
-                                        class="dropdown-item text-danger"
-                                        type="submit"
-                                    >
-                                        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-                                        Đăng xuất
-                                    </button>
-                                </form>
-                            </li>
-                        </ul>
-                    </div>
-                @else
-                    <a
-                        class="customer-login-link"
-                        href="{{ route('login') }}"
+                    <ul
+                        class="dropdown-menu dropdown-menu-end"
+                        aria-labelledby="customerAccountMenu"
                     >
-                        Đăng nhập
-                    </a>
+                        <li>
+                            <a
+                                class="dropdown-item"
+                                href="{{ route('public.taikhoan.edit') }}"
+                            >
+                                <i class="bi bi-person me-2" aria-hidden="true"></i>
+                                Tài khoản của tôi
+                            </a>
+                        </li>
 
-                    <a
-                        class="btn customer-register-button"
-                        href="{{ route('register') }}"
-                    >
-                        Đăng ký
-                    </a>
-                @endauth
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+
+                        <li>
+                            <x-public.logout-button />
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
