@@ -76,12 +76,19 @@ class KtvLichHenController extends Controller
             );
         }
 
-        return view('ktv.lichhen.index', compact(
-            'lichHens',
-            'tuKhoa',
-            'ngayHen',
-            'trangThai'
-        ));
+        $soLieu = $this->assignedTo($request)
+    ->select('TrangThai')
+    ->selectRaw('COUNT(*) AS Tong')
+    ->groupBy('TrangThai')
+    ->pluck('Tong', 'TrangThai');
+
+return view('ktv.lichhen.index', compact(
+    'lichHens',
+    'tuKhoa',
+    'ngayHen',
+    'trangThai',
+    'soLieu'
+));
     }
 
     public function show(Request $request, $maLH)

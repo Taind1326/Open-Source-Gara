@@ -1,0 +1,628 @@
+/* =========================
+   Nền tảng
+   ========================= */
+
+.ktv-app {
+    --ktv-orange: #f56616;
+    --ktv-text: #10243a;
+    --ktv-muted: #62748b;
+    --ktv-border: #e1e8f1;
+    --ktv-background: #f5f7fb;
+
+    margin: 0;
+    background: var(--ktv-background);
+    color: var(--ktv-text);
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    line-height: 1.6;
+}
+
+.ktv-app *,
+.ktv-app *::before,
+.ktv-app *::after {
+    box-sizing: border-box;
+}
+
+.ktv-app h1,
+.ktv-app h2,
+.ktv-app h3 {
+    color: var(--ktv-text);
+    letter-spacing: -0.025em;
+}
+
+.ktv-app .text-secondary,
+.ktv-app .text-muted {
+    color: var(--ktv-muted) !important;
+}
+
+.ktv-app :focus-visible {
+    outline: 3px solid #f7ac80;
+    outline-offset: 3px;
+}
+
+.ktv-container {
+    width: 100%;
+    max-width: 1440px;
+    margin-inline: auto;
+    padding-inline: 32px;
+}
+
+/* =========================
+   Header
+   ========================= */
+
+.ktv-header {
+    position: sticky;
+    top: 0;
+    z-index: 1020;
+    border-bottom: 1px solid var(--ktv-border);
+    background: #fff;
+}
+
+.ktv-header .navbar {
+    min-height: 80px;
+    padding: 0;
+}
+
+.ktv-header .navbar > .ktv-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.ktv-brand {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 10px;
+    color: var(--ktv-text);
+    font-size: 22px;
+    font-weight: 750;
+    letter-spacing: -0.04em;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ktv-brand:hover {
+    color: var(--ktv-text);
+}
+
+.ktv-brand-icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: var(--ktv-orange);
+    color: #fff;
+    font-size: 25px;
+}
+
+.ktv-brand-accent {
+    color: var(--ktv-orange);
+}
+
+.ktv-navigation {
+    display: flex;
+    align-items: stretch;
+    margin-left: 32px;
+}
+
+.ktv-nav-link {
+    display: flex;
+    align-items: center;
+    min-height: 80px;
+    padding: 0 10px;
+    border-bottom: 3px solid transparent;
+    color: var(--ktv-muted);
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.ktv-nav-link:hover,
+.ktv-nav-link.is-active {
+    color: #cf4d08;
+}
+
+.ktv-nav-link.is-active {
+    border-bottom-color: var(--ktv-orange);
+}
+
+.ktv-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-left: auto;
+}
+
+.ktv-website-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    color: var(--ktv-muted);
+    font-size: 14px;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.ktv-website-link:hover {
+    color: #cf4d08;
+}
+
+.ktv-account-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--ktv-text);
+    text-align: left;
+}
+
+.ktv-account-avatar {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #edf1f7;
+    color: #6b7d94;
+    font-size: 25px;
+}
+
+.ktv-account-info {
+    display: block;
+    min-width: 0;
+}
+
+.ktv-account-name {
+    display: block;
+    max-width: 170px;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ktv-account-role {
+    display: block;
+    color: var(--ktv-muted);
+    font-size: 12px;
+}
+
+.ktv-app .dropdown-menu {
+    min-width: 220px;
+    padding: 8px;
+    border: 1px solid var(--ktv-border);
+    border-radius: 12px;
+    box-shadow: 0 12px 35px #10243a12;
+}
+
+.ktv-app .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 42px;
+    padding: 9px 12px;
+    border-radius: 7px;
+    font-size: 14px;
+}
+
+.ktv-app .dropdown-item:active {
+    background: #fff0e6;
+    color: #a94008;
+}
+
+/* =========================
+   Nội dung
+   ========================= */
+
+.ktv-main {
+    padding: 36px 0 48px;
+}
+
+.ktv-page-heading {
+    margin-bottom: 28px;
+}
+
+.ktv-page-heading h1 {
+    margin: 0 0 8px;
+    font-size: clamp(1.8rem, 3vw, 2.4rem);
+    font-weight: 750;
+    line-height: 1.25;
+}
+
+.ktv-page-heading p {
+    margin: 0;
+    color: var(--ktv-muted);
+    font-size: 16px;
+}
+
+/* =========================
+   Thẻ số liệu
+   ========================= */
+
+.ktv-stat {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 100%;
+    min-height: 112px;
+    padding: 20px;
+    border: 1px solid var(--ktv-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--ktv-text);
+    text-decoration: none;
+}
+
+.ktv-stat:hover {
+    border-color: #f4b18e;
+    color: var(--ktv-text);
+}
+
+.ktv-stat-icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 12px;
+    font-size: 27px;
+}
+
+.ktv-tone-blue {
+    background: #e9f3ff;
+    color: #0969d8;
+}
+
+.ktv-tone-purple {
+    background: #f2eafe;
+    color: #8242ce;
+}
+
+.ktv-tone-yellow {
+    background: #fff6db;
+    color: #996500;
+}
+
+.ktv-tone-orange {
+    background: #fff0e6;
+    color: #c74b08;
+}
+
+.ktv-tone-green {
+    background: #e7f5ee;
+    color: #21764c;
+}
+
+.ktv-tone-gray {
+    background: #edf1f5;
+    color: #5b6b7d;
+}
+
+.ktv-stat-label {
+    margin: 0 0 4px;
+    color: var(--ktv-muted);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.ktv-stat-number {
+    margin: 0;
+    font-size: 29px;
+    font-weight: 750;
+    line-height: 1.2;
+}
+
+/* =========================
+   Danh sách và bộ lọc
+   ========================= */
+
+.ktv-panel {
+    padding: 22px;
+    border: 1px solid var(--ktv-border);
+    border-radius: 12px;
+    background: #fff;
+}
+
+.ktv-filter-form {
+    margin-bottom: 20px;
+}
+
+.ktv-search-field {
+    position: relative;
+}
+
+.ktv-search-field > i {
+    position: absolute;
+    top: 11px;
+    left: 14px;
+    color: var(--ktv-muted);
+    font-size: 19px;
+    pointer-events: none;
+}
+
+.ktv-search-field .form-control {
+    padding-left: 43px;
+}
+
+.ktv-status-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.ktv-status-tab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 8px 16px;
+    border: 1px solid var(--ktv-border);
+    border-radius: 7px;
+    color: var(--ktv-text);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.ktv-status-tab:hover,
+.ktv-status-tab.is-active {
+    border-color: #f7b08a;
+    background: #fff3ea;
+    color: #c54a08;
+}
+
+.ktv-status-tab.is-active {
+    font-weight: 650;
+}
+
+.ktv-table {
+    --bs-table-color: var(--ktv-text);
+    --bs-table-border-color: var(--ktv-border);
+
+    min-width: 860px;
+    margin: 0;
+}
+
+.ktv-table > :not(caption) > * > * {
+    padding: 16px;
+}
+
+.ktv-table thead th {
+    background: #f5f7fb;
+    font-size: 14px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.ktv-table tbody td {
+    font-size: 14px;
+}
+
+.ktv-vehicle-name {
+    margin-bottom: 3px;
+    font-weight: 650;
+}
+
+.ktv-customer-name {
+    color: var(--ktv-muted);
+    font-size: 13px;
+}
+
+.ktv-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.ktv-job-action {
+    min-width: 130px;
+    white-space: nowrap;
+}
+
+.ktv-empty {
+    padding: 42px 20px;
+    color: var(--ktv-muted);
+    text-align: center;
+}
+
+.ktv-empty > i {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 32px;
+}
+
+/* =========================
+   Nút, biểu mẫu và phân trang
+   ========================= */
+
+.ktv-app .btn {
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.ktv-app .btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--ktv-orange);
+    --bs-btn-border-color: var(--ktv-orange);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: #db5106;
+    --bs-btn-hover-border-color: #db5106;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #c74804;
+    --bs-btn-active-border-color: #c74804;
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: var(--ktv-orange);
+    --bs-btn-disabled-border-color: var(--ktv-orange);
+    --bs-btn-focus-shadow-rgb: 245, 102, 22;
+}
+
+.ktv-app .btn-outline-primary {
+    --bs-btn-color: #c94c08;
+    --bs-btn-border-color: var(--ktv-orange);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--ktv-orange);
+    --bs-btn-hover-border-color: var(--ktv-orange);
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: #db5106;
+    --bs-btn-active-border-color: #db5106;
+    --bs-btn-focus-shadow-rgb: 245, 102, 22;
+}
+
+.ktv-app .form-control,
+.ktv-app .form-select {
+    min-height: 46px;
+    border-color: #d7e0ec;
+    border-radius: 8px;
+    color: var(--ktv-text);
+    font-size: 14px;
+}
+
+.ktv-app .form-control:focus,
+.ktv-app .form-select:focus {
+    border-color: #f79b68;
+    box-shadow: 0 0 0 3px #f5661614;
+}
+
+.ktv-app .form-control.is-invalid,
+.ktv-app .form-select.is-invalid {
+    border-color: var(--bs-danger);
+}
+
+.ktv-app .page-link {
+    color: #b6470a;
+}
+
+.ktv-app .active > .page-link {
+    border-color: var(--ktv-orange);
+    background: var(--ktv-orange);
+    color: #fff;
+}
+
+.ktv-app .disabled > .page-link {
+    color: #8997a8;
+}
+
+/* =========================
+   Màn hình nhỏ
+   ========================= */
+
+@media (max-width: 1199.98px) {
+    .ktv-navigation {
+        margin-left: 8px;
+    }
+
+    .ktv-header-actions {
+        gap: 16px;
+    }
+
+    .ktv-brand {
+        font-size: 20px;
+    }
+}
+
+@media (max-width: 991.98px) {
+    .ktv-header .navbar {
+        padding-block: 14px;
+    }
+
+    .ktv-header .navbar > .ktv-container {
+        gap: 12px;
+    }
+
+    .ktv-navigation {
+        margin: 0;
+    }
+
+    .ktv-nav-link {
+        min-height: 48px;
+        padding-inline: 0;
+    }
+
+    .ktv-header-actions {
+        justify-content: space-between;
+        margin: 16px 0 0;
+        padding-top: 16px;
+        border-top: 1px solid var(--ktv-border);
+    }
+
+    .ktv-main {
+        padding-top: 28px;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .ktv-container {
+        padding-inline: 16px;
+    }
+
+    .ktv-brand {
+        gap: 8px;
+        font-size: 19px;
+    }
+
+    .ktv-brand-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 22px;
+    }
+
+    .ktv-page-heading {
+        margin-bottom: 22px;
+    }
+
+    .ktv-page-heading p {
+        font-size: 14px;
+    }
+
+    .ktv-stat {
+        gap: 10px;
+        min-height: 100px;
+        padding: 14px;
+    }
+
+    .ktv-stat-icon {
+        width: 38px;
+        height: 38px;
+        font-size: 21px;
+    }
+
+    .ktv-stat-label {
+        font-size: 12px;
+    }
+
+    .ktv-stat-number {
+        font-size: 25px;
+    }
+
+    .ktv-panel {
+        padding: 16px;
+    }
+
+    .ktv-status-tabs {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 5px;
+    }
+
+    .ktv-status-tab {
+        flex-shrink: 0;
+        padding-inline: 12px;
+        font-size: 13px;
+    }
+}
