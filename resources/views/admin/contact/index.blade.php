@@ -94,7 +94,7 @@
 
             @if($messages->hasPages())
                 <div class="mt-4">
-                    {{ $messages->links('pagination::bootstrap-5') }}
+                    {{ $messages->links('shared.pagination') }}
                 </div>
             @endif
         </div>
