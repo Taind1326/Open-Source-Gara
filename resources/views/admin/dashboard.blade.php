@@ -365,78 +365,102 @@
             const chartWrap = document.getElementById('dashboardChartWrap');
             const canvas = document.getElementById('dashboardRevenueChart');
 
-            if (!canvas || !chartWrap) {
+            if (!chartWrap || !canvas) {
                 return;
             }
 
-            if (typeof Chart === 'undefined') {
+            const showTable = () => {
                 chartWrap.hidden = true;
-                chartWrap.nextElementSibling?.closest('details');
 
                 const details = chartWrap.parentElement.querySelector('details');
 
                 if (details) {
                     details.open = true;
                 }
+            };
 
+            if (typeof Chart === 'undefined') {
+                showTable();
                 return;
             }
 
             const labels = {{ \Illuminate\Support\Js::from($chartLabels) }};
             const values = {{ \Illuminate\Support\Js::from($chartValues) }};
-            const money = value => new Intl.NumberFormat('vi-VN').format(value) + ' đ';
+            const money = new Intl.NumberFormat('vi-VN');
 
-            new Chart(canvas, {
-                type: 'bar',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'Doanh thu',
-                        data: values,
-                        backgroundColor: '#f56616',
-                        hoverBackgroundColor: '#d95008',
-                        borderRadius: 4,
-                        maxBarThickness: 24
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: window.matchMedia('(prefers-reduced-motion: reduce)').matches
-                        ? false
-                        : { duration: 400 },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                title: items => 'Ngày ' + items[0].label,
-                                label: context => money(context.parsed.y)
-                            }
-                        }
+            try {
+                new Chart(canvas, {
+                    type: 'bar',
+                    data: {
+                        labels,
+                        datasets: [{
+                            label: 'Doanh thu',
+                            data: values,
+                            backgroundColor: '#2563eb',
+                            hoverBackgroundColor: '#1d4ed8',
+                            borderRadius: 6,
+                            maxBarThickness: 45
+                        }]
                     },
-                    scales: {
-                        x: {
-                            grid: {
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false
+                        },
+                        animation: window.matchMedia(
+                            '(prefers-reduced-motion: reduce)'
+                        ).matches ? false : { duration: 400 },
+                        plugins: {
+                            legend: {
                                 display: false
                             },
-                            ticks: {
-                                maxTicksLimit: 10
+                            tooltip: {
+                                callbacks: {
+                                    title: items => 'Ngày ' + items[0].label,
+                                    label: context =>
+                                        'Doanh thu: '
+                                        + money.format(context.parsed.y)
+                                        + ' ₫'
+                                }
                             }
                         },
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: '#edf1f6'
+                        scales: {
+                            x: {
+                                grid: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#64748b',
+                                    maxTicksLimit: 10
+                                },
+                                border: {
+                                    display: false
+                                }
                             },
-                            ticks: {
-                                callback: value => new Intl.NumberFormat('vi-VN').format(value)
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(148, 163, 184, 0.15)'
+                                },
+                                border: {
+                                    display: false
+                                },
+                                ticks: {
+                                    color: '#64748b',
+                                    maxTicksLimit: 6,
+                                    callback: value =>
+                                        money.format(value) + ' ₫'
+                                }
                             }
                         }
                     }
-                }
-            });
+                });
+            } catch (error) {
+                showTable();
+                console.error('Không thể hiển thị biểu đồ doanh thu.', error);
+            }
         })();
     </script>
 @endpush
