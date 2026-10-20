@@ -170,7 +170,7 @@
             </div>
 
             <div class="admin-topbar-actions">
-                <a href="{{ route('public.home') }}" class="admin-website-link">
+                <a href="{{ route('public.website') }}" class="admin-website-link">
                     Xem website
                     <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
                 </a>
