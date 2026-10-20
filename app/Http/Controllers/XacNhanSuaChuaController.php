@@ -16,23 +16,33 @@ class XacNhanSuaChuaController extends Controller
     private const MAX_TOTAL = 999999999999999;
 
     public function preview(Request $request, $maLH)
-    {
-        $lichHen = $this->technicianAppointment($request, $maLH);
-        $phieu = $lichHen->phieuKiemTra;
+{
+    $lichHen = $this->technicianAppointment($request, $maLH);
+    $phieu = $lichHen->phieuKiemTra;
 
-        if (!$this->isDraft($lichHen, $phieu)) {
-            return redirect()->route('ktv.lichhen.show', $maLH)
-                ->with('error', 'Chỉ gửi được phiếu nháp của xe đang kiểm tra.');
-        }
-
-        $snapshot = $this->draftSnapshot($lichHen, $phieu);
-        $baoHanhs = $this->warrantySources($lichHen)->groupBy('MaHD');
-        $phienBan = $this->draftToken($snapshot);
-
-        return view('ktv.kiemtra.confirm', compact(
-            'lichHen', 'phieu', 'snapshot', 'baoHanhs', 'phienBan'
-        ));
+    if (!$this->isDraft($lichHen, $phieu)) {
+        return redirect()
+            ->route('ktv.lichhen.show', $maLH)
+            ->with(
+                'error',
+                'Chỉ gửi được phiếu nháp của xe đang kiểm tra.'
+            );
     }
+
+    $snapshot = $this->draftSnapshot($lichHen, $phieu);
+    $baoHanhs = $this->warrantySources($lichHen)->groupBy('MaHD');
+    $phienBan = $this->draftToken($snapshot);
+    $loiHangMuc = $this->itemProblem($lichHen);
+
+    return view('ktv.kiemtra.confirm', compact(
+        'lichHen',
+        'phieu',
+        'snapshot',
+        'baoHanhs',
+        'phienBan',
+        'loiHangMuc'
+    ));
+}
 
     public function send(Request $request, $maLH)
     {
@@ -72,24 +82,11 @@ class XacNhanSuaChuaController extends Controller
             if ($chosen->isEmpty()) {
                 $this->fail('phien_ban', 'Chưa có hạng mục đề xuất. Vui lòng quay lại cập nhật phiếu.');
             }
-            $itemErrors = [];
-            $parts = PhuTung::whereIn('MaPT', $chosen->whereNotNull('MaPT')->pluck('MaPT'))
-                ->orderBy('MaPT')->lockForUpdate()->get()->keyBy('MaPT');
-            foreach ($chosen as $row) {
-                if ($row->MaDV !== null) {
-                    if (!$row->dichVu?->HoatDong || !$row->dichVu?->loaiDichVu?->HoatDong) {
-                        $itemErrors[] = 'Có dịch vụ hoặc nhóm dịch vụ đã ngừng hoạt động.';
-                    }
-                } else {
-                    $part = $parts->get($row->MaPT);
-                    if (!$part || !$part->HoatDong) {
-                        $itemErrors[] = 'Có phụ tùng không còn hoạt động.';
-                    } elseif ($row->SoLuong > $part->SoLuongTon) {
-                        $itemErrors[] = "{$part->TenPT}: số lượng không được vượt quá tồn kho hiện tại ({$part->SoLuongTon} {$part->DonViTinh}).";
-                    }
-                }
-            }
-            if ($itemErrors) $this->fail('phien_ban', implode(' ', array_unique($itemErrors)));
+            $loiHangMuc = $this->itemProblem($lichHen, true);
+
+if ($loiHangMuc !== null) {
+    $this->fail('phien_ban', $loiHangMuc);
+}
 
             $warrantyIds = array_map('intval', $data['bao_hanh_dich_vus'] ?? []);
             if (count($warrantyIds) !== count(array_unique($warrantyIds))) {
@@ -380,6 +377,76 @@ class XacNhanSuaChuaController extends Controller
     {
         return hash('sha256', json_encode($snapshot, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
     }
+
+    private function itemProblem(
+    LichHen $lichHen,
+    bool $lockParts = false
+): ?string {
+    // Chỉ kiểm tra hạng mục KTV còn chọn.
+    // Hạng mục đã bỏ chọn vẫn giữ trong lịch sử nhưng không chặn gửi.
+    $chosen = $lichHen->chiTietLichHens
+        ->filter(fn ($row) => (bool) $row->KTVDeXuat);
+
+    $partIds = $chosen
+        ->whereNotNull('MaPT')
+        ->pluck('MaPT')
+        ->unique()
+        ->values();
+
+    $query = PhuTung::query()
+        ->whereIn('MaPT', $partIds)
+        ->orderBy('MaPT');
+
+    if ($lockParts) {
+        $query->lockForUpdate();
+    }
+
+    $parts = $query->get()->keyBy('MaPT');
+    $coHangMucNgungHoatDong = false;
+    $coPhuTungVuotTonKho = false;
+
+    foreach ($chosen as $row) {
+        if ($row->MaDV !== null) {
+            if (
+                !$row->dichVu?->HoatDong
+                || !$row->dichVu?->loaiDichVu?->HoatDong
+            ) {
+                $coHangMucNgungHoatDong = true;
+            }
+
+            continue;
+        }
+
+        $part = $parts->get($row->MaPT);
+
+        if (!$part || !$part->HoatDong) {
+            $coHangMucNgungHoatDong = true;
+            continue;
+        }
+
+        if ((int) $row->SoLuong > (int) $part->SoLuongTon) {
+            $coPhuTungVuotTonKho = true;
+        }
+    }
+
+    if ($coHangMucNgungHoatDong && $coPhuTungVuotTonKho) {
+        return 'Có hạng mục đã ngừng hoạt động và phụ tùng vượt tồn kho. '
+            . 'Vui lòng quay lại bỏ chọn hạng mục ngừng hoạt động, '
+            . 'điều chỉnh số lượng và lưu phiếu nháp.';
+    }
+
+    if ($coHangMucNgungHoatDong) {
+        return 'Có dịch vụ, nhóm dịch vụ hoặc phụ tùng đã ngừng hoạt động. '
+            . 'Vui lòng quay lại bỏ chọn hạng mục đó và lưu phiếu nháp.';
+    }
+
+    if ($coPhuTungVuotTonKho) {
+        return 'Có phụ tùng vượt tồn kho hiện tại. '
+            . 'Vui lòng quay lại điều chỉnh số lượng và lưu phiếu nháp.';
+    }
+
+    return null;
+}
 
     private function fail(string $field, string $message): never
     {
