@@ -5,153 +5,127 @@
 @section('content')
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h1 class="h4 fw-bold mb-1">Loại dịch vụ</h1>
+            <h1 class="h3 fw-bold mb-2">
+                Quản lý loại dịch vụ
+            </h1>
 
             <p class="text-secondary mb-0">
-                Quản lý các nhóm dịch vụ của gara.
+                Quản lý nhóm dịch vụ và trạng thái hoạt động.
             </p>
         </div>
 
         <a href="{{ route('loaidichvu.create') }}" class="btn btn-primary">
-            + Thêm loại dịch vụ
+            Thêm loại dịch vụ
         </a>
     </div>
 
-    <div class="card mb-4">
+    <div class="card border-0 shadow-sm mb-4">
         <div class="card-body p-4">
-            <form novalidate method="GET" action="{{ route('loaidichvu.index') }}">
-                <div class="row g-3 align-items-end">
-                    <div class="col-md-8">
-                        <label for="tu_khoa" class="form-label">
-                            Tìm loại dịch vụ
-                        </label>
+            <form
+                method="GET"
+                action="{{ route('loaidichvu.index') }}"
+                novalidate
+            >
+                <label for="category-search" class="form-label">
+                    Tìm loại dịch vụ
+                </label>
 
+                <div class="d-flex flex-wrap align-items-start gap-2">
+                    <div class="flex-grow-1">
                         <input
                             type="search"
-                            id="tu_khoa"
+                            id="category-search"
                             name="tu_khoa"
-                            value="{{ $tuKhoa }}"
-                            class="form-control"
+                            value="{{ old('tu_khoa', $tuKhoa) }}"
+                            class="form-control @error('tu_khoa') is-invalid @enderror"
                             placeholder="Nhập tên loại dịch vụ..."
                             maxlength="100"
                         >
+
+                        @error('tu_khoa')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
 
-                    <div class="col-md-2">
-                        <button type="submit" class="btn btn-primary w-100">
-                            Tìm kiếm
-                        </button>
-                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        Tìm kiếm
+                    </button>
 
-                    <div class="col-md-2">
-                        <a
-                            href="{{ route('loaidichvu.index') }}"
-                            class="btn btn-outline-secondary w-100"
-                        >
-                            Làm mới
-                        </a>
-                    </div>
+                    <a
+                        href="{{ route('loaidichvu.index') }}"
+                        class="btn btn-outline-secondary"
+                    >
+                        Xóa bộ lọc
+                    </a>
                 </div>
             </form>
         </div>
     </div>
 
-    <div class="card">
-        <div class="card-body p-4 border-bottom">
-            <div class="fw-semibold">
-                Danh sách loại dịch vụ
-                <span class="badge bg-primary-subtle text-primary ms-2">
-                    {{ $danhSach->total() }}
-                </span>
-            </div>
-        </div>
+    <div class="card border-0 shadow-sm">
+        <div class="card-body">
+            <p class="text-secondary small mb-3">
+                {{ $danhSach->total() }} loại dịch vụ
+            </p>
 
-        <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th class="ps-4">Mã</th>
-                        <th>Hình ảnh</th>
-                        <th>Tên loại dịch vụ</th>
-                        <th>Mô tả</th>
-                        <th>Trạng thái</th>
-                        <th class="text-end pe-4">Thao tác</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    @forelse ($danhSach as $item)
+            <div class="table-responsive">
+                <table class="table align-middle mb-0">
+                    <thead class="table-light">
                         <tr>
-                            <td class="ps-4">
-                                #{{ $item->MaLoaiDV }}
-                            </td>
+                            <th scope="col">Mã</th>
+                            <th scope="col">Tên loại dịch vụ</th>
+                            <th scope="col">Mô tả</th>
+                            <th scope="col" class="text-nowrap">Trạng thái</th>
+                            <th scope="col" class="text-end">Thao tác</th>
+                        </tr>
+                    </thead>
 
-                            <td>
-                                @if ($item->HinhAnh)
-                                    <img
-                                        src="{{ asset('storage/' . $item->HinhAnh) }}"
-                                        alt="{{ $item->TenLoaiDV }}"
-                                        width="80"
-                                        height="60"
-                                        class="rounded"
-                                        style="object-fit: cover;"
-                                        loading="lazy"
+                    <tbody>
+                        @forelse($danhSach as $item)
+                            <tr>
+                                <td class="text-secondary">
+                                    #{{ $item->MaLoaiDV }}
+                                </td>
+
+                                <td class="fw-semibold">
+                                    {{ $item->TenLoaiDV }}
+                                </td>
+
+                                <td>
+                                    {{ \Illuminate\Support\Str::limit($item->MoTa ?: 'Chưa có mô tả.', 110) }}
+                                </td>
+
+                                <td class="text-nowrap">
+                                    <span class="badge {{ $item->HoatDong ? 'text-bg-success' : 'text-bg-secondary' }}">
+                                        {{ $item->HoatDong ? 'Hoạt động' : 'Ngừng hoạt động' }}
+                                    </span>
+                                </td>
+
+                                <td class="text-end">
+                                    <a
+                                        href="{{ route('loaidichvu.edit', $item->MaLoaiDV) }}"
+                                        class="btn btn-outline-primary btn-sm"
                                     >
-                                @else
-                                    <span class="small text-secondary">
-                                        Chưa có ảnh
-                                    </span>
-                                @endif
-                            </td>
+                                        Sửa
+                                    </a>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center text-secondary py-5">
+                                    Chưa có loại dịch vụ phù hợp.
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
 
-                            <td class="fw-semibold">
-                                {{ $item->TenLoaiDV }}
-                            </td>
-
-                            <td>
-                                {{ \Illuminate\Support\Str::limit($item->MoTa ?: 'Chưa có mô tả', 100) }}
-                            </td>
-
-                            <td>
-                                @if ($item->TrangThai === 'HOAT_DONG')
-                                    <span class="badge bg-success-subtle text-success">
-                                        Hoạt động
-                                    </span>
-                                @else
-                                    <span class="badge bg-secondary-subtle text-secondary">
-                                        Ngừng hoạt động
-                                    </span>
-                                @endif
-                            </td>
-
-                            <td class="text-end pe-4">
-                                <a
-                                    href="{{ route('loaidichvu.edit', $item->MaLoaiDV) }}"
-                                    class="btn btn-outline-primary btn-sm"
-                                >
-                                    Chỉnh sửa
-                                </a>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="6" class="text-center py-5">
-                                <div class="fw-semibold mb-1">
-                                    Không có loại dịch vụ phù hợp
-                                </div>
-
-                                <div class="text-secondary small">
-                                    Thử từ khóa khác hoặc thêm loại dịch vụ mới.
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card-body border-top">
-            {{ $danhSach->links('pagination::bootstrap-5') }}
+            @if($danhSach->hasPages())
+                <div class="mt-4">
+                    {{ $danhSach->links('pagination::bootstrap-5') }}
+                </div>
+            @endif
         </div>
     </div>
 @endsection
