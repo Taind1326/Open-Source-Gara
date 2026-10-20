@@ -476,3 +476,145 @@
         transition: none;
     }
 }
+
+
+/* =========================
+   Tổng quan Admin
+   ========================= */
+
+.admin-dashboard .dashboard-stat {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 100%;
+    padding: 20px;
+}
+
+.admin-dashboard .dashboard-icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 54px;
+    height: 54px;
+    border-radius: 14px;
+    background: #fff0e6;
+    color: #ce4b06;
+    font-size: 25px;
+}
+
+.admin-dashboard .dashboard-icon-blue {
+    background: #eaf2ff;
+    color: #2563eb;
+}
+
+.admin-dashboard .dashboard-icon-purple {
+    background: #f1ebff;
+    color: #8050d9;
+}
+
+.admin-dashboard .dashboard-stat-label {
+    color: var(--admin-muted);
+    font-size: 14px;
+}
+
+.admin-dashboard .dashboard-stat-number {
+    margin-top: 2px;
+    font-size: 30px;
+    font-weight: 750;
+    line-height: 1.2;
+}
+
+.admin-dashboard .dashboard-revenue {
+    color: #d65008;
+    font-size: clamp(1.8rem, 3vw, 2.5rem);
+    font-weight: 750;
+    letter-spacing: -0.04em;
+}
+
+.admin-dashboard .dashboard-chart {
+    position: relative;
+    height: 240px;
+    margin-top: 20px;
+}
+
+.admin-dashboard .dashboard-task {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 0;
+}
+
+.admin-dashboard .dashboard-task + .dashboard-task {
+    border-top: 1px solid var(--admin-border);
+}
+
+.admin-dashboard .dashboard-task-number {
+    min-width: 30px;
+    font-size: 26px;
+    font-weight: 750;
+}
+
+.admin-dashboard .dashboard-task-label {
+    flex: 1;
+    color: var(--admin-muted);
+    font-size: 14px;
+}
+
+.admin-dashboard .dashboard-link {
+    color: #bd4806;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.admin-dashboard .dashboard-link:hover {
+    text-decoration: underline;
+}
+
+.admin-dashboard .dashboard-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 20px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-dashboard .dashboard-panel-heading h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.admin-dashboard .dashboard-waiting {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: #fff5dc;
+    color: #946000;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+@media (max-width: 575.98px) {
+    .admin-dashboard .dashboard-stat {
+        gap: 10px;
+        padding: 16px;
+    }
+
+    .admin-dashboard .dashboard-icon {
+        width: 42px;
+        height: 42px;
+        font-size: 21px;
+    }
+
+    .admin-dashboard .dashboard-stat-label {
+        font-size: 12px;
+    }
+
+    .admin-dashboard .dashboard-task {
+        gap: 10px;
+    }
+}

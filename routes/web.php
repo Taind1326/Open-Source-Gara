@@ -21,6 +21,7 @@ use App\Http\Controllers\XacNhanSuaChuaController;
 use App\Http\Controllers\XeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminKtvController;
+use App\Http\Controllers\AdminDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -170,8 +171,8 @@ Route::middleware([
 */
 
 Route::middleware(['auth', 'role:ADMIN'])->group(function () {
-    Route::view('/admin', 'admin.dashboard')
-        ->name('admin.dashboard');
+    Route::get('/admin', [AdminDashboardController::class, 'index'])
+    ->name('admin.dashboard');
 
     Route::resource(
     'loaidichvu',
