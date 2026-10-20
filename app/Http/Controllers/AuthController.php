@@ -156,7 +156,7 @@ class AuthController extends Controller
             'MatKhau_confirmation.same' => 'Mật khẩu xác nhận không khớp.',
         ]);
 
-        $taiKhoan = TaiKhoan::create([
+        TaiKhoan::create([
             'HoTen' => $data['HoTen'],
             'Email' => $data['Email'],
             'SoDienThoai' => $data['SoDienThoai'],
@@ -165,14 +165,9 @@ class AuthController extends Controller
             'TrangThai' => 'HOAT_DONG',
         ]);
 
-        Auth::login($taiKhoan);
-
-        $request->session()->regenerate();
-        $request->session()->forget('url.intended');
-
         return redirect()
-            ->route('public.home')
-            ->with('success', 'Đăng ký tài khoản thành công.');
+    ->route('login')
+    ->with('success', 'Đăng ký thành công. Vui lòng đăng nhập.');
     }
 
     public function logout(Request $request): RedirectResponse
