@@ -238,6 +238,13 @@
 >
     Kỹ thuật viên
 </a>
+
+<a
+    href="{{ route('admin.contact.index') }}"
+    class="sidebar-link {{ request()->routeIs('admin.contact.*') ? 'active' : '' }}"
+>
+    Tin nhắn liên hệ
+</a>
         </nav>
     </aside>
 
