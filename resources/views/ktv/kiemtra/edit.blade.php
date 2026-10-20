@@ -16,6 +16,11 @@
             ->filter(fn ($id) => is_scalar($id))
             ->map(fn ($id) => (string) $id)
             ->all();
+
+        $coBanNhapDaLuu = $phieu
+            && $phieu->TrangThaiXacNhan === \App\Models\PhieuKiemTra::NHAP;
+
+        $duocXemLai = $coBanNhapDaLuu && !$submitted;
     @endphp
 
     <section class="hero">
@@ -54,6 +59,7 @@
             </div>
 
             <form
+                id="inspection-draft-form"
                 method="POST"
                 action="{{ route('ktv.kiemtra.save', $lichHen->MaLH) }}"
                 novalidate
@@ -181,10 +187,14 @@
                                                         </span>
                                                     @endif
 
-                                                    @if(! $hoatDong)
+                                                    @if(!$hoatDong)
                                                         <span class="badge text-danger bg-danger-subtle mt-2">
-                                                            Đã ngừng hoạt động — cần bỏ chọn
+                                                            Đã ngừng hoạt động
                                                         </span>
+
+                                                        <small class="d-block text-danger mt-1">
+                                                            Bỏ chọn để tiếp tục.
+                                                        </small>
                                                     @endif
 
                                                     <span class="d-block text-primary fw-semibold mt-2">
@@ -256,7 +266,7 @@
                                                 — Tồn: {{ $tonKho }}
                                             </p>
 
-                                            @if(! $phuTung->HoatDong)
+                                            @if(!$phuTung->HoatDong)
                                                 <p class="text-danger small">
                                                     Phụ tùng đã ngừng hoạt động.
                                                     Để số lượng bằng 0.
@@ -338,15 +348,29 @@
                                 Lưu nháp phiếu kiểm tra
                             </button>
 
-                            <a class="btn btn-outline-primary w-100 mt-2"
-                            href="{{ route('ktv.kiemtra.preview', $lichHen->MaLH) }}">
+                            <a
+                                id="inspection-preview-link"
+                                href="{{ route('ktv.kiemtra.preview', $lichHen->MaLH) }}"
+                                class="btn btn-outline-primary w-100 mt-2 {{ $duocXemLai ? '' : 'd-none' }}"
+                                data-saved="{{ $duocXemLai ? '1' : '0' }}"
+                            >
                                 Xem lại và gửi khách
                             </a>
-                            <p class="small text-muted mt-2">Lưu nháp trước khi xem lại và gửi khách.</p>
+
+                            <p
+                                id="inspection-save-reminder"
+                                class="small text-muted mt-2 mb-0"
+                                role="status"
+                                aria-live="polite"
+                            >
+                                {{ $duocXemLai
+                                    ? 'Nội dung đã được lưu. Bạn có thể xem lại trước khi gửi khách.'
+                                    : 'Vui lòng lưu phiếu nháp thành công trước khi xem lại và gửi khách.' }}
+                            </p>
 
                             <a
                                 href="{{ route('ktv.lichhen.show', $lichHen->MaLH) }}"
-                                class="btn btn-light w-100 mt-2"
+                                class="btn btn-light w-100 mt-3"
                             >
                                 Quay lại công việc
                             </a>
@@ -357,3 +381,84 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        (() => {
+            function initInspectionSaveState() {
+                const form = document.getElementById('inspection-draft-form');
+                const previewLink = document.getElementById(
+                    'inspection-preview-link'
+                );
+                const reminder = document.getElementById(
+                    'inspection-save-reminder'
+                );
+
+                if (!form || !previewLink || !reminder) {
+                    return;
+                }
+
+                const hasSavedVersion = previewLink.dataset.saved === '1';
+
+                function formState() {
+                    return JSON.stringify(
+                        Array.from(new FormData(form).entries()).map(
+                            ([name, value]) => [name, String(value)]
+                        )
+                    );
+                }
+
+                const savedState = formState();
+
+                function canPreview() {
+                    return hasSavedVersion && formState() === savedState;
+                }
+
+                function updateSaveState() {
+                    const allowed = canPreview();
+
+                    previewLink.classList.toggle('d-none', !allowed);
+
+                    if (allowed) {
+                        reminder.textContent =
+                            'Nội dung đã được lưu. Bạn có thể xem lại trước khi gửi khách.';
+                    } else if (hasSavedVersion) {
+                        reminder.textContent =
+                            'Bạn có thay đổi chưa lưu. Vui lòng lưu thay đổi trước khi gửi khách.';
+                    } else {
+                        reminder.textContent =
+                            'Vui lòng lưu phiếu nháp thành công trước khi xem lại và gửi khách.';
+                    }
+                }
+
+                form.addEventListener('input', updateSaveState);
+                form.addEventListener('change', updateSaveState);
+
+                form.addEventListener('reset', () => {
+                    requestAnimationFrame(updateSaveState);
+                });
+
+                previewLink.addEventListener('click', (event) => {
+                    if (!canPreview()) {
+                        event.preventDefault();
+                        updateSaveState();
+                    }
+                });
+
+                window.addEventListener('pageshow', updateSaveState);
+
+                updateSaveState();
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener(
+                    'DOMContentLoaded',
+                    initInspectionSaveState,
+                    { once: true }
+                );
+            } else {
+                initInspectionSaveState();
+            }
+        })();
+    </script>
+@endpush
