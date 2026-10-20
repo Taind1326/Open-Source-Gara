@@ -126,6 +126,10 @@
 
                     <tbody>
                         @forelse($danhSach as $item)
+                            @php
+                                $loai = $item->loaiDichVu;
+                            @endphp
+
                             <tr>
                                 <td>
                                     <div class="d-flex align-items-center gap-3">
@@ -154,28 +158,38 @@
                                 </td>
 
                                 <td>
-                                    {{ $item->loaiDichVu?->TenLoaiDV ?? 'Không có nhóm' }}
-
-                                    @if(!$item->loaiDichVu?->HoatDong)
-                                        <div class="small text-secondary">
-                                            Nhóm ngừng hoạt động
-                                        </div>
-                                    @endif
+                                    {{ $loai?->TenLoaiDV ?? 'Không có nhóm' }}
                                 </td>
 
                                 <td class="text-end text-nowrap">
                                     {{ number_format($item->Gia, 0, ',', '.') }} đ
                                 </td>
 
-                                <td class="text-nowrap">
-                                    <span class="badge {{ $item->HoatDong ? 'text-bg-success' : 'text-bg-secondary' }}">
-                                        {{ $item->HoatDong ? 'Hoạt động' : 'Ngừng hoạt động' }}
-                                    </span>
+                                <td>
+                                    @if(!$item->HoatDong)
+                                        <span class="badge text-bg-secondary text-nowrap">
+                                            Ngừng hoạt động
+                                        </span>
+                                    @elseif(!$loai)
+                                        <span class="badge text-bg-warning text-nowrap">
+                                            Tạm ẩn
+                                        </span>
 
-                                    @if($item->HoatDong && !$item->loaiDichVu?->HoatDong)
                                         <div class="small text-secondary mt-1">
-                                            Đang ẩn do nhóm ngừng hoạt động
+                                            Chưa có loại dịch vụ hợp lệ
                                         </div>
+                                    @elseif(!$loai->HoatDong)
+                                        <span class="badge text-bg-warning text-nowrap">
+                                            Tạm ẩn
+                                        </span>
+
+                                        <div class="small text-secondary mt-1">
+                                            Loại dịch vụ ngừng hoạt động
+                                        </div>
+                                    @else
+                                        <span class="badge text-bg-success text-nowrap">
+                                            Hoạt động
+                                        </span>
                                     @endif
                                 </td>
 
@@ -223,7 +237,7 @@
 
             @if($danhSach->hasPages())
                 <div class="mt-4">
-                    {{ $danhSach->links('pagination::bootstrap-5') }}
+                    {{ $danhSach->links('shared.pagination') }}
                 </div>
             @endif
         </div>
@@ -231,6 +245,7 @@
 
     <p class="small text-secondary mt-3 mb-0">
         Chọn Sửa để cập nhật thông tin, bật hoặc ngừng hoạt động.
+        Dịch vụ được tạm ẩn khi loại dịch vụ ngừng hoạt động.
         Chỉ có thể xóa dịch vụ chưa có trong lịch hẹn.
     </p>
 @endsection
