@@ -8,29 +8,29 @@
             ← Danh sách dịch vụ
         </a>
 
-        <h1 class="h4 fw-bold mt-3 mb-1">Cập nhật dịch vụ</h1>
+        <h1 class="h4 fw-bold mt-3 mb-2">Cập nhật dịch vụ</h1>
 
         <p class="text-secondary mb-0">
-            Chỉnh sửa thông tin dịch vụ #{{ $dichvu->MaDV }}.
+            Chỉnh sửa dịch vụ #{{ $dichvu->MaDV }}.
         </p>
     </div>
 
-    @if ($dichvu->loaiDichVu?->TrangThai === 'NGUNG_HOAT_DONG')
-        <div class="alert alert-warning">
-            Loại dịch vụ hiện tại đã ngừng hoạt động.
-            Dịch vụ này đang được ẩn trên trang public.
-            Bạn có thể chuyển sang loại đang hoạt động.
-        </div>
+    @if(!$dichvu->loaiDichVu?->HoatDong)
+        <p class="text-secondary mb-4">
+            Nhóm hiện tại đã ngừng hoạt động nên dịch vụ đang được ẩn
+            khỏi danh sách công khai. Bạn có thể chọn nhóm khác.
+        </p>
     @endif
 
     <div class="row">
         <div class="col-xl-9">
             <div class="card">
                 <div class="card-body p-4">
-                    <form novalidate
+                    <form
                         action="{{ route('dichvu.update', $dichvu->MaDV) }}"
                         method="POST"
                         enctype="multipart/form-data"
+                        novalidate
                     >
                         @csrf
                         @method('PUT')

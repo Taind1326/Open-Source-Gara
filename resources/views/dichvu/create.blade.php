@@ -8,32 +8,33 @@
             ← Danh sách dịch vụ
         </a>
 
-        <h1 class="h4 fw-bold mt-3 mb-1">Thêm dịch vụ</h1>
+        <h1 class="h4 fw-bold mt-3 mb-2">Thêm dịch vụ</h1>
 
         <p class="text-secondary mb-0">
-            Dịch vụ mới sẽ được đặt ở trạng thái hoạt động.
+            Nhập thông tin, giá trọn gói và hình ảnh dịch vụ.
         </p>
     </div>
 
-    @if ($loaiDichVuList->isEmpty())
-        <div class="alert alert-warning">
-            Chưa có loại dịch vụ đang hoạt động.
+    @if($loaiDichVuList->isEmpty())
+        <div class="card">
+            <div class="card-body p-4">
+                <p>Vui lòng tạo loại dịch vụ trước khi thêm dịch vụ.</p>
 
-            <a href="{{ route('loaidichvu.create') }}" class="alert-link">
-                Thêm loại dịch vụ
-            </a>
-
-            hoặc bật lại một loại dịch vụ trước khi tạo dịch vụ mới.
+                <a href="{{ route('loaidichvu.create') }}" class="btn btn-primary">
+                    Thêm loại dịch vụ
+                </a>
+            </div>
         </div>
     @else
         <div class="row">
             <div class="col-xl-9">
                 <div class="card">
                     <div class="card-body p-4">
-                        <form novalidate
+                        <form
                             action="{{ route('dichvu.store') }}"
                             method="POST"
                             enctype="multipart/form-data"
+                            novalidate
                         >
                             @csrf
 
