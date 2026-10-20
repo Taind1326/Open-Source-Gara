@@ -26,8 +26,18 @@ class AuthController extends Controller
         $this->trimFields($request, ['Email']);
 
         $data = $request->validate([
-            'Email' => ['bail', 'required', 'email', 'max:100'],
-            'MatKhau' => ['bail', 'required', 'string', 'max:255'],
+            'Email' => [
+                'bail',
+                'required',
+                'email',
+                'max:100',
+            ],
+            'MatKhau' => [
+                'bail',
+                'required',
+                'string',
+                'max:255',
+            ],
         ], [
             'Email.required' => 'Vui lòng nhập email.',
             'Email.email' => 'Email không đúng định dạng.',
@@ -97,7 +107,7 @@ class AuthController extends Controller
                 'bail',
                 'required',
                 'string',
-                'regex:/^0[0-9]{9}$/',
+                'regex:/\A0[0-9]{9}\z/',
                 'unique:TAIKHOAN,SoDienThoai',
             ],
             'MatKhau' => [
@@ -105,7 +115,11 @@ class AuthController extends Controller
                 'required',
                 'string',
                 'max:255',
-                Password::min(8)->letters()->numbers(),
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
             ],
             'MatKhau_confirmation' => [
                 'bail',
@@ -133,7 +147,9 @@ class AuthController extends Controller
             'MatKhau.max' => 'Mật khẩu không được vượt quá 255 ký tự.',
             'MatKhau.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'MatKhau.letters' => 'Mật khẩu phải có chữ cái.',
+            'MatKhau.mixed' => 'Mật khẩu phải có chữ hoa và chữ thường.',
             'MatKhau.numbers' => 'Mật khẩu phải có chữ số.',
+            'MatKhau.symbols' => 'Mật khẩu phải có ký tự đặc biệt.',
 
             'MatKhau_confirmation.required' => 'Vui lòng nhập xác nhận mật khẩu.',
             'MatKhau_confirmation.string' => 'Mật khẩu xác nhận không hợp lệ.',
