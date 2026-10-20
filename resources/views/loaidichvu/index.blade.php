@@ -154,7 +154,7 @@
 
             @if($danhSach->hasPages())
                 <div class="mt-4">
-                    {{ $danhSach->links('pagination::bootstrap-5') }}
+                    {{ $danhSach->links('shared.pagination') }}
                 </div>
             @endif
         </div>
