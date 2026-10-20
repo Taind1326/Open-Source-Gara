@@ -29,8 +29,17 @@ use App\Http\Controllers\AdminDashboardController;
 |--------------------------------------------------------------------------
 */
 
-Route::view('/', 'public.home')
-    ->name('public.home');
+Route::get('/', function () {
+    if (auth()->user()?->VaiTro === 'TECHNICIAN') {
+        return redirect()->route('ktv.lichhen.index');
+    }
+
+    return view('public.home');
+})->name('public.home');
+
+// Cho KTV chủ động xem trang giới thiệu website.
+Route::view('/trang-chu', 'public.home')
+    ->name('public.website');
 
 Route::view('/gioi-thieu', 'public.about')
     ->name('public.about');
