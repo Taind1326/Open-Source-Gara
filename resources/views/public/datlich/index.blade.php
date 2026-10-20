@@ -193,7 +193,7 @@
 
                     @if($lichHens->hasPages())
                         <div class="mt-4">
-                            {{ $lichHens->links('pagination::bootstrap-5') }}
+                            {{ $lichHens->links('shared.pagination') }}
                         </div>
                     @endif
                 @else
