@@ -82,7 +82,7 @@
 
             @if($hoaDons->hasPages())
                 <div class="mt-4">
-                    {{ $hoaDons->links('pagination::bootstrap-5') }}
+                    {{ $hoaDons->links('shared.pagination') }}
                 </div>
             @endif
         </div>
