@@ -174,14 +174,14 @@ Route::middleware(['auth', 'role:ADMIN'])->group(function () {
         ->name('admin.dashboard');
 
     Route::resource(
-        'loaidichvu',
-        LoaiDichVuController::class
-    )->except(['show', 'destroy']);
+    'loaidichvu',
+    LoaiDichVuController::class
+)->except(['show']);
 
-    Route::resource(
-        'dichvu',
-        DichVuController::class
-    )->except(['show', 'destroy']);
+Route::resource(
+    'dichvu',
+    DichVuController::class
+)->except(['show']);
 
     Route::resource(
         'phutung',

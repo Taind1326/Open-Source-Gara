@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\LoaiDichVu;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 
 class LoaiDichVuController extends Controller
 {
@@ -69,6 +71,52 @@ class LoaiDichVuController extends Controller
             ->route('loaidichvu.index')
             ->with('success', 'Đã cập nhật loại dịch vụ.');
     }
+
+
+    public function destroy(LoaiDichVu $loaidichvu)
+{
+    try {
+        $daXoa = DB::transaction(function () use ($loaidichvu) {
+            $loai = LoaiDichVu::query()
+                ->where('MaLoaiDV', $loaidichvu->MaLoaiDV)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $coDichVu = DB::table('DICHVU')
+                ->where('MaLoaiDV', $loai->MaLoaiDV)
+                ->exists();
+
+            if ($coDichVu) {
+                return false;
+            }
+
+            $loai->delete();
+
+            return true;
+        });
+    } catch (QueryException $exception) {
+        if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
+            throw $exception;
+        }
+
+        $daXoa = false;
+    }
+
+    if (!$daXoa) {
+        return redirect()
+            ->route('loaidichvu.index')
+            ->with(
+                'error',
+                'Loại dịch vụ đang chứa dịch vụ nên không thể xóa. '
+                . 'Hãy chuyển các dịch vụ sang nhóm khác hoặc '
+                . 'chuyển loại dịch vụ này sang ngừng hoạt động.'
+            );
+    }
+
+    return redirect()
+        ->route('loaidichvu.index')
+        ->with('success', 'Đã xóa loại dịch vụ.');
+}
 
     private function validateCategory(
         Request $request,

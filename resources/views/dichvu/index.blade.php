@@ -5,7 +5,9 @@
 @section('content')
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
         <div>
-            <h1 class="h3 fw-bold mb-2">Quản lý dịch vụ</h1>
+            <h1 class="h3 fw-bold mb-2">
+                Quản lý dịch vụ
+            </h1>
 
             <p class="text-secondary mb-0">
                 Quản lý thông tin, giá trọn gói và trạng thái dịch vụ.
@@ -19,7 +21,11 @@
 
     <div class="card mb-4">
         <div class="card-body p-4">
-            <form method="GET" action="{{ route('dichvu.index') }}" novalidate>
+            <form
+                method="GET"
+                action="{{ route('dichvu.index') }}"
+                novalidate
+            >
                 <div class="row g-3 align-items-start">
                     <div class="col-md-5">
                         <label for="service-search" class="form-label">
@@ -37,7 +43,9 @@
                         >
 
                         @error('tu_khoa')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                         @enderror
                     </div>
 
@@ -64,7 +72,9 @@
                         </select>
 
                         @error('ma_loai')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                         @enderror
                     </div>
 
@@ -74,7 +84,10 @@
                                 Tìm kiếm
                             </button>
 
-                            <a href="{{ route('dichvu.index') }}" class="btn btn-outline-secondary">
+                            <a
+                                href="{{ route('dichvu.index') }}"
+                                class="btn btn-outline-secondary"
+                            >
                                 Đặt lại
                             </a>
                         </div>
@@ -96,9 +109,18 @@
                         <tr>
                             <th scope="col">Dịch vụ</th>
                             <th scope="col">Loại dịch vụ</th>
-                            <th scope="col" class="text-end text-nowrap">Giá dịch vụ</th>
-                            <th scope="col" class="text-nowrap">Trạng thái</th>
-                            <th scope="col" class="text-end">Thao tác</th>
+
+                            <th scope="col" class="text-end text-nowrap">
+                                Giá dịch vụ
+                            </th>
+
+                            <th scope="col" class="text-nowrap">
+                                Trạng thái
+                            </th>
+
+                            <th scope="col" class="text-end">
+                                Thao tác
+                            </th>
                         </tr>
                     </thead>
 
@@ -120,8 +142,13 @@
                                         @endif
 
                                         <div>
-                                            <div class="fw-semibold">{{ $item->TenDV }}</div>
-                                            <small class="text-secondary">#{{ $item->MaDV }}</small>
+                                            <div class="fw-semibold">
+                                                {{ $item->TenDV }}
+                                            </div>
+
+                                            <small class="text-secondary">
+                                                #{{ $item->MaDV }}
+                                            </small>
                                         </div>
                                     </div>
                                 </td>
@@ -153,12 +180,34 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <a
-                                        href="{{ route('dichvu.edit', $item->MaDV) }}"
-                                        class="btn btn-outline-primary btn-sm"
-                                    >
-                                        Sửa
-                                    </a>
+                                    <div class="d-flex flex-nowrap justify-content-end gap-2">
+                                        <a
+                                            href="{{ route('dichvu.edit', $item->MaDV) }}"
+                                            class="btn btn-outline-primary btn-sm text-nowrap"
+                                        >
+                                            Sửa
+                                        </a>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('dichvu.destroy', $item->MaDV) }}"
+                                            class="m-0"
+                                            novalidate
+                                            data-confirm-title="Xóa dịch vụ"
+                                            data-confirm="Bạn muốn xóa dịch vụ {{ $item->TenDV }}? Dịch vụ đã có trong lịch hẹn sẽ không thể xóa."
+                                            data-confirm-accept="Xóa dịch vụ"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-outline-danger btn-sm text-nowrap"
+                                            >
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -179,4 +228,9 @@
             @endif
         </div>
     </div>
+
+    <p class="small text-secondary mt-3 mb-0">
+        Chọn Sửa để cập nhật thông tin, bật hoặc ngừng hoạt động.
+        Chỉ có thể xóa dịch vụ chưa có trong lịch hẹn.
+    </p>
 @endsection

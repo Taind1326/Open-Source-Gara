@@ -7,6 +7,8 @@ use App\Models\LoaiDichVu;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
+use Illuminate\Database\QueryException;
+use Illuminate\Support\Facades\DB;
 use Throwable;
 
 class DichVuController extends Controller
@@ -134,6 +136,50 @@ class DichVuController extends Controller
             ->route('dichvu.index')
             ->with('success', 'Đã cập nhật dịch vụ.');
     }
+
+    public function destroy(DichVu $dichvu)
+{
+    try {
+        $daXoa = DB::transaction(function () use ($dichvu) {
+            $service = DichVu::query()
+                ->where('MaDV', $dichvu->MaDV)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            $daDuocSuDung = DB::table('CHITIETLICHHEN')
+                ->where('MaDV', $service->MaDV)
+                ->exists();
+
+            if ($daDuocSuDung) {
+                return false;
+            }
+
+            $service->delete();
+
+            return true;
+        });
+    } catch (QueryException $exception) {
+        if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
+            throw $exception;
+        }
+
+        $daXoa = false;
+    }
+
+    if (!$daXoa) {
+        return redirect()
+            ->route('dichvu.index')
+            ->with(
+                'error',
+                'Dịch vụ đã có trong lịch hẹn nên không thể xóa. '
+                . 'Hãy chuyển sang ngừng hoạt động để giữ lịch sử.'
+            );
+    }
+
+    return redirect()
+        ->route('dichvu.index')
+        ->with('success', 'Đã xóa dịch vụ.');
+}
 
     private function validateService(Request $request): array
     {

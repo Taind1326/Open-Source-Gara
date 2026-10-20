@@ -43,7 +43,9 @@
                         >
 
                         @error('tu_khoa')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback">
+                                {{ $message }}
+                            </div>
                         @enderror
                     </div>
 
@@ -75,8 +77,12 @@
                             <th scope="col">Mã</th>
                             <th scope="col">Tên loại dịch vụ</th>
                             <th scope="col">Mô tả</th>
-                            <th scope="col" class="text-nowrap">Trạng thái</th>
-                            <th scope="col" class="text-end">Thao tác</th>
+                            <th scope="col" class="text-nowrap">
+                                Trạng thái
+                            </th>
+                            <th scope="col" class="text-end">
+                                Thao tác
+                            </th>
                         </tr>
                     </thead>
 
@@ -92,7 +98,10 @@
                                 </td>
 
                                 <td>
-                                    {{ \Illuminate\Support\Str::limit($item->MoTa ?: 'Chưa có mô tả.', 110) }}
+                                    {{ \Illuminate\Support\Str::limit(
+                                        $item->MoTa ?: 'Chưa có mô tả.',
+                                        110
+                                    ) }}
                                 </td>
 
                                 <td class="text-nowrap">
@@ -102,12 +111,34 @@
                                 </td>
 
                                 <td class="text-end">
-                                    <a
-                                        href="{{ route('loaidichvu.edit', $item->MaLoaiDV) }}"
-                                        class="btn btn-outline-primary btn-sm"
-                                    >
-                                        Sửa
-                                    </a>
+                                    <div class="d-flex flex-nowrap justify-content-end gap-2">
+                                        <a
+                                            href="{{ route('loaidichvu.edit', $item->MaLoaiDV) }}"
+                                            class="btn btn-outline-primary btn-sm text-nowrap"
+                                        >
+                                            Sửa
+                                        </a>
+
+                                        <form
+                                            method="POST"
+                                            action="{{ route('loaidichvu.destroy', $item->MaLoaiDV) }}"
+                                            class="m-0"
+                                            novalidate
+                                            data-confirm-title="Xóa loại dịch vụ"
+                                            data-confirm="Bạn muốn xóa loại dịch vụ {{ $item->TenLoaiDV }}? Chỉ xóa được nhóm chưa chứa dịch vụ."
+                                            data-confirm-accept="Xóa loại dịch vụ"
+                                        >
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <button
+                                                type="submit"
+                                                class="btn btn-outline-danger btn-sm text-nowrap"
+                                            >
+                                                Xóa
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         @empty
@@ -128,4 +159,10 @@
             @endif
         </div>
     </div>
+
+    <p class="small text-secondary mt-3 mb-0">
+        Chọn Sửa để bật hoặc ngừng hoạt động.
+        Chỉ có thể xóa loại dịch vụ chưa chứa dịch vụ;
+        nhóm đã có dịch vụ có thể chuyển sang ngừng hoạt động để giữ lịch sử.
+    </p>
 @endsection
