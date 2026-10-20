@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Database\QueryException;
 
 class XeController extends Controller
 {
@@ -104,6 +105,53 @@ class XeController extends Controller
             ->route('public.xe.index')
             ->with('success', 'Đã cập nhật thông tin xe.');
     }
+
+    public function destroy(Request $request, $maXe)
+{
+    try {
+        $daXoa = DB::transaction(function () use ($request, $maXe) {
+            $xe = Xe::query()
+                ->where('MaTK', $request->user()->MaTK)
+                ->where('MaXe', $maXe)
+                ->lockForUpdate()
+                ->firstOrFail();
+
+            // Giữ lịch sử của mọi lịch hẹn, kể cả đã hủy hoặc hoàn tất.
+            $daCoLichHen = DB::table('LICHHEN')
+                ->where('MaXe', $xe->MaXe)
+                ->exists();
+
+            if ($daCoLichHen) {
+                return false;
+            }
+
+            $xe->delete();
+
+            return true;
+        }, 3);
+    } catch (QueryException $exception) {
+        if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
+            throw $exception;
+        }
+
+        $daXoa = false;
+    }
+
+    if (!$daXoa) {
+        return redirect()
+            ->route('public.xe.index')
+            ->with(
+                'error',
+                'Xe đã có lịch hẹn nên không thể xóa. '
+                . 'Thông tin xe được giữ lại để bảo toàn lịch sử sửa chữa, '
+                . 'hóa đơn và bảo hành.'
+            );
+    }
+
+    return redirect()
+        ->route('public.xe.index')
+        ->with('success', 'Đã xóa xe khỏi tài khoản của bạn.');
+}
 
     private function hasOpenAppointment(Xe $xe): bool
     {

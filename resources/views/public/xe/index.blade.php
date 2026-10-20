@@ -180,10 +180,10 @@
                                 </dd>
                             </dl>
 
-                            <div class="border-top pt-3 mt-auto">
+                            <div class="d-flex flex-wrap gap-2 border-top pt-3 mt-auto">
                                 <a
                                     href="{{ route('public.xe.edit', $xe->MaXe) }}"
-                                    class="btn btn-outline-primary w-100"
+                                    class="btn btn-outline-primary flex-grow-1"
                                 >
                                     <i
                                         class="bi bi-pencil-square me-1"
@@ -191,6 +191,30 @@
                                     ></i>
                                     Sửa thông tin
                                 </a>
+
+                                <form
+                                    method="POST"
+                                    action="{{ route('public.xe.destroy', $xe->MaXe) }}"
+                                    novalidate
+                                    data-confirm-title="Xóa xe"
+                                    data-confirm="Bạn muốn xóa xe {{ $xe->BienSo }} khỏi tài khoản? Chỉ xe chưa có lịch hẹn mới có thể xóa."
+                                    data-confirm-accept="Xóa xe"
+                                >
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button
+                                        type="submit"
+                                        class="btn btn-outline-danger"
+                                        aria-label="Xóa xe {{ $xe->BienSo }}"
+                                    >
+                                        <i
+                                            class="bi bi-trash me-1"
+                                            aria-hidden="true"
+                                        ></i>
+                                        Xóa xe
+                                    </button>
+                                </form>
                             </div>
                         </article>
                     </div>
@@ -254,6 +278,7 @@
                 <div>
                     Xe đang có lịch hẹn chưa kết thúc cần hoàn tất
                     hoặc hủy lịch trước khi sửa thông tin.
+                    Chỉ có thể xóa xe chưa từng có lịch hẹn.
                 </div>
             </div>
         </div>

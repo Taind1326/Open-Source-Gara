@@ -290,6 +290,13 @@ Route::middleware(['auth', 'role:USER'])->group(function () {
         ->whereNumber('maXe')
         ->name('public.xe.update');
 
+    Route::delete(
+    '/xe-cua-toi/{maXe}',
+    [XeController::class, 'destroy']
+)
+    ->whereNumber('maXe')
+    ->name('public.xe.destroy');
+
     /*
     | Đặt lịch và xem lịch hẹn.
     */
