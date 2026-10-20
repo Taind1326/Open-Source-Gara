@@ -1,5 +1,5 @@
 /* =========================
-   Giao diện quản trị
+   Nền tảng
    ========================= */
 
 .admin-app {
@@ -34,11 +34,18 @@
     color: var(--admin-muted) !important;
 }
 
+.admin-app :focus-visible {
+    outline: 3px solid #f7ac80;
+    outline-offset: 3px;
+}
+
 /* =========================
    Sidebar
    ========================= */
 
 .admin-sidebar {
+    --bs-offcanvas-width: var(--admin-sidebar-width);
+
     position: fixed;
     inset: 0 auto 0 0;
     z-index: 1045;
@@ -89,6 +96,7 @@
 
 .admin-sidebar-nav {
     flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding: 18px 12px;
 }
@@ -136,6 +144,7 @@
 }
 
 .admin-sidebar-footer {
+    flex-shrink: 0;
     padding: 16px 25px;
     border-top: 1px solid #ffffff12;
     color: #aebed0;
@@ -228,6 +237,21 @@
     font-size: 11px;
 }
 
+.admin-content {
+    width: 100%;
+    max-width: 1720px;
+    margin-inline: auto;
+    padding: 30px 32px 48px;
+}
+
+.admin-mobile-toggle {
+    display: none;
+}
+
+/* =========================
+   Menu tài khoản
+   ========================= */
+
 .admin-app .dropdown-menu {
     min-width: 220px;
     padding: 8px;
@@ -251,19 +275,8 @@
     color: #a94008;
 }
 
-.admin-content {
-    width: 100%;
-    max-width: 1720px;
-    margin-inline: auto;
-    padding: 30px 32px 48px;
-}
-
-.admin-mobile-toggle {
-    display: none;
-}
-
 /* =========================
-   Thành phần trong Admin
+   Thẻ và bảng
    ========================= */
 
 .admin-app .card {
@@ -300,6 +313,15 @@
 .admin-app .table > tbody > tr:last-child > td {
     border-bottom: 0;
 }
+
+.admin-app .badge {
+    padding: 7px 10px;
+    font-weight: 600;
+}
+
+/* =========================
+   Nút và biểu mẫu
+   ========================= */
 
 .admin-app .btn,
 .admin-app .form-control,
@@ -360,10 +382,9 @@
     border-color: var(--bs-danger);
 }
 
-.admin-app .badge {
-    padding: 7px 10px;
-    font-weight: 600;
-}
+/* =========================
+   Phân trang
+   ========================= */
 
 .admin-app .page-link {
     color: #b6470a;
@@ -379,12 +400,9 @@
     color: #8997a8;
 }
 
-.admin-app :focus-visible {
-    outline: 3px solid #f7ac80;
-    outline-offset: 3px;
-}
-
-/* Giữ tương thích trang tổng quan cũ trong lúc thay từng bước. */
+/* =========================
+   Tương thích tổng quan cũ
+   ========================= */
 
 .admin-app .dashboard-banner {
     padding: 28px;
@@ -419,12 +437,155 @@
     font-weight: 750;
 }
 
+/* =========================
+   Tổng quan Admin
+   ========================= */
+
+.admin-dashboard .card.dashboard-stat {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 16px;
+    height: 100%;
+    min-height: 112px;
+    padding: 20px;
+    text-align: left;
+}
+
+.admin-dashboard .dashboard-stat > div {
+    min-width: 0;
+}
+
+.admin-dashboard .dashboard-icon {
+    display: grid;
+    flex-shrink: 0;
+    place-items: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 12px;
+    background: #fff0e6;
+    color: #ce4b06;
+    font-size: 24px;
+}
+
+.admin-dashboard .dashboard-icon-blue {
+    background: #eaf2ff;
+    color: #2563eb;
+}
+
+.admin-dashboard .dashboard-icon-purple {
+    background: #f1ebff;
+    color: #8050d9;
+}
+
+.admin-dashboard .dashboard-stat-label {
+    margin-bottom: 6px;
+    color: var(--admin-muted);
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.admin-dashboard .dashboard-stat-number {
+    margin: 0;
+    color: var(--admin-navy);
+    font-size: 30px;
+    font-weight: 750;
+    line-height: 1.15;
+}
+
+.admin-dashboard .dashboard-revenue {
+    margin-top: 10px;
+    margin-bottom: 4px;
+    color: #2563eb;
+    font-size: clamp(1.8rem, 2.8vw, 2.3rem);
+    font-weight: 750;
+    letter-spacing: -0.04em;
+    line-height: 1.3;
+}
+
+.admin-dashboard .dashboard-chart {
+    position: relative;
+    height: 290px;
+    margin-top: 24px;
+}
+
+.admin-dashboard .dashboard-task {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 0;
+}
+
+.admin-dashboard .dashboard-task + .dashboard-task {
+    border-top: 1px solid var(--admin-border);
+}
+
+.admin-dashboard .dashboard-task-number {
+    min-width: 24px;
+    font-size: 25px;
+    font-weight: 750;
+}
+
+.admin-dashboard .dashboard-task-label {
+    flex: 1;
+    color: var(--admin-muted);
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.admin-dashboard .dashboard-link {
+    color: #bd4806;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.admin-dashboard .dashboard-link:hover {
+    text-decoration: underline;
+}
+
+.admin-dashboard .dashboard-panel-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-dashboard .dashboard-panel-heading h2 {
+    margin: 0;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.admin-dashboard .dashboard-waiting {
+    display: inline-block;
+    padding: 5px 9px;
+    border-radius: 8px;
+    background: #fff5dc;
+    color: #946000;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+/* =========================
+   Màn hình lớn
+   ========================= */
+
 @media (min-width: 992px) {
     .admin-sidebar.offcanvas-lg {
         visibility: visible !important;
         background: #10243a !important;
     }
 }
+
+/* =========================
+   Máy tính bảng
+   ========================= */
 
 @media (max-width: 991.98px) {
     .admin-main {
@@ -448,6 +609,10 @@
     }
 }
 
+/* =========================
+   Điện thoại
+   ========================= */
+
 @media (max-width: 575.98px) {
     .admin-topbar-title,
     .admin-website-link {
@@ -469,235 +634,17 @@
     .admin-app .card-body {
         padding: 18px;
     }
-}
 
-@media (prefers-reduced-motion: reduce) {
-    .admin-nav-link {
-        transition: none;
-    }
-}
-
-
-/* =========================
-   Tổng quan Admin
-   ========================= */
-
-.admin-dashboard .dashboard-stat {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    height: 100%;
-    padding: 20px;
-}
-
-.admin-dashboard .dashboard-icon {
-    display: grid;
-    flex-shrink: 0;
-    place-items: center;
-    width: 54px;
-    height: 54px;
-    border-radius: 14px;
-    background: #fff0e6;
-    color: #ce4b06;
-    font-size: 25px;
-}
-
-.admin-dashboard .dashboard-icon-blue {
-    background: #eaf2ff;
-    color: #2563eb;
-}
-
-.admin-dashboard .dashboard-icon-purple {
-    background: #f1ebff;
-    color: #8050d9;
-}
-
-.admin-dashboard .dashboard-stat-label {
-    color: var(--admin-muted);
-    font-size: 14px;
-}
-
-.admin-dashboard .dashboard-stat-number {
-    margin-top: 2px;
-    font-size: 30px;
-    font-weight: 750;
-    line-height: 1.2;
-}
-
-.admin-dashboard .dashboard-revenue {
-    color: #d65008;
-    font-size: clamp(1.8rem, 3vw, 2.5rem);
-    font-weight: 750;
-    letter-spacing: -0.04em;
-}
-
-.admin-dashboard .dashboard-chart {
-    position: relative;
-    height: 240px;
-    margin-top: 20px;
-}
-
-.admin-dashboard .dashboard-task {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 20px 0;
-}
-
-.admin-dashboard .dashboard-task + .dashboard-task {
-    border-top: 1px solid var(--admin-border);
-}
-
-.admin-dashboard .dashboard-task-number {
-    min-width: 30px;
-    font-size: 26px;
-    font-weight: 750;
-}
-
-.admin-dashboard .dashboard-task-label {
-    flex: 1;
-    color: var(--admin-muted);
-    font-size: 14px;
-}
-
-.admin-dashboard .dashboard-link {
-    color: #bd4806;
-    font-size: 13px;
-    font-weight: 600;
-    text-decoration: none;
-    white-space: nowrap;
-}
-
-.admin-dashboard .dashboard-link:hover {
-    text-decoration: underline;
-}
-
-.admin-dashboard .dashboard-panel-heading {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 20px;
-    border-bottom: 1px solid var(--admin-border);
-}
-
-.admin-dashboard .dashboard-panel-heading h2 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-}
-
-.admin-dashboard .dashboard-waiting {
-    display: inline-block;
-    padding: 5px 9px;
-    border-radius: 8px;
-    background: #fff5dc;
-    color: #946000;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-@media (max-width: 575.98px) {
-    .admin-dashboard .dashboard-stat {
+    .admin-dashboard .card.dashboard-stat {
         gap: 10px;
-        padding: 16px;
+        min-height: 100px;
+        padding: 14px;
     }
 
     .admin-dashboard .dashboard-icon {
         width: 42px;
         height: 42px;
         font-size: 21px;
-    }
-
-    .admin-dashboard .dashboard-stat-label {
-        font-size: 12px;
-    }
-
-    .admin-dashboard .dashboard-task {
-        gap: 10px;
-    }
-}
-
-/* Tổng quan: các ô số liệu gọn theo hàng ngang */
-
-.admin-dashboard .card.dashboard-stat {
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 16px;
-    min-height: 112px;
-    padding: 20px;
-    text-align: left;
-}
-
-.admin-dashboard .dashboard-stat > div {
-    min-width: 0;
-}
-
-.admin-dashboard .dashboard-stat-label {
-    margin-bottom: 6px;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
-.admin-dashboard .dashboard-stat-number {
-    margin: 0;
-    color: var(--admin-navy);
-    font-size: 30px;
-    line-height: 1.15;
-}
-
-.admin-dashboard .dashboard-icon {
-    width: 52px;
-    height: 52px;
-    border-radius: 12px;
-    font-size: 24px;
-}
-
-/* Doanh thu cùng màu biểu đồ trang Thống kê */
-
-.admin-dashboard .dashboard-revenue {
-    margin-top: 10px;
-    margin-bottom: 4px;
-    color: #2563eb;
-    font-size: clamp(1.8rem, 2.8vw, 2.3rem);
-    font-weight: 750;
-    line-height: 1.3;
-}
-
-.admin-dashboard .dashboard-chart {
-    height: 290px;
-    margin-top: 24px;
-}
-
-.admin-dashboard .dashboard-task {
-    gap: 12px;
-    padding: 18px 0;
-}
-
-.admin-dashboard .dashboard-task-number {
-    min-width: 24px;
-    font-size: 25px;
-}
-
-.admin-dashboard .dashboard-task-label {
-    line-height: 1.5;
-}
-
-.admin-dashboard .dashboard-panel-heading {
-    padding: 18px 20px;
-}
-
-.admin-dashboard .dashboard-panel-heading h2 {
-    font-size: 17px;
-}
-
-@media (max-width: 575.98px) {
-    .admin-dashboard .card.dashboard-stat {
-        gap: 10px;
-        min-height: 100px;
-        padding: 14px;
     }
 
     .admin-dashboard .dashboard-stat .dashboard-icon {
@@ -714,7 +661,21 @@
         font-size: 26px;
     }
 
+    .admin-dashboard .dashboard-task {
+        gap: 10px;
+    }
+
     .admin-dashboard .dashboard-chart {
         height: 240px;
+    }
+}
+
+/* =========================
+   Giảm chuyển động
+   ========================= */
+
+@media (prefers-reduced-motion: reduce) {
+    .admin-nav-link {
+        transition: none;
     }
 }
