@@ -1,5 +1,4 @@
-@extends('public.layout')
-
+@extends(auth()->user()->VaiTro === 'ADMIN' ? 'admin.layout' : 'public.layout')
 @section('title', 'Tài khoản của tôi')
 
 @section('content')
