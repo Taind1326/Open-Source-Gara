@@ -12,6 +12,14 @@ use Illuminate\Validation\ValidationException;
 
 class AdminLichHenController extends Controller
 {
+    private const BUSY_STATUSES = [
+        LichHen::CHO_NHAN_XE,
+        LichHen::DANG_KIEM_TRA,
+        LichHen::CHO_XAC_NHAN,
+        LichHen::CHO_SUA_CHUA,
+        LichHen::DANG_SUA_CHUA,
+    ];
+
     public function index(Request $request)
     {
         $data = $request->validate([
@@ -23,8 +31,12 @@ class AdminLichHenController extends Controller
             ],
             'page' => ['nullable', 'integer', 'min:1'],
         ], [
+            'tu_khoa.string' => 'Từ khóa phải là văn bản.',
+            'tu_khoa.max' => 'Từ khóa không được vượt quá 100 ký tự.',
             'ngay_hen.date_format' => 'Ngày hẹn không hợp lệ.',
             'trang_thai.in' => 'Trạng thái không hợp lệ.',
+            'page.integer' => 'Trang không hợp lệ.',
+            'page.min' => 'Trang phải từ 1.',
         ]);
 
         $tuKhoa = trim($data['tu_khoa'] ?? '');
@@ -39,13 +51,15 @@ class AdminLichHenController extends Controller
             ])
             ->when($tuKhoa !== '', function ($query) use ($tuKhoa) {
                 $query->where(function ($query) use ($tuKhoa) {
-                    $query->whereHas('taiKhoan', function ($query) use ($tuKhoa) {
-                        $query->where('HoTen', 'like', "%{$tuKhoa}%")
-                            ->orWhere('SoDienThoai', 'like', "%{$tuKhoa}%")
-                            ->orWhere('Email', 'like', "%{$tuKhoa}%");
-                    })->orWhereHas('xe', function ($query) use ($tuKhoa) {
-                        $query->where('BienSo', 'like', "%{$tuKhoa}%");
-                    });
+                    $query
+                        ->whereHas('taiKhoan', function ($query) use ($tuKhoa) {
+                            $query->where('HoTen', 'like', "%{$tuKhoa}%")
+                                ->orWhere('SoDienThoai', 'like', "%{$tuKhoa}%")
+                                ->orWhere('Email', 'like', "%{$tuKhoa}%");
+                        })
+                        ->orWhereHas('xe', function ($query) use ($tuKhoa) {
+                            $query->where('BienSo', 'like', "%{$tuKhoa}%");
+                        });
                 });
             })
             ->when($ngayHen !== '', function ($query) use ($ngayHen) {
@@ -102,14 +116,6 @@ class AdminLichHenController extends Controller
             fn ($item) => (int) $item->DonGia * $item->SoLuong
         );
 
-        $trangThaiDangPhuTrach = [
-            LichHen::CHO_NHAN_XE,
-            LichHen::DANG_KIEM_TRA,
-            LichHen::CHO_XAC_NHAN,
-            LichHen::CHO_SUA_CHUA,
-            LichHen::DANG_SUA_CHUA,
-        ];
-
         $kyThuatViens = TaiKhoan::query()
             ->where('VaiTro', 'TECHNICIAN')
             ->where('TrangThai', 'HOAT_DONG')
@@ -122,7 +128,7 @@ class AdminLichHenController extends Controller
                 DB::table('PHANCONG as pc')
                     ->join('LICHHEN as lh', 'lh.MaLH', '=', 'pc.MaLH')
                     ->whereColumn('pc.MaKTV', 'TAIKHOAN.MaTK')
-                    ->whereIn('lh.TrangThai', $trangThaiDangPhuTrach)
+                    ->whereIn('lh.TrangThai', self::BUSY_STATUSES)
                     ->selectRaw('COUNT(*)'),
                 'SoLichDangPhuTrach'
             )
@@ -130,9 +136,10 @@ class AdminLichHenController extends Controller
                 DB::table('PHANCONG as pc')
                     ->join('LICHHEN as lh', 'lh.MaLH', '=', 'pc.MaLH')
                     ->whereColumn('pc.MaKTV', 'TAIKHOAN.MaTK')
+                    ->where('lh.MaLH', '<>', $lichHen->MaLH)
                     ->where('lh.NgayHen', $lichHen->NgayHen->toDateString())
                     ->where('lh.KhungGioHen', $lichHen->KhungGioHen)
-                    ->whereIn('lh.TrangThai', $trangThaiDangPhuTrach)
+                    ->whereIn('lh.TrangThai', self::BUSY_STATUSES)
                     ->selectRaw('COUNT(*)'),
                 'SoLichCungKhung'
             )
@@ -170,7 +177,8 @@ class AdminLichHenController extends Controller
         ], [
             'MaKTV.required' => 'Vui lòng chọn kỹ thuật viên.',
             'MaKTV.integer' => 'Kỹ thuật viên không hợp lệ.',
-            'MaKTV.exists' => 'Kỹ thuật viên không tồn tại hoặc đã ngừng hoạt động.',
+            'MaKTV.exists' =>
+                'Kỹ thuật viên không tồn tại hoặc đã ngừng hoạt động.',
             'GhiChu.string' => 'Ghi chú phải là văn bản.',
             'GhiChu.max' => 'Ghi chú không được vượt quá 1.000 ký tự.',
         ]);
@@ -186,11 +194,13 @@ class AdminLichHenController extends Controller
                 || PhanCong::where('MaLH', $lichHen->MaLH)->exists()
             ) {
                 throw ValidationException::withMessages([
-                    'MaKTV' => 'Lịch đã được phân công hoặc đã chuyển trạng thái. '
+                    'MaKTV' =>
+                        'Lịch đã được phân công hoặc đã chuyển trạng thái. '
                         . 'Vui lòng tải lại trang.',
                 ]);
             }
 
+            // Khóa KTV để các lượt phân công đồng thời được xử lý lần lượt.
             $ktv = TaiKhoan::query()
                 ->where('MaTK', $data['MaKTV'])
                 ->where('VaiTro', 'TECHNICIAN')
@@ -198,9 +208,30 @@ class AdminLichHenController extends Controller
                 ->lockForUpdate()
                 ->first();
 
-            if (! $ktv) {
+            if (!$ktv) {
                 throw ValidationException::withMessages([
-                    'MaKTV' => 'Kỹ thuật viên không còn hoạt động. '
+                    'MaKTV' =>
+                        'Kỹ thuật viên không còn hoạt động. '
+                        . 'Vui lòng chọn người khác.',
+                ]);
+            }
+
+            // Đọc dữ liệu hiện tại bằng locking read sau khi đã khóa KTV.
+            $lichTrung = DB::table('PHANCONG as pc')
+                ->join('LICHHEN as lh', 'lh.MaLH', '=', 'pc.MaLH')
+                ->where('pc.MaKTV', $ktv->MaTK)
+                ->where('lh.MaLH', '<>', $lichHen->MaLH)
+                ->where('lh.NgayHen', $lichHen->NgayHen->toDateString())
+                ->where('lh.KhungGioHen', $lichHen->KhungGioHen)
+                ->whereIn('lh.TrangThai', self::BUSY_STATUSES)
+                ->select('pc.MaPC')
+                ->lockForUpdate()
+                ->first();
+
+            if ($lichTrung) {
+                throw ValidationException::withMessages([
+                    'MaKTV' =>
+                        'Kỹ thuật viên đã có lịch trong ngày và khung giờ này. '
                         . 'Vui lòng chọn người khác.',
                 ]);
             }
@@ -210,7 +241,7 @@ class AdminLichHenController extends Controller
                 'MaKTV' => $ktv->MaTK,
                 'MaAdmin' => $request->user()->MaTK,
                 'NgayPhanCong' => now('Asia/Ho_Chi_Minh'),
-                'GhiChu' => $data['GhiChu'] ?: null,
+                'GhiChu' => ($data['GhiChu'] ?? '') ?: null,
             ]);
 
             $lichHen->update([
@@ -219,7 +250,7 @@ class AdminLichHenController extends Controller
         }, 3);
 
         return redirect()
-    ->route('admin.lichhen.show', $maLH)
-    ->with('success', 'Đã phân công kỹ thuật viên kiểm tra xe.');
+            ->route('admin.lichhen.show', $maLH)
+            ->with('success', 'Đã phân công kỹ thuật viên kiểm tra xe.');
     }
 }
