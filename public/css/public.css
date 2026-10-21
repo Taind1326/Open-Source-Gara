@@ -1,6 +1,6 @@
 :root {
     --garage-navy: #10243a;
-    --garage-blue: #2563eb;
+    --garage-blue: #f56616;
     --garage-muted: #64748b;
     --garage-bg: #f5f7fb;
     --garage-border: #e5eaf1;
@@ -64,8 +64,8 @@ a {
 .btn-primary {
     --bs-btn-bg: var(--garage-blue);
     --bs-btn-border-color: var(--garage-blue);
-    --bs-btn-hover-bg: #1d4ed8;
-    --bs-btn-hover-border-color: #1d4ed8;
+    --bs-btn-hover-bg: #c74705;
+    --bs-btn-hover-border-color: #c74705;
     border-radius: 10px;
     font-weight: 600;
 }
@@ -360,3 +360,10 @@ body > .site-footer {
     margin-top: auto;
     transform: none;
 }
+/* Orange public theme: keep existing account navigation and footer. */
+body{font-size:1rem;background:#fff;font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.btn-primary{--bs-btn-color:#fff;--bs-btn-hover-color:#fff;--bs-btn-active-bg:#c74705;--bs-btn-active-border-color:#c74705;--bs-btn-disabled-bg:#f56616;--bs-btn-disabled-border-color:#f56616}
+.btn-outline-primary{--bs-btn-color:#b94305;--bs-btn-border-color:#f56616;--bs-btn-hover-bg:#c74705;--bs-btn-hover-border-color:#c74705;--bs-btn-hover-color:#fff;--bs-btn-active-bg:#c74705;--bs-btn-active-border-color:#c74705}
+.text-primary{color:#c74705!important}.site-navbar .nav-link.active{position:relative}.site-navbar .nav-link.active:after{content:"";position:absolute;bottom:0;left:.85rem;right:.85rem;height:2px;background:#f56616}
+a:focus-visible,button:focus-visible{outline:3px solid #10243a;outline-offset:4px}
+.site-footer{background:#10243a;color:#fff}.site-footer a{color:#e5eaf1}.site-footer a:hover{color:#ffb885}

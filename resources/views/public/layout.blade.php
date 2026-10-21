@@ -17,6 +17,7 @@
 
     <link rel="stylesheet" href="{{ asset('css/public.css') }}">
 
+    <link rel="stylesheet" href="{{ asset('css/public-theme.css') }}">
     @stack('styles')
 </head>
 
@@ -168,17 +169,7 @@
                                 </li>
 
                                 <li>
-                                    <form method="POST"
-                                          action="{{ route('logout') }}">
-                                        @csrf
-
-                                        <button class="dropdown-item text-danger"
-                                                type="submit">
-                                            <i class="bi bi-box-arrow-right me-2"
-                                               aria-hidden="true"></i>
-                                            Đăng xuất
-                                        </button>
-                                    </form>
+                                    <x-public.logout-button />
                                 </li>
                             </ul>
                         </div>
@@ -331,6 +322,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
+    <script src="{{ asset('js/public-reveal.js') }}" defer></script>
     @stack('scripts')
 </body>
 </html>

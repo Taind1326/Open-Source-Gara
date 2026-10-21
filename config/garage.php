@@ -7,5 +7,10 @@ return [
 
     'email' => null,
 
-    'opening_hours' => null,
+    'opening_hours' => '07:30 – 20:00 hằng ngày',
+    'socials' => [
+        'Facebook' => env('GARAGE_FACEBOOK_URL'),
+        'Zalo' => env('GARAGE_ZALO_URL'),
+        'YouTube' => env('GARAGE_YOUTUBE_URL'),
+    ],
 ];

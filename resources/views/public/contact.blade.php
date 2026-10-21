@@ -1,301 +1,123 @@
 @extends('public.layout')
-
 @section('title', 'Liên hệ')
-
-@section('description', 'Liên hệ AutoCare Garage để trao đổi nhu cầu chăm sóc, bảo dưỡng và sửa chữa ô tô.')
-
+@section('description', 'Liên hệ AutoCare Garage, gửi tin nhắn và tìm đường đến garage.')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/contact-orange.css') }}">
+@endpush
 @section('content')
-    @php
-        $address = config('garage.address');
-        $phone = config('garage.phone');
-        $email = config('garage.email');
-        $openingHours = config('garage.opening_hours');
-
-        $phoneLink = preg_replace('/[^0-9+]/', '', $phone ?? '');
-
-        $mapUrl = $address
-            ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($address)
-            : null;
-    @endphp
-
-    <section class="hero">
-        <div class="container">
-            <nav aria-label="Đường dẫn">
-                <ol class="breadcrumb mb-4">
-                    <li class="breadcrumb-item">
-                        <a href="{{ url('/') }}" class="text-white">
-                            Trang chủ
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item active text-white"
-                        aria-current="page">
-                        Liên hệ
-                    </li>
-                </ol>
-            </nav>
-
-            <h1 class="display-5 fw-bold mb-3">
-                Kết nối với AutoCare Garage
-            </h1>
-
-            <p class="hero-description fs-5 mb-0">
-                Trao đổi tình trạng xe và nhu cầu của bạn
-                để gara hỗ trợ chuẩn bị các bước tiếp theo.
-            </p>
+@php
+    $address = config('garage.address');
+    $phone = config('garage.phone');
+    $email = config('garage.email');
+    $mapUrl = $address ? 'https://www.google.com/maps/search/?api=1&query=' . rawurlencode($address) : null;
+@endphp
+<div class="public-page contact-page">
+    <section class="contact-page-header">
+        <div class="container" data-reveal>
+            <nav aria-label="Đường dẫn"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ route('public.home') }}">Trang chủ</a></li><li class="breadcrumb-item active" aria-current="page">Liên hệ</li></ol></nav>
+            <h1>Kết nối với AutoCare Garage</h1>
+            <p>Gửi lời nhắn hoặc ghé garage để trao đổi nhu cầu chăm sóc xe.</p>
         </div>
     </section>
-
-    <section class="section-space">
+    <section class="contact-main">
         <div class="container">
-            <div class="row g-4">
-                <div class="col-sm-6 col-lg-3">
-                    <div class="feature-card">
-                        <span class="feature-icon">
-                            <i class="bi bi-geo-alt" aria-hidden="true"></i>
-                        </span>
-
-                        <h2 class="h5 fw-bold">Địa chỉ gara</h2>
-
-                        <p class="text-muted mb-3">
-                            {{ $address ?: 'Địa chỉ đang được cập nhật.' }}
-                        </p>
-
-                        @if($mapUrl)
-                            <a href="{{ $mapUrl }}"
-                               target="_blank"
-                               rel="noopener noreferrer"
-                               class="fw-semibold">
-                                Xem đường đi
-                                <i class="bi bi-arrow-up-right ms-1"
-                                   aria-hidden="true"></i>
-                            </a>
-                        @endif
+            <div class="row g-4 g-xl-5">
+                <div class="col-lg-5" data-reveal>
+                    <h2>Chúng tôi sẵn sàng lắng nghe</h2>
+                    <p>Chia sẻ tình trạng xe hoặc điều bạn cần hỗ trợ.</p>
+                    <div class="contact-info-row">
+                        <i class="bi bi-geo-alt" aria-hidden="true"></i>
+                        <div><h3>Địa chỉ garage</h3><p>{{ $address ?: 'Địa chỉ đang cập nhật.' }}</p></div>
                     </div>
-                </div>
-
-                <div class="col-sm-6 col-lg-3">
-                    <div class="feature-card">
-                        <span class="feature-icon">
-                            <i class="bi bi-telephone" aria-hidden="true"></i>
-                        </span>
-
-                        <h2 class="h5 fw-bold">Điện thoại</h2>
-
-                        <p class="text-muted mb-3">
-                            {{ $phone ?: 'Số điện thoại đang được cập nhật.' }}
-                        </p>
-
-                        @if($phoneLink)
-                            <a href="tel:{{ $phoneLink }}" class="fw-semibold">
-                                Gọi cho gara
-                                <i class="bi bi-arrow-right ms-1"
-                                   aria-hidden="true"></i>
-                            </a>
-                        @endif
+                    <div class="contact-info-row">
+                        <i class="bi bi-clock" aria-hidden="true"></i>
+                        <div><h3>Giờ mở cửa</h3><p>{{ config('garage.opening_hours') ?: 'Giờ mở cửa đang cập nhật.' }}</p></div>
                     </div>
-                </div>
-
-                <div class="col-sm-6 col-lg-3">
-                    <div class="feature-card">
-                        <span class="feature-icon">
-                            <i class="bi bi-envelope" aria-hidden="true"></i>
-                        </span>
-
-                        <h2 class="h5 fw-bold">Email</h2>
-
-                        <p class="text-muted text-break mb-3">
-                            {{ $email ?: 'Email đang được cập nhật.' }}
-                        </p>
-
-                        @if($email)
-                            <a href="mailto:{{ $email }}" class="fw-semibold">
-                                Gửi email
-                                <i class="bi bi-arrow-right ms-1"
-                                   aria-hidden="true"></i>
-                            </a>
-                        @endif
-                    </div>
-                </div>
-
-                <div class="col-sm-6 col-lg-3">
-                    <div class="feature-card">
-                        <span class="feature-icon">
-                            <i class="bi bi-clock" aria-hidden="true"></i>
-                        </span>
-
-                        <h2 class="h5 fw-bold">Giờ làm việc</h2>
-
-                        <p class="text-muted mb-0">
-                            {{ $openingHours ?: 'Giờ làm việc đang được cập nhật.' }}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="section-space bg-white">
-        <div class="container">
-            <div class="row g-5">
-                <div class="col-lg-5">
-                    <p class="section-eyebrow mb-2">Đến gara</p>
-
-                    <h2 class="section-title mb-4">
-                        Tìm đường đến AutoCare Garage
-                    </h2>
-
-                    <p class="text-muted">
-                        Liên hệ trước khi đến để trao đổi nhu cầu
-                        và thời gian tiếp nhận xe.
-                    </p>
-
-                    <div class="d-flex gap-3 mb-4">
-                        <i class="bi bi-car-front text-primary fs-4"
-                           aria-hidden="true"></i>
-
+                    <div class="contact-info-row">
+                        <i class="bi bi-telephone" aria-hidden="true"></i>
                         <div>
-                            <h3 class="h6 fw-bold">Thông tin chiếc xe</h3>
-
-                            <p class="text-muted mb-0">
-                                Chuẩn bị biển số, hãng xe và dòng xe
-                                để thuận tiện khi tiếp nhận.
-                            </p>
+                            <h3>Thông tin liên hệ</h3>
+                            @if($phone)<p><a href="tel:{{ preg_replace('/[^0-9+]/', '', $phone) }}">{{ $phone }}</a></p>@endif
+                            @if($email)<p><a href="mailto:{{ $email }}">{{ $email }}</a></p>@endif
+                            @if(!$phone && !$email)<p>Số điện thoại và email đang cập nhật.</p>@endif
                         </div>
                     </div>
-
-                    <div class="d-flex gap-3 mb-4">
-                        <i class="bi bi-chat-square-text text-primary fs-4"
-                           aria-hidden="true"></i>
-
-                        <div>
-                            <h3 class="h6 fw-bold">Tình trạng đang gặp phải</h3>
-
-                            <p class="text-muted mb-0">
-                                Mô tả dấu hiệu bất thường hoặc hạng mục
-                                bạn muốn kiểm tra, bảo dưỡng.
-                            </p>
+                    <div class="contact-socials">
+                        <h3>Kết nối cùng chúng tôi</h3>
+                        <p>Theo dõi thông tin và hoạt động của garage.</p>
+                        <div class="contact-social-links">
+                            @foreach(['Facebook' => 'facebook', 'Zalo' => 'chat-dots', 'YouTube' => 'youtube'] as $platform => $icon)
+                                @php
+                                    $socialUrl = config('garage.socials.' . $platform);
+                                    $validUrl = is_string($socialUrl) && filter_var($socialUrl, FILTER_VALIDATE_URL) && in_array(strtolower(parse_url($socialUrl, PHP_URL_SCHEME) ?? ''), ['http', 'https'], true);
+                                @endphp
+                                @if($validUrl)
+                                    <a href="{{ $socialUrl }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-{{ $icon }}" aria-hidden="true"></i>{{ $platform }}<span class="visually-hidden"> (mở tab mới)</span></a>
+                                @else
+                                    <span class="contact-social-pending"><i class="bi bi-{{ $icon }}" aria-hidden="true"></i>{{ $platform }}<small>Đang cập nhật</small></span>
+                                @endif
+                            @endforeach
                         </div>
                     </div>
-
-                    @if($mapUrl)
-                        <a href="{{ $mapUrl }}"
-                           target="_blank"
-                           rel="noopener noreferrer"
-                           class="btn btn-primary">
-                            Mở Google Maps
-                            <i class="bi bi-arrow-up-right ms-2"
-                               aria-hidden="true"></i>
-                        </a>
-                    @endif
                 </div>
-
-                <div class="col-lg-7">
-                    @if($address)
-                        <div class="ratio ratio-4x3 rounded-4 overflow-hidden border">
-                            <iframe
-                                src="https://maps.google.com/maps?q={{ rawurlencode($address) }}&output=embed"
-                                title="Bản đồ vị trí AutoCare Garage"
-                                loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade"
-                                allowfullscreen>
-                            </iframe>
+                <div class="col-lg-7" data-reveal>
+                    <form class="contact-form" method="POST" action="{{ route('public.contact.store') }}">
+                        @csrf
+                        <h2>Gửi tin nhắn cho garage</h2>
+                        <p>Điền thông tin bên dưới để chúng tôi có thể liên hệ lại.</p>
+                        <div class="row g-3">
+                            @foreach(['name' => ['Họ và tên', 'text', true, 100], 'phone' => ['Số điện thoại', 'tel', true, 20], 'email' => ['Email', 'email', false, 255]] as $field => [$label, $type, $required, $maxlength])
+                                <div class="col-md-6">
+                                    <label for="contact-{{ $field }}" class="form-label">{{ $label }} @if($required)<span class="text-danger" aria-hidden="true">*</span>@endif</label>
+                                    <input id="contact-{{ $field }}" type="{{ $type }}" name="{{ $field }}" value="{{ old($field) }}" maxlength="{{ $maxlength }}"
+                                        autocomplete="{{ ['name' => 'name', 'phone' => 'tel', 'email' => 'email'][$field] }}"
+                                        class="form-control @error($field) is-invalid @enderror" @required($required)
+                                        @error($field) aria-invalid="true" aria-describedby="contact-{{ $field }}-error" @enderror>
+                                    @error($field)<div id="contact-{{ $field }}-error" class="invalid-feedback">{{ $message }}</div>@enderror
+                                </div>
+                            @endforeach
+                            <div class="col-md-6">
+                                <label for="contact-subject" class="form-label">Chủ đề <span class="text-danger" aria-hidden="true">*</span></label>
+                                <select id="contact-subject" name="subject" required class="form-select @error('subject') is-invalid @enderror">
+                                    <option value="">Chọn nội dung cần hỗ trợ</option>
+                                    @foreach(['Tư vấn dịch vụ', 'Hỗ trợ đặt lịch', 'Góp ý', 'Nội dung khác'] as $subject)<option value="{{ $subject }}" @selected(old('subject') === $subject)>{{ $subject }}</option>@endforeach
+                                </select>
+                                @error('subject')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
+                            <div class="col-12">
+                                <label for="contact-message" class="form-label">Tin nhắn <span class="text-danger" aria-hidden="true">*</span></label>
+                                <textarea id="contact-message" name="message" rows="6" minlength="10" maxlength="5000" required class="form-control @error('message') is-invalid @enderror" placeholder="Bạn cần tư vấn dịch vụ hoặc hỗ trợ điều gì?">{{ old('message') }}</textarea>
+                                @error('message')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                            </div>
                         </div>
-                    @else
-                        <div class="feature-card d-flex flex-column align-items-center justify-content-center text-center">
-                            <span class="feature-icon">
-                                <i class="bi bi-map" aria-hidden="true"></i>
-                            </span>
-
-                            <h3 class="h5 fw-bold">Vị trí gara đang được cập nhật</h3>
-
-                            <p class="text-muted mb-0">
-                                Bản đồ sẽ hiển thị khi có thông tin địa chỉ.
-                            </p>
-                        </div>
-                    @endif
+                        <p class="contact-form-note mt-3">* Thông tin bắt buộc. Email không bắt buộc.</p>
+                        <p class="contact-form-note">Thông tin bạn cung cấp được dùng để phản hồi yêu cầu.</p>
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-envelope me-2" aria-hidden="true"></i>Gửi tin nhắn</button>
+                    </form>
                 </div>
             </div>
         </div>
     </section>
-
-    <section class="section-space">
+    <section class="contact-map-section">
+        <div class="container" data-reveal>
+            <div class="contact-map-heading">
+                <div><h2>Đường đến AutoCare Garage</h2><p>{{ $address ?: 'Địa chỉ đang cập nhật.' }}</p></div>
+                @if($mapUrl)<a class="btn btn-outline-primary" href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer">Mở Google Maps <i class="bi bi-arrow-up-right ms-2" aria-hidden="true"></i><span class="visually-hidden"> (mở tab mới)</span></a>@endif
+            </div>
+            @if($address)
+                <iframe class="contact-map" title="Bản đồ đường đến AutoCare Garage" src="https://www.google.com/maps?q={{ rawurlencode($address) }}&output=embed" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>
+            @else
+                <p>Garage sẽ bổ sung bản đồ khi có địa chỉ.</p>
+            @endif
+        </div>
+    </section>
+    <section class="contact-cta-section">
         <div class="container">
-            <div class="text-center mb-5">
-                <p class="section-eyebrow mb-2">Thông tin hữu ích</p>
-                <h2 class="section-title">Trước khi sửa chữa</h2>
-            </div>
-
-            <div class="accordion" id="contactFaq">
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqQuotation"
-                                aria-expanded="true"
-                                aria-controls="faqQuotation">
-                            Tôi có được xem báo giá trước khi sửa không?
-                        </button>
-                    </h3>
-
-                    <div id="faqQuotation"
-                         class="accordion-collapse collapse show"
-                         data-bs-parent="#contactFaq">
-                        <div class="accordion-body text-muted">
-                            Sau khi kiểm tra xe, gara lập báo giá các hạng mục
-                            đề xuất. Bạn xem và đồng ý hoặc từ chối báo giá
-                            trước khi thực hiện sửa chữa.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button collapsed"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqProgress"
-                                aria-expanded="false"
-                                aria-controls="faqProgress">
-                            Tôi theo dõi tiến độ sửa chữa như thế nào?
-                        </button>
-                    </h3>
-
-                    <div id="faqProgress"
-                         class="accordion-collapse collapse"
-                         data-bs-parent="#contactFaq">
-                        <div class="accordion-body text-muted">
-                            Các cập nhật được ghi nhận trong hồ sơ sửa chữa.
-                            Đăng nhập bằng tài khoản gắn với yêu cầu để xem
-                            thông tin tiến độ của chiếc xe.
-                        </div>
-                    </div>
-                </div>
-
-                <div class="accordion-item">
-                    <h3 class="accordion-header">
-                        <button class="accordion-button collapsed"
-                                type="button"
-                                data-bs-toggle="collapse"
-                                data-bs-target="#faqPayment"
-                                aria-expanded="false"
-                                aria-controls="faqPayment">
-                            Gara hỗ trợ phương thức thanh toán nào?
-                        </button>
-                    </h3>
-
-                    <div id="faqPayment"
-                         class="accordion-collapse collapse"
-                         data-bs-parent="#contactFaq">
-                        <div class="accordion-body text-muted">
-                            Bạn có thể chọn tiền mặt hoặc chuyển khoản.
-                            Hóa đơn được cập nhật đã thanh toán sau khi
-                            gara kiểm tra và xác nhận đã nhận tiền.
-                        </div>
-                    </div>
-                </div>
+            <div class="contact-booking" data-reveal>
+                <div><h2>Bạn muốn đặt lịch chăm sóc xe?</h2><p>Chọn ngày và khung giờ phù hợp với bạn.</p></div>
+                <a class="btn btn-primary" href="{{ route('public.datlich.create') }}"><i class="bi bi-calendar-plus me-2" aria-hidden="true"></i>Đặt lịch sửa chữa</a>
             </div>
         </div>
     </section>
+</div>
 @endsection

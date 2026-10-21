@@ -1,262 +1,84 @@
 @extends('public.layout')
-
 @section('title', 'Dịch vụ')
-
-@section('description', 'Khám phá các dịch vụ chăm sóc, bảo dưỡng và sửa chữa ô tô tại AutoCare Garage.')
-
+@section('description', 'Khám phá dịch vụ sửa chữa, bảo dưỡng và chăm sóc ô tô tại AutoCare Garage.')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/services-orange.css') }}">
+@endpush
 @section('content')
-    <section class="hero">
-        <div class="container">
-            <nav aria-label="Đường dẫn">
-                <ol class="breadcrumb mb-4">
-                    <li class="breadcrumb-item">
-                        <a href="{{ url('/') }}" class="text-white">
-                            Trang chủ
-                        </a>
-                    </li>
-
-                    <li class="breadcrumb-item active text-white"
-                        aria-current="page">
-                        Dịch vụ
-                    </li>
-                </ol>
-            </nav>
-
-            <div class="row align-items-center g-4">
-                <div class="col-lg-8">
-                    <div class="hero-label mb-3">
-                        <i class="bi bi-tools" aria-hidden="true"></i>
-                        Dịch vụ tại gara
-                    </div>
-
-                    <h1 class="display-5 fw-bold mb-3">
-                        Chăm sóc xe theo nhu cầu
-                    </h1>
-
-                    <p class="hero-description fs-5 mb-0">
-                        Tìm hiểu từng dịch vụ và giá niêm yết.
-                        Các hạng mục sửa chữa được kiểm tra, báo giá
-                        và thống nhất trước khi thực hiện.
-                    </p>
-                </div>
-
-                <div class="col-lg-4 text-lg-end">
-                    <a href="{{ url('/lien-he') }}"
-                       class="btn btn-outline-light">
-                        Liên hệ tư vấn
-                        <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
-                    </a>
-                </div>
-            </div>
+<div class="services-page">
+    <section class="services-hero">
+        @if(file_exists(public_path('images/services/banner.jpg')))
+            <img class="services-hero-image" src="{{ asset('images/services/banner.jpg') }}" alt="" fetchpriority="high">
+        @endif
+        <div class="container services-hero-content" data-reveal>
+            <nav aria-label="Đường dẫn"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="{{ route('public.home') }}">Trang chủ</a></li><li class="breadcrumb-item active" aria-current="page">Dịch vụ</li></ol></nav>
+            <h1>Chọn dịch vụ phù hợp<br>cho chiếc xe</h1>
+            <p>Khám phá dịch vụ sửa chữa, bảo dưỡng và chăm sóc ô tô.</p>
         </div>
     </section>
-
-    <section class="section-space">
+    <section class="services-catalog">
         <div class="container">
-            <div class="feature-card mb-4">
-                <form method="GET" action="{{ route('public.dichvu.index') }}">
-                    <div class="row align-items-end g-3">
-                        <div class="col-lg-5">
-                            <label for="serviceKeyword"
-                                   class="form-label fw-semibold">
-                                Tìm dịch vụ
-                            </label>
-
-                            <div class="input-group">
-                                <span class="input-group-text bg-white">
-                                    <i class="bi bi-search" aria-hidden="true"></i>
-                                </span>
-
-                                <input type="search"
-                                       id="serviceKeyword"
-                                       name="tu_khoa"
-                                       class="form-control"
-                                       value="{{ $tuKhoa }}"
-                                       maxlength="100"
-                                       placeholder="Nhập tên dịch vụ…">
-                            </div>
-                        </div>
-
-                        <div class="col-lg-4">
-                            <label for="serviceCategory"
-                                   class="form-label fw-semibold">
-                                Loại dịch vụ
-                            </label>
-
-                            <select id="serviceCategory"
-                                    name="ma_loai"
-                                    class="form-select">
-                                <option value="">Tất cả loại dịch vụ</option>
-
-                                @foreach($loaiDichVus as $loai)
-                                    <option value="{{ $loai->MaLoaiDV }}"
-                                            @selected((string) $maLoai === (string) $loai->MaLoaiDV)>
-                                        {{ $loai->TenLoaiDV }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-
-                        <div class="col-lg-3">
-                            <div class="d-flex gap-2">
-                                <button type="submit"
-                                        class="btn btn-primary flex-grow-1">
-                                    <i class="bi bi-funnel me-1" aria-hidden="true"></i>
-                                    Tìm kiếm
-                                </button>
-
-                                <a href="{{ route('public.dichvu.index') }}"
-                                   class="btn btn-light"
-                                   aria-label="Xóa bộ lọc"
-                                   title="Xóa bộ lọc">
-                                    <i class="bi bi-arrow-counterclockwise"
-                                       aria-hidden="true"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
+            <form method="GET" action="{{ route('public.dichvu.index') }}" class="services-search" role="search">
+                @if($maLoai)<input type="hidden" name="ma_loai" value="{{ $maLoai }}">@endif
+                <input type="hidden" name="sap_xep" value="{{ $sapXep }}">
+                <div class="services-search-field"><i class="bi bi-search" aria-hidden="true"></i><label class="visually-hidden" for="service-keyword">Tìm tên dịch vụ</label><input class="form-control" id="service-keyword" type="search" name="tu_khoa" value="{{ $tuKhoa }}" maxlength="100" placeholder="Tìm tên dịch vụ bạn cần..."></div>
+                <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+            </form>
+            <nav class="services-filters" aria-label="Lọc nhóm dịch vụ">
+                <a class="services-filter {{ !$maLoai ? 'is-active' : '' }}" href="{{ route('public.dichvu.index', array_filter(['tu_khoa' => $tuKhoa, 'sap_xep' => $sapXep])) }}" @if(!$maLoai) aria-current="true" @endif>Tất cả</a>
+                @foreach($loaiDichVus as $loai)
+                    <a class="services-filter {{ (string) $maLoai === (string) $loai->MaLoaiDV ? 'is-active' : '' }}" href="{{ route('public.dichvu.index', ['tu_khoa' => $tuKhoa, 'ma_loai' => $loai->MaLoaiDV, 'sap_xep' => $sapXep]) }}" @if((string) $maLoai === (string) $loai->MaLoaiDV) aria-current="true" @endif>{{ $loai->TenLoaiDV }}</a>
+                @endforeach
+            </nav>
+            <div class="services-toolbar">
+                <strong>{{ $dichVus->total() }} dịch vụ</strong>
+                <form method="GET" action="{{ route('public.dichvu.index') }}" class="services-sort">
+                    <input type="hidden" name="tu_khoa" value="{{ $tuKhoa }}">
+                    @if($maLoai)<input type="hidden" name="ma_loai" value="{{ $maLoai }}">@endif
+                    <label for="service-sort">Sắp xếp:</label>
+                    <select class="form-select" id="service-sort" name="sap_xep" onchange="this.form.requestSubmit()">
+                        @foreach(['mac_dinh' => 'Mặc định', 'gia_tang' => 'Giá tăng dần', 'gia_giam' => 'Giá giảm dần', 'ten' => 'Tên A–Z'] as $value => $label)<option value="{{ $value }}" @selected($sapXep === $value)>{{ $label }}</option>@endforeach
+                    </select>
+                    <noscript><button class="btn btn-outline-primary" type="submit">Áp dụng</button></noscript>
                 </form>
             </div>
-
-            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-                <div>
-                    <h2 class="h4 fw-bold mb-1">Danh sách dịch vụ</h2>
-
-                    <p class="text-muted small mb-0">
-                        @if($dichVus->total() > 0)
-                            Hiển thị {{ $dichVus->firstItem() }}–{{ $dichVus->lastItem() }}
-                            trong {{ $dichVus->total() }} dịch vụ
-                        @else
-                            Không có dịch vụ phù hợp
-                        @endif
-                    </p>
-                </div>
-
-                @if($tuKhoa !== '')
-                    <span class="badge rounded-pill text-bg-light border px-3 py-2">
-                        Từ khóa: {{ $tuKhoa }}
-                    </span>
-                @endif
-            </div>
-
             <div class="row g-4">
                 @forelse($dichVus as $dichVu)
-                    <div class="col-md-6 col-lg-4">
-                        <article class="service-card d-flex flex-column">
-                            <a href="{{ route('public.dichvu.show', $dichVu->MaDV) }}"
-                               aria-label="Xem dịch vụ {{ $dichVu->TenDV }}">
+                    <div class="col-md-6 col-lg-4" data-reveal>
+                        <article class="catalog-card">
+                            <a class="catalog-photo" href="{{ route('public.dichvu.show', $dichVu->MaDV) }}" aria-label="Xem {{ $dichVu->TenDV }}">
                                 @if($dichVu->HinhAnh)
-                                    <img src="{{ asset('storage/' . $dichVu->HinhAnh) }}"
-                                         alt="{{ $dichVu->TenDV }}"
-                                         loading="lazy">
+                                    <img src="{{ asset('storage/' . $dichVu->HinhAnh) }}" alt="{{ $dichVu->TenDV }}" loading="lazy" width="600" height="360">
                                 @else
-                                    <div class="ratio ratio-16x9 bg-light">
-                                        <div class="d-flex align-items-center justify-content-center">
-                                            <i class="bi bi-tools display-3 text-primary"
-                                               aria-hidden="true"></i>
-                                        </div>
-                                    </div>
+                                    <span class="catalog-photo-placeholder"><i class="bi bi-tools" aria-hidden="true"></i></span>
                                 @endif
                             </a>
-
-                            <div class="p-4 d-flex flex-column flex-grow-1">
-                                <div class="mb-3">
-                                    <span class="badge rounded-pill text-primary bg-primary-subtle px-3 py-2">
-                                        {{ $dichVu->loaiDichVu->TenLoaiDV }}
-                                    </span>
-                                </div>
-
-                                <h3 class="h5 fw-bold mb-3">
-                                    <a href="{{ route('public.dichvu.show', $dichVu->MaDV) }}"
-                                       class="text-dark">
-                                        {{ $dichVu->TenDV }}
-                                    </a>
-                                </h3>
-
-                                <p class="text-muted mb-4">
-                                    {{ \Illuminate\Support\Str::limit(
-                                        strip_tags($dichVu->MoTa ?: 'Xem thông tin chi tiết và trao đổi với gara về nhu cầu của bạn.'),
-                                        120
-                                    ) }}
-                                </p>
-
-                                <div class="mt-auto">
-                                    <div class="border-top pt-3 mb-3">
-                                        <span class="text-muted small">
-                                            Giá niêm yết
-                                        </span>
-
-                                        <div class="fs-5 fw-bold text-primary">
-                                            {{ number_format($dichVu->Gia, 0, ',', '.') }} ₫
-                                        </div>
+                            <div class="catalog-card-body">
+                                <span class="catalog-category">{{ $dichVu->loaiDichVu->TenLoaiDV }}</span>
+                                <h2><a href="{{ route('public.dichvu.show', $dichVu->MaDV) }}">{{ $dichVu->TenDV }}</a></h2>
+                                <p class="catalog-description">{{ \Illuminate\Support\Str::limit(strip_tags($dichVu->MoTa ?: 'Xem thông tin dịch vụ và trao đổi nhu cầu với garage.'), 110) }}</p>
+                                <div class="catalog-bottom">
+                                    <p class="catalog-price"><span>Giá</span> <strong>{{ number_format($dichVu->Gia, 0, ',', '.') }}đ</strong></p>
+                                    <div class="catalog-actions">
+                                        <a class="btn btn-outline-primary" href="{{ route('public.dichvu.show', $dichVu->MaDV) }}">Xem chi tiết<span class="visually-hidden"> {{ $dichVu->TenDV }}</span></a>
+                                        <a class="btn btn-primary" href="{{ route('public.datlich.create', ['ma_dv' => $dichVu->MaDV]) }}"><i class="bi bi-calendar-plus me-2" aria-hidden="true"></i>Đặt lịch<span class="visually-hidden"> {{ $dichVu->TenDV }}</span></a>
                                     </div>
-
-                                    <a href="{{ route('public.dichvu.show', $dichVu->MaDV) }}"
-                                       class="btn btn-outline-primary w-100">
-                                        Xem chi tiết
-                                        <i class="bi bi-arrow-right ms-2"
-                                           aria-hidden="true"></i>
-                                    </a>
                                 </div>
                             </div>
                         </article>
                     </div>
                 @empty
-                    <div class="col-12">
-                        <div class="feature-card text-center py-5">
-                            <span class="feature-icon">
-                                <i class="bi bi-search" aria-hidden="true"></i>
-                            </span>
-
-                            <h3 class="h5 fw-bold">
-                                Chưa tìm thấy dịch vụ phù hợp
-                            </h3>
-
-                            <p class="text-muted">
-                                Thử từ khóa khác hoặc bỏ bộ lọc loại dịch vụ.
-                            </p>
-
-                            <a href="{{ route('public.dichvu.index') }}"
-                               class="btn btn-primary">
-                                Xem tất cả dịch vụ
-                            </a>
-                        </div>
-                    </div>
+                    <div class="col-12"><div class="services-empty"><i class="bi bi-search" aria-hidden="true"></i><h2>Chưa có dịch vụ phù hợp</h2><p>Thử từ khóa khác hoặc chọn lại nhóm dịch vụ.</p><a class="btn btn-outline-primary" href="{{ route('public.dichvu.index') }}">Xóa bộ lọc</a></div></div>
                 @endforelse
             </div>
-
-            @if($dichVus->hasPages())
-                <div class="mt-5">
-                    {{ $dichVus->links('pagination::bootstrap-5') }}
-                </div>
-            @endif
+            @include('public.partials.services-pagination', ['paginator' => $dichVus])
         </div>
     </section>
-
-    <section class="pb-5">
-        <div class="container">
-            <div class="cta-panel">
-                <div class="row align-items-center g-4">
-                    <div class="col-lg-8">
-                        <h2 class="h3 fw-bold mb-3">
-                            Chưa biết chiếc xe cần dịch vụ nào?
-                        </h2>
-
-                        <p class="cta-description mb-0">
-                            Liên hệ gara và mô tả tình trạng xe
-                            để trao đổi về bước kiểm tra phù hợp.
-                        </p>
-                    </div>
-
-                    <div class="col-lg-4 text-lg-end">
-                        <a href="{{ url('/lien-he') }}"
-                           class="btn btn-light btn-lg">
-                            Liên hệ gara
-                            <i class="bi bi-arrow-right ms-2" aria-hidden="true"></i>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
+    <section class="services-cta-section">
+        <div class="container"><div class="services-cta" data-reveal>
+            <div><h2>Chưa biết xe cần dịch vụ gì?</h2><p>Bạn có thể đặt lịch và mô tả tình trạng xe để garage kiểm tra.</p></div>
+            <div class="services-cta-actions"><a class="btn btn-primary" href="{{ route('public.datlich.create') }}"><i class="bi bi-calendar-plus me-2" aria-hidden="true"></i>Đặt lịch kiểm tra</a><a class="btn services-secondary" href="{{ route('public.contact') }}">Liên hệ tư vấn</a></div>
+        </div></div>
     </section>
+</div>
 @endsection

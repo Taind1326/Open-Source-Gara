@@ -13,10 +13,13 @@ class DichVuPublicController extends Controller
         $data = $request->validate([
             'tu_khoa' => 'nullable|string|max:100',
             'ma_loai' => 'nullable|integer|exists:LOAIDICHVU,MaLoaiDV',
+            'sap_xep' => 'nullable|in:mac_dinh,gia_tang,gia_giam,ten',
+            'page' => 'nullable|integer|min:1',
         ]);
 
         $tuKhoa = trim($data['tu_khoa'] ?? '');
         $maLoai = $data['ma_loai'] ?? null;
+        $sapXep = $data['sap_xep'] ?? 'mac_dinh';
 
         $loaiDichVus = LoaiDichVu::where(
             'TrangThai',
@@ -36,15 +39,23 @@ class DichVuPublicController extends Controller
             ->when($maLoai, function ($query) use ($maLoai) {
                 $query->where('MaLoaiDV', $maLoai);
             })
-            ->orderBy('TenDV')
-            ->paginate(9)
+            ->when($sapXep === 'gia_tang', fn ($query) => $query->orderBy('Gia'))
+            ->when($sapXep === 'gia_giam', fn ($query) => $query->orderByDesc('Gia'))
+            ->when($sapXep === 'ten', fn ($query) => $query->orderBy('TenDV'))
+            ->orderBy('MaDV')
+            ->paginate(6)
             ->withQueryString();
+
+        if ($dichVus->currentPage() > $dichVus->lastPage()) {
+            return redirect()->to($dichVus->url($dichVus->lastPage()));
+        }
 
         return view('public.dichvu.index', compact(
             'dichVus',
             'loaiDichVus',
             'tuKhoa',
-            'maLoai'
+            'maLoai',
+            'sapXep'
         ));
     }
 
