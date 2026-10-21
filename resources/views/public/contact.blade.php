@@ -61,7 +61,7 @@
                     </div>
                 </div>
                 <div class="col-lg-7" data-reveal>
-                    <form class="contact-form" method="POST" action="{{ route('public.contact.store') }}">
+                    <form novalidate class="contact-form" method="POST" action="{{ route('public.contact.store') }}">
                         @csrf
                         <h2>Gửi tin nhắn cho garage</h2>
                         <p>Điền thông tin bên dưới để chúng tôi có thể liên hệ lại.</p>

@@ -19,7 +19,7 @@
         <div class="col-xl-9">
             <div class="card">
                 <div class="card-body p-4">
-                    <form action="{{ route('phutung.store') }}" method="POST">
+                    <form novalidate action="{{ route('phutung.store') }}" method="POST">
                         @csrf
 
                         @include('phutung._form')

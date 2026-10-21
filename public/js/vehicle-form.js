@@ -1,361 +1,83 @@
 (() => {
-    "use strict";
-
-    function initializeVehicleForm(root) {
-        const yearSelect = root.querySelector("[data-vehicle-year]");
-        const makeSelect = root.querySelector("[data-vehicle-make]");
-        const modelSelect = root.querySelector("[data-vehicle-model]");
-        const notice = root.querySelector("[data-vehicle-notice]");
-        const errorBox = root.querySelector("[data-vehicle-error]");
-        const submitButton = root.querySelector("[data-vehicle-submit]");
-        const retryButton = root.querySelector("[data-vehicle-retry]");
-
-        const form = root.closest("form");
-
-        let makesLoaded = false;
-        let loadingMakes = false;
-        let loadingModels = false;
-
-        let makeRequest = null;
-        let modelRequest = null;
-
-        let makeVersion = 0;
-        let modelVersion = 0;
-
-        let initialModelPending = true;
-
-        const initialMakeId = root.dataset.selectedMakeId || "";
-        const initialModelId = root.dataset.selectedModelId || "";
-        const existingMake = root.dataset.existingMake || "";
-        const existingModel = root.dataset.existingModel || "";
-
-        function normalize(value) {
-            return String(value).trim().toLocaleUpperCase("en-US");
-        }
-
-        function showError(message) {
-            errorBox.textContent = message;
-            errorBox.classList.remove("d-none");
-        }
-
-        function clearError() {
-            errorBox.textContent = "";
-            errorBox.classList.add("d-none");
-        }
-
-        function resetSelect(select, message) {
-            select.replaceChildren(new Option(message, ""));
-            select.disabled = true;
-        }
-
-        function updateSubmitState() {
-            submitButton.disabled =
-                loadingMakes ||
-                loadingModels ||
-                !makesLoaded ||
-                !yearSelect.value ||
-                !makeSelect.value ||
-                !modelSelect.value;
-        }
-
-        async function fetchJson(url, signal) {
-            const response = await fetch(url, {
-                method: "GET",
-                credentials: "same-origin",
-                headers: {
-                    Accept: "application/json",
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-                signal,
+    'use strict';
+    const normalize = value => String(value).trim().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/đ/g,'d').replace(/Đ/g,'D').toLocaleLowerCase('vi');
+    function initialize(root) {
+        const makeInput = root.querySelector('[name="HangXe"]');
+        const modelInput = root.querySelector('[name="DongXe"]');
+        if (!makeInput || !modelInput) return;
+        let catalog = {};
+        try { catalog = JSON.parse(root.querySelector('[data-vehicle-catalog]').textContent); } catch {}
+        const entries = Object.entries(catalog);
+        const closers = [];
+        let previousMake = normalize(makeInput.value);
+        makeInput.addEventListener('input',() => {
+            const current = normalize(makeInput.value);
+            if (current !== previousMake) { modelInput.value = ''; previousMake = current; }
+        });
+        function combo(box,getItems) {
+            const input = box.querySelector('input');
+            const toggle = box.querySelector('[data-combo-toggle]');
+            const menu = box.querySelector('[data-combo-menu]');
+            let options = [], active = -1;
+            function close() {
+                menu.hidden = true; active = -1;
+                input.setAttribute('aria-expanded','false');
+                toggle.setAttribute('aria-expanded','false');
+                input.removeAttribute('aria-activedescendant');
+            }
+            closers.push(close);
+            function select(value) {
+                input.value = value;
+                input.dispatchEvent(new Event('input',{bubbles:true}));
+                input.dispatchEvent(new Event('change',{bubbles:true}));
+                input.focus(); close();
+            }
+            function open(all = false) {
+                closers.forEach(closeMenu => closeMenu());
+                const keyword = all ? '' : normalize(input.value);
+                const matches = getItems().filter(value => normalize(value).includes(keyword)).sort((a,b) => Number(normalize(b).startsWith(keyword)) - Number(normalize(a).startsWith(keyword)) || a.localeCompare(b,'vi'));
+                menu.replaceChildren(); options = []; active = -1;
+                matches.forEach((value,index) => {
+                    const button = document.createElement('button');
+                    button.type = 'button'; button.tabIndex = -1;
+                    button.id = `${input.id}Option${index}`;
+                    button.className = 'garage-combobox-option';
+                    button.textContent = value; button.setAttribute('role','option');
+                    button.setAttribute('aria-selected','false');
+                    button.addEventListener('mousedown',event => event.preventDefault());
+                    button.addEventListener('click',() => select(value));
+                    menu.append(button); options.push(button);
+                });
+                if (!matches.length) {
+                    const empty = document.createElement('div');
+                    empty.className = 'garage-combobox-empty';
+                    empty.textContent = 'Không có gợi ý phù hợp. Bạn có thể nhập trực tiếp.';
+                    menu.append(empty);
+                }
+                menu.hidden = false;
+                input.setAttribute('aria-expanded','true'); toggle.setAttribute('aria-expanded','true');
+            }
+            input.addEventListener('focus',() => open());
+            input.addEventListener('click',() => open());
+            input.addEventListener('input',() => open());
+            toggle.addEventListener('mousedown',event => event.preventDefault());
+            toggle.addEventListener('click',() => { const wasOpen = !menu.hidden; input.focus(); if (wasOpen) close(); else open(true); });
+            input.addEventListener('keydown',event => {
+                if (['Escape','Tab'].includes(event.key)) { close(); return; }
+                if (['ArrowDown','ArrowUp'].includes(event.key)) {
+                    event.preventDefault(); if (menu.hidden) open(); if (!options.length) return;
+                    active = event.key === 'ArrowDown' ? (active + 1) % options.length : active <= 0 ? options.length - 1 : active - 1;
+                    options.forEach((option,index) => { option.classList.toggle('is-active',index === active); option.setAttribute('aria-selected',String(index === active)); });
+                    input.setAttribute('aria-activedescendant',options[active].id);
+                    options[active].scrollIntoView({block:'nearest'});
+                } else if (event.key === 'Enter' && !menu.hidden && active >= 0) { event.preventDefault(); select(options[active].textContent); }
             });
-
-            const body = await response.json().catch(() => null);
-
-            if (!response.ok) {
-                if (response.status === 401 || response.status === 403) {
-                    throw new Error(
-                        "Phiên đăng nhập không còn hợp lệ. Vui lòng tải lại trang và đăng nhập."
-                    );
-                }
-
-                if (response.status === 429) {
-                    throw new Error(
-                        "Bạn tải danh mục quá nhanh. Vui lòng chờ một lát rồi thử lại."
-                    );
-                }
-
-                throw new Error(
-                    body?.message || "Không tải được danh mục xe. Vui lòng thử lại."
-                );
-            }
-
-            if (!body || typeof body !== "object") {
-                throw new Error("Dữ liệu danh mục không hợp lệ.");
-            }
-
-            return body;
+            box.addEventListener('focusout',() => setTimeout(() => { if (!box.contains(document.activeElement)) close(); },0));
         }
-
-        function selectMatchingOption(select, items, preferredId, preferredName) {
-            let selected = null;
-
-            if (preferredId) {
-                selected = items.find(
-                    (item) => String(item.id) === String(preferredId)
-                );
-            } else if (preferredName) {
-                selected = items.find(
-                    (item) => normalize(item.name) === normalize(preferredName)
-                );
-            }
-
-            if (selected) {
-                select.value = String(selected.id);
-            }
-
-            return Boolean(selected);
-        }
-
-        async function loadModels(preferredId = "", preferredName = "") {
-            const version = ++modelVersion;
-
-            modelRequest?.abort();
-            modelRequest = null;
-
-            loadingModels = false;
-
-            resetSelect(modelSelect, "Chọn năm và hãng xe trước");
-            notice.textContent =
-                "Danh sách dòng xe được tải theo hãng và năm đã chọn.";
-
-            clearError();
-            updateSubmitState();
-
-            if (!makesLoaded || !yearSelect.value || !makeSelect.value) {
-                return;
-            }
-
-            loadingModels = true;
-            resetSelect(modelSelect, "Đang tải dòng xe…");
-            updateSubmitState();
-
-            const controller = new AbortController();
-            modelRequest = controller;
-
-            const url = new URL(root.dataset.modelsUrl, window.location.origin);
-            url.searchParams.set("make_id", makeSelect.value);
-            url.searchParams.set("year", yearSelect.value);
-
-            try {
-                const data = await fetchJson(url, controller.signal);
-
-                if (version !== modelVersion) {
-                    return;
-                }
-
-                if (!Array.isArray(data.models)) {
-                    throw new Error("Danh sách dòng xe không hợp lệ.");
-                }
-
-                notice.textContent = data.notice || "";
-
-                if (data.models.length === 0) {
-                    resetSelect(modelSelect, "Không có dòng xe trong danh mục");
-
-                    showError(
-                        "API chưa có dòng xe cho hãng và năm này. " +
-                        "Kiểm tra lại thông tin hoặc liên hệ gara để được hỗ trợ."
-                    );
-
-                    return;
-                }
-
-                modelSelect.replaceChildren(new Option("Chọn dòng xe", ""));
-
-                data.models.forEach((item) => {
-                    modelSelect.add(
-                        new Option(String(item.name), String(item.id))
-                    );
-                });
-
-                modelSelect.disabled = false;
-
-                const restored = selectMatchingOption(
-                    modelSelect,
-                    data.models,
-                    preferredId,
-                    preferredName
-                );
-
-                if ((preferredId || preferredName) && !restored) {
-                    showError(
-                        "Dòng xe đã lưu không có trong danh sách hiện tại. " +
-                        "Vui lòng kiểm tra và chọn đúng dòng xe trước khi lưu."
-                    );
-                }
-            } catch (error) {
-                if (version !== modelVersion || error.name === "AbortError") {
-                    return;
-                }
-
-                resetSelect(modelSelect, "Chưa tải được dòng xe");
-                showError(error.message || "Không tải được dòng xe.");
-            } finally {
-                if (version === modelVersion) {
-                    loadingModels = false;
-                    updateSubmitState();
-                }
-            }
-        }
-
-        async function loadMakes() {
-            const preferredMakeId = makeSelect.value || initialMakeId;
-            const preferredModelId =
-                modelSelect.value ||
-                (initialModelPending ? initialModelId : "");
-
-            const preferredModelName =
-                initialModelPending && !preferredModelId ? existingModel : "";
-
-            const version = ++makeVersion;
-
-            makeRequest?.abort();
-            modelRequest?.abort();
-
-            ++modelVersion;
-
-            makesLoaded = false;
-            loadingMakes = true;
-            loadingModels = false;
-
-            clearError();
-
-            resetSelect(makeSelect, "Đang tải hãng xe…");
-            resetSelect(modelSelect, "Chọn năm và hãng xe trước");
-
-            updateSubmitState();
-
-            const controller = new AbortController();
-            makeRequest = controller;
-
-            try {
-                const data = await fetchJson(
-                    root.dataset.makesUrl,
-                    controller.signal
-                );
-
-                if (version !== makeVersion) {
-                    return;
-                }
-
-                if (!Array.isArray(data.data) || data.data.length === 0) {
-                    throw new Error("Chưa có danh sách hãng xe.");
-                }
-
-                makeSelect.replaceChildren(new Option("Chọn hãng xe", ""));
-
-                data.data.forEach((item) => {
-                    makeSelect.add(
-                        new Option(String(item.name), String(item.id))
-                    );
-                });
-
-                makeSelect.disabled = false;
-                makesLoaded = true;
-
-                const restored = selectMatchingOption(
-                    makeSelect,
-                    data.data,
-                    preferredMakeId,
-                    existingMake
-                );
-
-                if ((preferredMakeId || existingMake) && !restored) {
-                    showError(
-                        "Hãng xe đã lưu không có trong danh mục hiện tại. " +
-                        "Vui lòng kiểm tra lại thông tin."
-                    );
-                }
-
-                loadingMakes = false;
-
-                await loadModels(preferredModelId, preferredModelName);
-            } catch (error) {
-                if (version !== makeVersion || error.name === "AbortError") {
-                    return;
-                }
-
-                resetSelect(makeSelect, "Chưa tải được hãng xe");
-                resetSelect(modelSelect, "Chọn năm và hãng xe trước");
-
-                showError(error.message || "Không tải được hãng xe.");
-            } finally {
-                if (version === makeVersion) {
-                    loadingMakes = false;
-                    updateSubmitState();
-                }
-            }
-        }
-
-        yearSelect.addEventListener("change", () => {
-            initialModelPending = false;
-            void loadModels();
-        });
-
-        makeSelect.addEventListener("change", () => {
-            initialModelPending = false;
-            void loadModels();
-        });
-
-        modelSelect.addEventListener("change", () => {
-            initialModelPending = false;
-            updateSubmitState();
-        });
-
-        retryButton.addEventListener("click", () => {
-            if (loadingMakes || loadingModels) {
-                return;
-            }
-
-            if (!makesLoaded) {
-                void loadMakes();
-                return;
-            }
-
-            const selectedModelId =
-                modelSelect.value ||
-                (initialModelPending ? initialModelId : "");
-
-            const selectedModelName =
-                initialModelPending && !selectedModelId ? existingModel : "";
-
-            void loadModels(selectedModelId, selectedModelName);
-        });
-
-        form?.addEventListener("submit", (event) => {
-            updateSubmitState();
-
-            if (submitButton.disabled) {
-                event.preventDefault();
-
-                showError(
-                    "Vui lòng chọn đủ năm, hãng và dòng xe trước khi lưu."
-                );
-            }
-        });
-
-        void loadMakes();
+        combo(root.querySelector('[data-vehicle-combo="make"]'),() => entries.map(([make]) => make));
+        combo(root.querySelector('[data-vehicle-combo="model"]'),() => entries.find(([make]) => normalize(make) === normalize(makeInput.value))?.[1] || []);
+        document.addEventListener('click',event => { if (!root.contains(event.target) || !event.target.closest('[data-vehicle-combo]')) closers.forEach(close => close()); });
     }
-
-    function initialize() {
-        document.querySelectorAll("[data-vehicle-form]").forEach(
-            initializeVehicleForm
-        );
-    }
-
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initialize, { once: true });
-    } else {
-        initialize();
-    }
+    const start = () => document.querySelectorAll('[data-vehicle-form]').forEach(initialize);
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded',start); else start();
 })();

@@ -1,30 +1,9 @@
 @php
-    $isEdit = isset($dichvu);
-    $selectedLoai = old('MaLoaiDV', $isEdit ? $dichvu->MaLoaiDV : '');
+    $isEdit = isset($dichvu) && $dichvu->exists;
+    $hasImage = $isEdit && filled($dichvu->HinhAnh);
 @endphp
 
-<div class="row g-4">
-    <div class="col-md-6">
-        <label for="TenDV" class="form-label fw-semibold">
-            Tên dịch vụ <span class="text-danger">*</span>
-        </label>
-
-        <input
-            type="text"
-            id="TenDV"
-            name="TenDV"
-            value="{{ old('TenDV', $isEdit ? $dichvu->TenDV : '') }}"
-            class="form-control @error('TenDV') is-invalid @enderror"
-            maxlength="100"
-            placeholder="Ví dụ: Thay dầu động cơ"
-            required
-        >
-
-        @error('TenDV')
-            <div class="invalid-feedback">{{ $message }}</div>
-        @enderror
-    </div>
-
+<div class="row g-3">
     <div class="col-md-6">
         <label for="MaLoaiDV" class="form-label fw-semibold">
             Loại dịch vụ <span class="text-danger">*</span>
@@ -38,22 +17,15 @@
         >
             <option value="">Chọn loại dịch vụ</option>
 
-            @if ($isEdit && ! $loaiDichVuList->contains('MaLoaiDV', $dichvu->MaLoaiDV))
-                <option
-                    value="{{ $dichvu->MaLoaiDV }}"
-                    @selected((string) $selectedLoai === (string) $dichvu->MaLoaiDV)
-                >
-                    {{ $dichvu->loaiDichVu?->TenLoaiDV ?? 'Loại dịch vụ hiện tại' }}
-                    — ngừng hoạt động
-                </option>
-            @endif
-
-            @foreach ($loaiDichVuList as $loai)
+            @foreach($loaiDichVuList as $loai)
                 <option
                     value="{{ $loai->MaLoaiDV }}"
-                    @selected((string) $selectedLoai === (string) $loai->MaLoaiDV)
+                    @selected(
+                        (string) old('MaLoaiDV', $isEdit ? $dichvu->MaLoaiDV : '')
+                        === (string) $loai->MaLoaiDV
+                    )
                 >
-                    {{ $loai->TenLoaiDV }}
+                    {{ $loai->TenLoaiDV }}{{ $loai->HoatDong ? '' : ' — Ngừng hoạt động' }}
                 </option>
             @endforeach
         </select>
@@ -61,11 +33,35 @@
         @error('MaLoaiDV')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
+
+        <div class="form-text">
+            Dịch vụ thuộc nhóm ngừng hoạt động sẽ được ẩn khỏi danh sách công khai.
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <label for="TenDV" class="form-label fw-semibold">
+            Tên dịch vụ <span class="text-danger">*</span>
+        </label>
+
+        <input
+            type="text"
+            id="TenDV"
+            name="TenDV"
+            value="{{ old('TenDV', $isEdit ? $dichvu->TenDV : '') }}"
+            class="form-control @error('TenDV') is-invalid @enderror"
+            maxlength="150"
+            required
+        >
+
+        @error('TenDV')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
     </div>
 
     <div class="col-md-6">
         <label for="Gia" class="form-label fw-semibold">
-            Giá dịch vụ (đồng) <span class="text-danger">*</span>
+            Giá dịch vụ (đ) <span class="text-danger">*</span>
         </label>
 
         <input
@@ -75,72 +71,84 @@
             value="{{ old('Gia', $isEdit ? $dichvu->Gia : '') }}"
             class="form-control @error('Gia') is-invalid @enderror"
             min="0"
-            max="9999999999.99"
-            step="0.01"
-            placeholder="Ví dụ: 350000"
+            max="999999999999"
+            step="1"
             required
         >
 
         @error('Gia')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
+
+        <div class="form-text">
+            Giá trọn gói của dịch vụ.
+        </div>
     </div>
 
-    @if ($isEdit)
-        <div class="col-md-6">
-            <label for="TrangThai" class="form-label fw-semibold">
-                Trạng thái
-            </label>
+    <div class="col-md-6">
+        <label for="HoatDong" class="form-label fw-semibold">
+            Trạng thái <span class="text-danger">*</span>
+        </label>
 
-            <select
-                id="TrangThai"
-                name="TrangThai"
-                class="form-select @error('TrangThai') is-invalid @enderror"
-                required
+        <select
+            id="HoatDong"
+            name="HoatDong"
+            class="form-select @error('HoatDong') is-invalid @enderror"
+            required
+        >
+            <option value="">Chọn trạng thái</option>
+
+            <option
+                value="1"
+                @selected(
+                    (string) old('HoatDong', $isEdit ? (int) $dichvu->HoatDong : 1)
+                    === '1'
+                )
             >
-                <option
-                    value="HOAT_DONG"
-                    @selected(old('TrangThai', $dichvu->TrangThai) === 'HOAT_DONG')
-                >
-                    Hoạt động
-                </option>
+                Hoạt động
+            </option>
 
-                <option
-                    value="NGUNG_HOAT_DONG"
-                    @selected(old('TrangThai', $dichvu->TrangThai) === 'NGUNG_HOAT_DONG')
-                >
-                    Ngừng hoạt động
-                </option>
-            </select>
+            <option
+                value="0"
+                @selected(
+                    (string) old('HoatDong', $isEdit ? (int) $dichvu->HoatDong : 1)
+                    === '0'
+                )
+            >
+                Ngừng hoạt động
+            </option>
+        </select>
 
-            @error('TrangThai')
-                <div class="invalid-feedback">{{ $message }}</div>
-            @enderror
-        </div>
-    @endif
+        @error('HoatDong')
+            <div class="invalid-feedback">{{ $message }}</div>
+        @enderror
+    </div>
 
     <div class="col-12">
-        <label for="MoTa" class="form-label fw-semibold">Mô tả</label>
+        <label for="MoTa" class="form-label fw-semibold">
+            Mô tả dịch vụ
+        </label>
 
         <textarea
             id="MoTa"
             name="MoTa"
-            rows="5"
-            maxlength="500"
             class="form-control @error('MoTa') is-invalid @enderror"
-            placeholder="Mô tả nội dung và phạm vi dịch vụ..."
+            rows="5"
+            maxlength="10000"
         >{{ old('MoTa', $isEdit ? $dichvu->MoTa : '') }}</textarea>
 
         @error('MoTa')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
-
-        <div class="form-text">Tối đa 500 ký tự.</div>
     </div>
 
     <div class="col-12">
         <label for="HinhAnh" class="form-label fw-semibold">
-            {{ $isEdit ? 'Hình ảnh mới' : 'Hình ảnh' }}
+            Hình ảnh dịch vụ
+
+            @unless($hasImage)
+                <span class="text-danger">*</span>
+            @endunless
         </label>
 
         <input
@@ -148,42 +156,47 @@
             id="HinhAnh"
             name="HinhAnh"
             class="form-control @error('HinhAnh') is-invalid @enderror"
-            accept=".jpg,.jpeg,.png,.webp"
+            accept="image/jpeg,image/png,image/webp"
+            aria-describedby="HinhAnhHelp"
+            @if(!$hasImage) required @endif
         >
 
         @error('HinhAnh')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
 
-        <div class="form-text">
-            JPG, JPEG, PNG hoặc WEBP. Dung lượng tối đa 2 MB.
-            @if ($isEdit)
-                Để trống để giữ ảnh hiện tại.
+        <div id="HinhAnhHelp" class="form-text">
+            JPG, JPEG, PNG hoặc WebP, tối đa 2 MB.
+
+            @if($hasImage)
+                Không chọn ảnh mới nếu muốn giữ ảnh hiện tại.
+            @else
+                Vui lòng chọn ảnh cho dịch vụ.
             @endif
         </div>
 
-        @if ($isEdit && $dichvu->HinhAnh)
+        @if($hasImage)
             <div class="mt-3">
-                <div class="small text-secondary mb-2">
-                    Hình ảnh hiện tại
-                </div>
+                <p class="small text-secondary mb-2">
+                    Ảnh hiện tại
+                </p>
 
                 <img
                     src="{{ asset('storage/' . $dichvu->HinhAnh) }}"
-                    alt="{{ $dichvu->TenDV }}"
-                    width="180"
-                    height="120"
-                    class="rounded"
-                    style="object-fit: cover;"
+                    alt="Ảnh hiện tại của {{ $dichvu->TenDV }}"
+                    class="rounded-3 border"
+                    width="280"
+                    height="168"
+                    style="object-fit: cover; max-width: 100%;"
                 >
             </div>
         @endif
     </div>
 </div>
 
-<div class="d-flex gap-2 mt-4 pt-3 border-top">
+<div class="d-flex flex-wrap gap-2 mt-4">
     <button type="submit" class="btn btn-primary">
-        {{ $isEdit ? 'Lưu thay đổi' : 'Lưu dịch vụ' }}
+        {{ $isEdit ? 'Lưu thay đổi' : 'Thêm dịch vụ' }}
     </button>
 
     <a href="{{ route('dichvu.index') }}" class="btn btn-outline-secondary">

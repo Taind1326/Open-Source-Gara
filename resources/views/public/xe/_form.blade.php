@@ -1,24 +1,14 @@
 @php
     $editingVehicle = isset($xe);
-
-    $selectedYear = old(
-        'NamSanXuat',
-        $editingVehicle ? $xe->NamSanXuat : ''
-    );
-
-    $selectedMakeId = old('MakeId', '');
-    $selectedModelId = old('ModelId', '');
-
     $currentYear = now('Asia/Ho_Chi_Minh')->year;
+    $vehicleCatalog = config('vehicle_catalog', []);
 @endphp
 
-<div data-vehicle-form
-     data-makes-url="{{ route('public.xe.catalog.makes') }}"
-     data-models-url="{{ route('public.xe.catalog.models') }}"
-     data-selected-make-id="{{ $selectedMakeId }}"
-     data-selected-model-id="{{ $selectedModelId }}"
-     data-existing-make="{{ $editingVehicle ? $xe->HangXe : '' }}"
-     data-existing-model="{{ $editingVehicle ? $xe->DongXe : '' }}">
+<div data-vehicle-form>
+    <script type="application/json" data-vehicle-catalog>
+        @json($vehicleCatalog)
+    </script>
+
     <div class="row g-4">
         <div class="col-lg-8">
             <section class="feature-card h-auto">
@@ -31,158 +21,196 @@
                 </h2>
 
                 <div class="mb-4">
-                    <label for="vehiclePlate"
-                           class="form-label fw-semibold">
+                    <label for="vehiclePlate" class="form-label fw-semibold">
                         Biển số xe
                     </label>
 
-                    <input type="text"
-                           id="vehiclePlate"
-                           name="BienSo"
-                           class="form-control @error('BienSo') is-invalid @enderror"
-                           value="{{ old('BienSo', $editingVehicle ? $xe->BienSo : '') }}"
-                           placeholder="Ví dụ: 51A-123.45"
-                           maxlength="15"
-                           pattern="[A-Za-z0-9.\-]+"
-                           spellcheck="false"
-                           autocapitalize="characters"
-                           aria-describedby="vehiclePlateHelp"
-                           required>
+                    <input
+                        type="text"
+                        id="vehiclePlate"
+                        name="BienSo"
+                        class="form-control @error('BienSo') is-invalid @enderror"
+                        value="{{ old('BienSo', $editingVehicle ? $xe->BienSo : '') }}"
+                        placeholder="Ví dụ: 51A-12345"
+                        maxlength="10"
+                        pattern="[0-9]{2}[A-Za-z][A-Za-z0-9]?-[0-9]{4,5}"
+                        data-pattern-message="Biển số không đúng định dạng. Ví dụ: 51A-12345 hoặc 51A1-1234."
+                        spellcheck="false"
+                        autocapitalize="characters"
+                        aria-describedby="vehiclePlateHelp"
+                        required
+                    >
 
                     @error('BienSo')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
 
                     <div id="vehiclePlateHelp" class="form-text">
-                        Nhập đúng biển số trên giấy đăng ký xe,
-                        không có khoảng trắng.
+                        Nhập biển số trên giấy đăng ký xe, không có khoảng trắng.
                     </div>
                 </div>
 
                 <div class="mb-4">
-                    <label for="vehicleYear"
-                           class="form-label fw-semibold">
-                        Năm sản xuất
-                    </label>
-
-                    <select id="vehicleYear"
-                            name="NamSanXuat"
-                            data-vehicle-year
-                            class="form-select @error('NamSanXuat') is-invalid @enderror"
-                            aria-describedby="vehicleYearHelp"
-                            required>
-                        <option value="">Chọn năm sản xuất</option>
-
-                        @for($year = $currentYear; $year >= 1990; $year--)
-                            <option value="{{ $year }}"
-                                    @selected((string) $selectedYear === (string) $year)>
-                                {{ $year }}
-                            </option>
-                        @endfor
-                    </select>
-
-                    @error('NamSanXuat')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
-                    @enderror
-
-                    <div id="vehicleYearHelp" class="form-text">
-                        Chọn từ năm 1990 đến {{ $currentYear }}.
-                        API lọc dòng xe theo năm mẫu xe, có thể khác
-                        năm sản xuất thực tế.
-                    </div>
-                </div>
-
-                <div class="mb-4">
-                    <label for="vehicleMake"
-                           class="form-label fw-semibold">
+                    <label for="vehicleMake" class="form-label fw-semibold">
                         Hãng xe
                     </label>
 
-                    <select id="vehicleMake"
-                            name="MakeId"
-                            data-vehicle-make
-                            class="form-select @error('MakeId') is-invalid @enderror"
-                            required
-                            disabled>
-                        <option value="">Đang tải hãng xe…</option>
-                    </select>
+                    <div class="garage-combobox" data-vehicle-combo="make">
+                    <input
+                        type="text"
+                        id="vehicleMake"
+                        name="HangXe"
+                        data-vehicle-make
+                        class="form-control @error('HangXe') is-invalid @enderror"
+                        value="{{ old('HangXe', $editingVehicle ? $xe->HangXe : '') }}"
+                        placeholder="Gõ tên hãng xe để tìm..."
+                        maxlength="50"
+                        autocomplete="off"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="vehicleMakeMenu"
+                        aria-describedby="vehicleMakeHelp"
+                        required
+                    >
+                        <button type="button" class="garage-combobox-toggle" data-combo-toggle
+                                aria-label="Mở danh sách hãng xe" aria-expanded="false"
+                                aria-controls="vehicleMakeMenu">
+                            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div id="vehicleMakeMenu" data-combo-menu class="garage-combobox-menu"
+                             role="listbox" aria-label="Hãng xe" hidden></div>
+                    </div>
 
-                    @error('MakeId')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
+                    
+
+                    @error('HangXe')
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+
+                    <div id="vehicleMakeHelp" class="form-text">
+                        Chọn hãng trong gợi ý hoặc nhập hãng chưa có.
+                    </div>
                 </div>
 
                 <div class="mb-4">
-                    <label for="vehicleModel"
-                           class="form-label fw-semibold">
+                    <label for="vehicleModel" class="form-label fw-semibold">
                         Dòng xe
                     </label>
 
-                    <select id="vehicleModel"
-                            name="ModelId"
-                            data-vehicle-model
-                            class="form-select @error('ModelId') is-invalid @enderror"
-                            aria-describedby="vehicleCatalogNotice"
-                            required
-                            disabled>
-                        <option value="">
-                            Chọn năm và hãng xe trước
-                        </option>
-                    </select>
+                    <div class="garage-combobox" data-vehicle-combo="model">
+                    <input
+                        type="text"
+                        id="vehicleModel"
+                        name="DongXe"
+                        data-vehicle-model
+                        class="form-control @error('DongXe') is-invalid @enderror"
+                        value="{{ old('DongXe', $editingVehicle ? $xe->DongXe : '') }}"
+                        placeholder="Chọn hãng rồi gõ tên dòng xe..."
+                        maxlength="70"
+                        autocomplete="off"
+                        role="combobox"
+                        aria-autocomplete="list"
+                        aria-expanded="false"
+                        aria-controls="vehicleModelMenu"
+                        aria-describedby="vehicleModelHelp"
+                        required
+                    >
+                        <button type="button" class="garage-combobox-toggle" data-combo-toggle
+                                aria-label="Mở danh sách dòng xe" aria-expanded="false"
+                                aria-controls="vehicleModelMenu">
+                            <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                        </button>
+                        <div id="vehicleModelMenu" data-combo-menu class="garage-combobox-menu"
+                             role="listbox" aria-label="Dòng xe" hidden></div>
+                    </div>
 
-                    @error('ModelId')
-                        <div class="invalid-feedback">
-                            {{ $message }}
-                        </div>
+                    
+
+                    @error('DongXe')
+                        <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
 
-                    <div id="vehicleCatalogNotice"
-                         data-vehicle-notice
-                         class="form-text"
-                         aria-live="polite">
-                        Danh sách dòng xe được tải theo hãng và năm đã chọn.
+                    <div
+                        id="vehicleModelHelp"
+                        class="form-text"
+                        data-vehicle-notice
+                        aria-live="polite"
+                    >
+                        Chọn dòng xe trong gợi ý hoặc nhập dòng xe chưa có.
                     </div>
                 </div>
 
-                <div data-vehicle-error
-                     class="alert alert-warning d-none"
-                     role="alert"></div>
+                <div class="mb-4">
+                    <label for="vehicleYear" class="form-label fw-semibold">
+                        Năm sản xuất
+                        <span class="text-muted fw-normal">
+                            (không bắt buộc)
+                        </span>
+                    </label>
 
-                <noscript>
-                    <div class="alert alert-warning">
-                        Vui lòng bật JavaScript để tải danh sách hãng
-                        và dòng xe.
+                    <input
+                        type="number"
+                        id="vehicleYear"
+                        name="NamSX"
+                        class="form-control @error('NamSX') is-invalid @enderror"
+                        value="{{ old('NamSX', $editingVehicle ? $xe->NamSX : '') }}"
+                        placeholder="Ví dụ: 2018"
+                        min="1900"
+                        max="{{ $currentYear }}"
+                        step="1"
+                        aria-describedby="vehicleYearHelp"
+                    >
+
+                    
+
+                    @error('NamSX')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+
+                    <div id="vehicleYearHelp" class="form-text">
+                        Nhập hoặc chọn năm sản xuất. Chưa rõ có thể để trống.
                     </div>
-                </noscript>
+                </div>
+
+                <div class="mb-4">
+                    <label for="vehicleColor" class="form-label fw-semibold">
+                        Màu sắc
+                        <span class="text-muted fw-normal">
+                            (không bắt buộc)
+                        </span>
+                    </label>
+
+                    <input
+                        type="text"
+                        id="vehicleColor"
+                        name="MauSac"
+                        class="form-control @error('MauSac') is-invalid @enderror"
+                        value="{{ old('MauSac', $editingVehicle ? $xe->MauSac : '') }}"
+                        placeholder="Ví dụ: Trắng, đen, bạc..."
+                        maxlength="40"
+                    >
+
+                    @error('MauSac')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
                 <div class="d-flex flex-wrap gap-2 border-top pt-4">
-                    <button type="submit"
-                            data-vehicle-submit
-                            class="btn btn-primary"
-                            disabled>
-                        <i class="bi bi-check2-circle me-2"
-                           aria-hidden="true"></i>
+                    <button type="submit" class="btn btn-primary">
+                        <i
+                            class="bi bi-check2-circle me-2"
+                            aria-hidden="true"
+                        ></i>
                         {{ $editingVehicle ? 'Lưu thay đổi' : 'Thêm xe' }}
                     </button>
 
-                    <a href="{{ route('public.xe.index') }}"
-                       class="btn btn-light">
+                    <a
+                        href="{{ route('public.xe.index') }}"
+                        class="btn btn-light"
+                    >
                         Quay lại
                     </a>
-
-                    <button type="button"
-                            data-vehicle-retry
-                            class="btn btn-outline-primary">
-                        <i class="bi bi-arrow-repeat me-1"
-                           aria-hidden="true"></i>
-                        Tải lại danh mục
-                    </button>
                 </div>
             </section>
         </div>
@@ -194,21 +222,20 @@
                 </span>
 
                 <h2 class="h5 fw-bold mb-3">
-                    Chọn đúng thông tin xe
+                    Thêm xe nhanh chóng
                 </h2>
 
                 <ol class="text-muted ps-3 mb-4">
                     <li class="mb-2">Nhập biển số xe.</li>
-                    <li class="mb-2">Chọn năm sản xuất.</li>
-                    <li class="mb-2">Chọn hãng xe từ danh mục.</li>
-                    <li>Chọn dòng xe tương ứng.</li>
+                    <li class="mb-2">Gõ tên hãng để tìm và chọn.</li>
+                    <li class="mb-2">Gõ tên dòng xe tương ứng.</li>
+                    <li>Bổ sung năm sản xuất và màu sắc nếu biết.</li>
                 </ol>
 
                 <div class="border-top pt-3">
                     <p class="text-muted small mb-0">
-                        Danh mục lấy từ NHTSA và có thể chưa có một số
-                        dòng xe tại Việt Nam. Với năm 1990–1995,
-                        danh sách dòng xe chỉ lọc theo hãng.
+                        Không tìm thấy hãng hoặc dòng xe?
+                        Bạn có thể nhập trực tiếp thông tin trên giấy đăng ký xe.
                     </p>
                 </div>
 
@@ -223,7 +250,8 @@
                         </p>
 
                         <p class="text-muted small mb-0">
-                            Năm sản xuất: {{ $xe->NamSanXuat }}
+                            Năm sản xuất:
+                            {{ $xe->NamSX ?? 'Chưa cập nhật' }}
                         </p>
                     </div>
                 @endif

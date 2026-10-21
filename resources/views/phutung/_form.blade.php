@@ -1,9 +1,9 @@
 @php
-    $isEdit = isset($phuTung);
+    $isEdit = isset($phuTung) && $phuTung->exists;
 @endphp
 
-<div class="row g-4">
-    <div class="col-md-6">
+<div class="row g-3">
+    <div class="col-md-8">
         <label for="TenPT" class="form-label fw-semibold">
             Tên phụ tùng <span class="text-danger">*</span>
         </label>
@@ -14,8 +14,7 @@
             name="TenPT"
             value="{{ old('TenPT', $isEdit ? $phuTung->TenPT : '') }}"
             class="form-control @error('TenPT') is-invalid @enderror"
-            maxlength="100"
-            placeholder="Ví dụ: Lọc dầu động cơ"
+            maxlength="150"
             required
         >
 
@@ -24,7 +23,7 @@
         @enderror
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-4">
         <label for="DonViTinh" class="form-label fw-semibold">
             Đơn vị tính <span class="text-danger">*</span>
         </label>
@@ -35,8 +34,8 @@
             name="DonViTinh"
             value="{{ old('DonViTinh', $isEdit ? $phuTung->DonViTinh : '') }}"
             class="form-control @error('DonViTinh') is-invalid @enderror"
+            placeholder="Cái, bộ, lít..."
             maxlength="30"
-            placeholder="Ví dụ: Cái, Bộ, Bình"
             required
         >
 
@@ -46,23 +45,23 @@
     </div>
 
     <div class="col-md-6">
-        <label for="Gia" class="form-label fw-semibold">
-            Đơn giá (đồng) <span class="text-danger">*</span>
+        <label for="GiaBan" class="form-label fw-semibold">
+            Giá bán (đ) <span class="text-danger">*</span>
         </label>
 
         <input
             type="number"
-            id="Gia"
-            name="Gia"
-            value="{{ old('Gia', $isEdit ? $phuTung->Gia : '') }}"
-            class="form-control @error('Gia') is-invalid @enderror"
+            id="GiaBan"
+            name="GiaBan"
+            value="{{ old('GiaBan', $isEdit ? $phuTung->GiaBan : '') }}"
+            class="form-control @error('GiaBan') is-invalid @enderror"
             min="0"
-            max="9999999999.99"
-            step="0.01"
+            max="999999999999"
+            step="1"
             required
         >
 
-        @error('Gia')
+        @error('GiaBan')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
@@ -79,6 +78,7 @@
             value="{{ old('SoLuongTon', $isEdit ? $phuTung->SoLuongTon : 0) }}"
             class="form-control @error('SoLuongTon') is-invalid @enderror"
             min="0"
+            max="2147483647"
             step="1"
             required
         >
@@ -89,40 +89,42 @@
     </div>
 
     <div class="col-md-6">
-        <label for="TrangThai" class="form-label fw-semibold">
-            Trạng thái
+        <label for="HoatDong" class="form-label fw-semibold">
+            Trạng thái <span class="text-danger">*</span>
         </label>
 
         <select
-            id="TrangThai"
-            name="TrangThai"
-            class="form-select @error('TrangThai') is-invalid @enderror"
+            id="HoatDong"
+            name="HoatDong"
+            class="form-select @error('HoatDong') is-invalid @enderror"
             required
         >
+            <option value="">Chọn trạng thái</option>
+
             <option
-                value="DANG_SU_DUNG"
-                @selected(old('TrangThai', $isEdit ? $phuTung->TrangThai : 'DANG_SU_DUNG') === 'DANG_SU_DUNG')
+                value="1"
+                @selected((string) old('HoatDong', $isEdit ? (int) $phuTung->HoatDong : 1) === '1')
             >
                 Đang sử dụng
             </option>
 
             <option
-                value="NGUNG_SU_DUNG"
-                @selected(old('TrangThai', $isEdit ? $phuTung->TrangThai : 'DANG_SU_DUNG') === 'NGUNG_SU_DUNG')
+                value="0"
+                @selected((string) old('HoatDong', $isEdit ? (int) $phuTung->HoatDong : 1) === '0')
             >
                 Ngừng sử dụng
             </option>
         </select>
 
-        @error('TrangThai')
+        @error('HoatDong')
             <div class="invalid-feedback">{{ $message }}</div>
         @enderror
     </div>
 </div>
 
-<div class="d-flex gap-2 mt-4 pt-3 border-top">
+<div class="d-flex flex-wrap gap-2 mt-4">
     <button type="submit" class="btn btn-primary">
-        {{ $isEdit ? 'Lưu thay đổi' : 'Lưu phụ tùng' }}
+        {{ $isEdit ? 'Lưu thay đổi' : 'Thêm phụ tùng' }}
     </button>
 
     <a href="{{ route('phutung.index') }}" class="btn btn-outline-secondary">

@@ -18,7 +18,7 @@
             @if($step === 1)
                 <h2>Nhập email của bạn</h2>
                 <p>Nhập email đã đăng ký tài khoản tại AutoCare Garage.</p>
-                <form method="POST" action="{{ route('password.demo.start') }}">
+                <form novalidate method="POST" action="{{ route('password.demo.start') }}">
                     @csrf
                     <label for="reset-email">Email</label>
                     <input class="form-control @error('Email') is-invalid @enderror" id="reset-email" name="Email" type="email" value="{{ old('Email') }}" autocomplete="email" maxlength="100" placeholder="Nhập email của bạn" required autofocus>
@@ -32,7 +32,7 @@
                 @endphp
                 <h2>Xác nhận mã OTP</h2>
                 <p>Email khôi phục: <strong class="password-demo-email">{{ $flow->email }}</strong></p>
-                <form method="POST" action="{{ route('password.demo.verify') }}">
+                <form novalidate method="POST" action="{{ route('password.demo.verify') }}">
                     @csrf
                     <label for="reset-otp">Mã xác nhận 6 chữ số</label>
                     <input class="form-control password-demo-otp @error('otp') is-invalid @enderror" id="reset-otp" name="otp" inputmode="numeric" pattern="[0-9]{6}" minlength="6" maxlength="6" autocomplete="one-time-code" placeholder="000000" required autofocus>
@@ -41,7 +41,7 @@
                     <button class="btn btn-primary w-100" type="submit" data-verify @disabled($remaining === 0)>Xác nhận OTP</button>
                 </form>
                 <div class="password-demo-resend">
-                    <form method="POST" action="{{ route('password.demo.resend') }}">
+                    <form novalidate method="POST" action="{{ route('password.demo.resend') }}">
                         @csrf
                         <button class="password-demo-link" type="submit" data-resend @disabled($remaining > 0)>Gửi lại mã</button>
                     </form>
@@ -50,7 +50,7 @@
             @else
                 <h2>Tạo mật khẩu mới</h2>
                 <p>Mật khẩu có ít nhất 8 ký tự, gồm chữ và số.</p>
-                <form method="POST" action="{{ route('password.demo.reset') }}">
+                <form novalidate method="POST" action="{{ route('password.demo.reset') }}">
                     @csrf
                     @foreach(['MatKhau' => 'Mật khẩu mới', 'MatKhau_confirmation' => 'Xác nhận mật khẩu mới'] as $name => $label)
                         <div class="mt-3">
@@ -59,14 +59,14 @@
                                 <input class="form-control @error($name) is-invalid @enderror" type="password" id="reset-{{ $name }}" name="{{ $name }}" minlength="8" maxlength="255" autocomplete="new-password" required>
                                 <button class="password-demo-eye" type="button" data-reset-toggle aria-controls="reset-{{ $name }}" aria-label="Hiện mật khẩu" aria-pressed="false" hidden><i class="bi bi-eye" aria-hidden="true"></i></button>
                             </div>
-                            @error($name)<p class="text-danger small mt-2">{{ $message }}</p>@enderror
+                            @error($name)<p class="invalid-feedback d-block">{{ $message }}</p>@enderror
                         </div>
                     @endforeach
                     <button class="btn btn-primary w-100 mt-4" type="submit">Đổi mật khẩu</button>
                 </form>
             @endif
             @if($step > 1)
-                <form method="POST" action="{{ route('password.demo.restart') }}" class="mt-3">
+                <form novalidate method="POST" action="{{ route('password.demo.restart') }}" class="mt-3">
                     @csrf
                     <button class="password-demo-link" type="submit">Dùng email khác / Bắt đầu lại</button>
                 </form>

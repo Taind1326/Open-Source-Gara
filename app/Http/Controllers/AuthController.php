@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\TaiKhoan;
+use App\Services\GaragePassword;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,38 +19,61 @@ class AuthController extends Controller
         return view('auth.login');
     }
 
-    public function login(Request $request): RedirectResponse
-    {
+    public function login(
+        Request $request,
+        GaragePassword $garagePassword
+    ): RedirectResponse {
+        $this->trimFields($request, ['Email']);
+
         $data = $request->validate([
-            'Email' => ['required', 'email', 'max:100'],
-            'MatKhau' => ['required', 'string', 'max:255'],
+            'Email' => [
+                'bail',
+                'required',
+                'email',
+                'max:100',
+            ],
+            'MatKhau' => [
+                'bail',
+                'required',
+                'string',
+                'max:255',
+            ],
         ], [
             'Email.required' => 'Vui lòng nhập email.',
             'Email.email' => 'Email không đúng định dạng.',
+            'Email.max' => 'Email không được vượt quá 100 ký tự.',
+
             'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
+            'MatKhau.string' => 'Mật khẩu không hợp lệ.',
+            'MatKhau.max' => 'Mật khẩu không được vượt quá 255 ký tự.',
         ]);
 
-        $credentials = [
-            'Email' => trim($data['Email']),
-            'password' => $data['MatKhau'],
-            'TrangThai' => 'HOAT_DONG',
-        ];
+        $taiKhoan = TaiKhoan::query()
+            ->where('Email', $data['Email'])
+            ->first();
 
-        if (! Auth::attempt($credentials)) {
+        if (
+            !$taiKhoan
+            || $taiKhoan->TrangThai !== 'HOAT_DONG'
+            || !$garagePassword->check($taiKhoan, $data['MatKhau'])
+        ) {
             throw ValidationException::withMessages([
                 'Email' => 'Email hoặc mật khẩu không đúng, hoặc tài khoản đã bị khóa.',
             ]);
         }
 
+        Auth::login($taiKhoan);
+
         $request->session()->regenerate();
+        $request->session()->forget('url.intended');
 
-        if ($request->user()->VaiTro === 'ADMIN') {
-            $request->session()->forget('url.intended');
+        $trangDich = match ($taiKhoan->VaiTro) {
+            'ADMIN' => 'admin.dashboard',
+            'TECHNICIAN' => 'ktv.lichhen.index',
+            default => 'public.home',
+        };
 
-            return redirect()->route('admin.dashboard');
-        }
-
-        return redirect()->intended(route('public.dichvu.index'));
+        return redirect()->route($trangDich);
     }
 
     public function showRegister(): View
@@ -59,66 +83,91 @@ class AuthController extends Controller
 
     public function register(Request $request): RedirectResponse
     {
-        $request->merge([
-            'HoTen' => trim((string) $request->input('HoTen')),
-            'Email' => trim((string) $request->input('Email')),
-            'SoDienThoai' => trim((string) $request->input('SoDienThoai')),
+        $this->trimFields($request, [
+            'HoTen',
+            'Email',
+            'SoDienThoai',
         ]);
 
         $data = $request->validate([
-            'HoTen' => ['required', 'string', 'max:100'],
+            'HoTen' => [
+                'bail',
+                'required',
+                'string',
+                'max:100',
+            ],
             'Email' => [
+                'bail',
                 'required',
                 'email',
                 'max:100',
                 'unique:TAIKHOAN,Email',
             ],
             'SoDienThoai' => [
+                'bail',
                 'required',
-                'regex:/^0[0-9]{9}$/',
+                'string',
+                'regex:/\A0[0-9]{9}\z/',
                 'unique:TAIKHOAN,SoDienThoai',
             ],
             'MatKhau' => [
+                'bail',
                 'required',
                 'string',
                 'max:255',
-                'confirmed',
-                Password::min(8)->letters()->numbers(),
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
+            'MatKhau_confirmation' => [
+                'bail',
+                'required',
+                'string',
+                'same:MatKhau',
             ],
         ], [
             'HoTen.required' => 'Vui lòng nhập họ tên.',
+            'HoTen.string' => 'Họ tên không hợp lệ.',
             'HoTen.max' => 'Họ tên không được vượt quá 100 ký tự.',
+
             'Email.required' => 'Vui lòng nhập email.',
             'Email.email' => 'Email không đúng định dạng.',
-            'Email.unique' => 'Email đã được sử dụng.',
             'Email.max' => 'Email không được vượt quá 100 ký tự.',
+            'Email.unique' => 'Email đã được sử dụng.',
+
             'SoDienThoai.required' => 'Vui lòng nhập số điện thoại.',
+            'SoDienThoai.string' => 'Số điện thoại không hợp lệ.',
             'SoDienThoai.regex' => 'Số điện thoại gồm 10 chữ số và bắt đầu bằng 0.',
             'SoDienThoai.unique' => 'Số điện thoại đã được sử dụng.',
+
             'MatKhau.required' => 'Vui lòng nhập mật khẩu.',
-            'MatKhau.confirmed' => 'Mật khẩu xác nhận không khớp.',
+            'MatKhau.string' => 'Mật khẩu không hợp lệ.',
+            'MatKhau.max' => 'Mật khẩu không được vượt quá 255 ký tự.',
             'MatKhau.min' => 'Mật khẩu phải có ít nhất 8 ký tự.',
             'MatKhau.letters' => 'Mật khẩu phải có chữ cái.',
+            'MatKhau.mixed' => 'Mật khẩu phải có chữ hoa và chữ thường.',
             'MatKhau.numbers' => 'Mật khẩu phải có chữ số.',
+            'MatKhau.symbols' => 'Mật khẩu phải có ký tự đặc biệt.',
+
+            'MatKhau_confirmation.required' => 'Vui lòng nhập xác nhận mật khẩu.',
+            'MatKhau_confirmation.string' => 'Mật khẩu xác nhận không hợp lệ.',
+            'MatKhau_confirmation.same' => 'Mật khẩu xác nhận không khớp.',
         ]);
 
-        $taiKhoan = TaiKhoan::create([
+        TaiKhoan::create([
             'HoTen' => $data['HoTen'],
             'Email' => $data['Email'],
             'SoDienThoai' => $data['SoDienThoai'],
             'MatKhau' => Hash::make($data['MatKhau']),
             'VaiTro' => 'USER',
-            'DiemTichLuy' => 0,
             'TrangThai' => 'HOAT_DONG',
         ]);
 
-        Auth::login($taiKhoan);
-
-        $request->session()->regenerate();
-
         return redirect()
-            ->intended(route('public.dichvu.index'))
-            ->with('success', 'Đăng ký tài khoản thành công.');
+    ->route('login')
+    ->with('success', 'Đăng ký thành công. Vui lòng đăng nhập.');
     }
 
     public function logout(Request $request): RedirectResponse
@@ -128,6 +177,21 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('public.dichvu.index');
+        return redirect()->route('public.home');
+    }
+
+    private function trimFields(Request $request, array $fields): void
+    {
+        $normalized = [];
+
+        foreach ($fields as $field) {
+            $value = $request->input($field);
+
+            if (is_string($value)) {
+                $normalized[$field] = trim($value);
+            }
+        }
+
+        $request->merge($normalized);
     }
 }

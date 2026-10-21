@@ -3,37 +3,63 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HoaDon extends Model
 {
     protected $table = 'HOADON';
+
     protected $primaryKey = 'MaHD';
+
     public $timestamps = false;
 
     protected $fillable = [
+        'MaLH',
         'MaPSC',
-        'TongTienGoc',
-        'DiemDaDung',
-        'PhanTramGiam',
-        'SoTienGiam',
-        'TongThanhToan',
-        'PhuongThucThanhToan',
-        'TrangThaiThanhToan',
         'NgayLap',
-        'NgayThanhToan',
+        'LoaiUuDai',
+        'TyLeGiam',
+        'DiemSuDung',
+        'DiemDuocCong',
+        'DaXuLyDiem',
+        'TongTruocGiam',
+        'GiaTriDuocGiam',
+        'TienGiam',
+        'TongTien',
+        'TrangThai',
     ];
 
-    protected $casts = [
-        'TongTienGoc' => 'decimal:2',
-        'DiemDaDung' => 'integer',
-        'PhanTramGiam' => 'decimal:2',
-        'SoTienGiam' => 'decimal:2',
-        'TongThanhToan' => 'decimal:2',
-        'NgayLap' => 'datetime',
-        'NgayThanhToan' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'MaHD' => 'integer',
+            'MaLH' => 'integer',
+            'MaPSC' => 'integer',
 
-    public function phieuSuaChua()
+            'NgayLap' => 'datetime',
+
+            'TyLeGiam' => 'decimal:2',
+            'DiemSuDung' => 'integer',
+            'DiemDuocCong' => 'integer',
+            'DaXuLyDiem' => 'boolean',
+
+            'TongTruocGiam' => 'decimal:0',
+            'GiaTriDuocGiam' => 'decimal:0',
+            'TienGiam' => 'decimal:0',
+            'TongTien' => 'decimal:0',
+        ];
+    }
+
+    public function lichHen(): BelongsTo
+    {
+        return $this->belongsTo(
+            LichHen::class,
+            'MaLH',
+            'MaLH'
+        );
+    }
+
+    public function phieuSuaChua(): BelongsTo
     {
         return $this->belongsTo(
             PhieuSuaChua::class,

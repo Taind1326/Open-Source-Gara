@@ -78,18 +78,20 @@ class TaiKhoanController extends Controller
         $data = $request->validateWithBag('password', [
             'MatKhauHienTai' => ['required', 'string'],
 
+            'MatKhau_confirmation' => ['bail', 'required', 'string', 'same:MatKhau'],
+
             'MatKhau' => [
                 'required',
                 'string',
                 Password::min(8)->letters()->numbers(),
-                'confirmed',
                 'different:MatKhauHienTai',
             ],
         ], [
             'MatKhauHienTai.required' => 'Vui lòng nhập mật khẩu hiện tại.',
             'MatKhau.required' => 'Vui lòng nhập mật khẩu mới.',
             'MatKhau.min' => 'Mật khẩu mới phải có ít nhất 8 ký tự.',
-            'MatKhau.confirmed' => 'Xác nhận mật khẩu mới không khớp.',
+            'MatKhau_confirmation.required' => 'Vui lòng nhập xác nhận mật khẩu.',
+            'MatKhau_confirmation.same' => 'Xác nhận mật khẩu mới không khớp.',
             'MatKhau.different' => 'Mật khẩu mới phải khác mật khẩu hiện tại.',
         ]);
 

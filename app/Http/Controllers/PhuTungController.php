@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PhuTung;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -10,7 +11,9 @@ class PhuTungController extends Controller
 {
     public function index()
     {
-        $danhSach = PhuTung::orderBy('MaPT', 'desc')->get();
+        $danhSach = PhuTung::query()
+            ->orderByDesc('MaPT')
+            ->get();
 
         return view('phutung.index', compact('danhSach'));
     }
@@ -22,42 +25,13 @@ class PhuTungController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate(
-            [
-                'TenPT' => 'required|string|max:100',
-                'DonViTinh' => 'required|string|max:30',
-                'Gia' => 'required|numeric|min:0|max:9999999999.99',
-                'SoLuongTon' => 'required|integer|min:0',
-                'TrangThai' => 'required|in:DANG_SU_DUNG,NGUNG_SU_DUNG'
-            ],
-            [
-                'TenPT.required' => 'Vui lòng nhập tên phụ tùng.',
-                'TenPT.string' => 'Tên phụ tùng phải là chuỗi.',
-                'TenPT.max' => 'Tên phụ tùng không được vượt quá 100 ký tự.',
-
-                'DonViTinh.required' => 'Vui lòng nhập đơn vị tính.',
-                'DonViTinh.string' => 'Đơn vị tính phải là chuỗi.',
-                'DonViTinh.max' => 'Đơn vị tính không được vượt quá 30 ký tự.',
-
-                'Gia.required' => 'Vui lòng nhập giá hợp lệ.',
-                'Gia.numeric' => 'Vui lòng nhập giá hợp lệ.',
-                'Gia.min' => 'Vui lòng nhập giá hợp lệ.',
-                'Gia.max' => 'Vui lòng nhập giá hợp lệ.',
-
-                'SoLuongTon.required' => 'Vui lòng nhập số lượng tồn.',
-                'SoLuongTon.integer' => 'Số lượng tồn phải là số nguyên.',
-                'SoLuongTon.min' => 'Số lượng tồn không được nhỏ hơn 0.',
-
-                'TrangThai.required' => 'Vui lòng chọn trạng thái.',
-                'TrangThai.in' => 'Trạng thái không hợp lệ.'
-            ]
-        );
+        $data = $this->validatePart($request);
 
         PhuTung::create($data);
 
         return redirect()
             ->route('phutung.index')
-            ->with('success', 'Thêm phụ tùng thành công.');
+            ->with('success', 'Đã thêm phụ tùng.');
     }
 
     public function edit($id)
@@ -69,71 +43,129 @@ class PhuTungController extends Controller
 
     public function update(Request $request, $id)
     {
-        $phuTung = PhuTung::findOrFail($id);
+        PhuTung::findOrFail($id);
 
-        $data = $request->validate(
-            [
-                'TenPT' => 'required|string|max:100',
-                'DonViTinh' => 'required|string|max:30',
-                'Gia' => 'required|numeric|min:0|max:9999999999.99',
-                'SoLuongTon' => 'required|integer|min:0',
-                'TrangThai' => 'required|in:DANG_SU_DUNG,NGUNG_SU_DUNG'
-            ],
-            [
-                'TenPT.required' => 'Vui lòng nhập tên phụ tùng.',
-                'TenPT.string' => 'Tên phụ tùng phải là chuỗi.',
-                'TenPT.max' => 'Tên phụ tùng không được vượt quá 100 ký tự.',
+        $data = $this->validatePart($request);
 
-                'DonViTinh.required' => 'Vui lòng nhập đơn vị tính.',
-                'DonViTinh.string' => 'Đơn vị tính phải là chuỗi.',
-                'DonViTinh.max' => 'Đơn vị tính không được vượt quá 30 ký tự.',
+        DB::transaction(function () use ($id, $data) {
+            $phuTung = PhuTung::query()
+                ->where('MaPT', $id)
+                ->lockForUpdate()
+                ->firstOrFail();
 
-                'Gia.required' => 'Vui lòng nhập giá hợp lệ.',
-                'Gia.numeric' => 'Vui lòng nhập giá hợp lệ.',
-                'Gia.min' => 'Vui lòng nhập giá hợp lệ.',
-                'Gia.max' => 'Vui lòng nhập giá hợp lệ.',
-
-                'SoLuongTon.required' => 'Vui lòng nhập số lượng tồn.',
-                'SoLuongTon.integer' => 'Số lượng tồn phải là số nguyên.',
-                'SoLuongTon.min' => 'Số lượng tồn không được nhỏ hơn 0.',
-
-                'TrangThai.required' => 'Vui lòng chọn trạng thái.',
-                'TrangThai.in' => 'Trạng thái không hợp lệ.'
-            ]
-        );
-
-        $phuTung->update($data);
+            $phuTung->update($data);
+        });
 
         return redirect()
             ->route('phutung.index')
-            ->with('success', 'Cập nhật phụ tùng thành công.');
+            ->with('success', 'Đã cập nhật phụ tùng.');
     }
 
     public function destroy($id)
     {
-        $phuTung = PhuTung::findOrFail($id);
+        try {
+            $daXoa = DB::transaction(function () use ($id) {
+                $phuTung = PhuTung::query()
+                    ->where('MaPT', $id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
 
-        $daCoBaoGia = DB::table('CHITIETBAOGIA')
-            ->where('MaPT', $id)
-            ->exists();
+                $daDuocSuDung = DB::table('CHITIETLICHHEN')
+                    ->where('MaPT', $phuTung->MaPT)
+                    ->exists();
 
-        $daCoSuaChua = DB::table('CHITIETSUACHUA')
-            ->where('MaPT', $id)
-            ->exists();
+                if ($daDuocSuDung) {
+                    return false;
+                }
 
-        if ($daCoBaoGia || $daCoSuaChua) {
+                $phuTung->delete();
+
+                return true;
+            });
+        } catch (QueryException $exception) {
+            if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
+                throw $exception;
+            }
+
+            $daXoa = false;
+        }
+
+        if (!$daXoa) {
             return redirect()
                 ->route('phutung.index')
                 ->with(
                     'error',
-                    'Không thể xóa phụ tùng này vì đã được sử dụng trong báo giá hoặc sửa chữa.'
+                    'Phụ tùng đã có trong lịch hẹn nên không thể xóa. '
+                    . 'Hãy chuyển sang ngừng sử dụng để giữ lịch sử.'
                 );
         }
 
-        $phuTung->delete();
-
         return redirect()
             ->route('phutung.index')
-            ->with('success', 'Xóa phụ tùng thành công.');
+            ->with('success', 'Đã xóa phụ tùng.');
+    }
+
+    private function validatePart(Request $request): array
+    {
+        $normalized = [];
+
+        foreach (['TenPT', 'DonViTinh'] as $field) {
+            $value = $request->input($field);
+
+            if (is_string($value)) {
+                $normalized[$field] = trim($value);
+            }
+        }
+
+        $request->merge($normalized);
+
+        $data = $request->validate([
+            'TenPT' => ['bail', 'required', 'string', 'max:150'],
+            'DonViTinh' => ['bail', 'required', 'string', 'max:30'],
+            'GiaBan' => [
+                'bail',
+                'required',
+                'integer',
+                'min:0',
+                'max:999999999999',
+            ],
+            'SoLuongTon' => [
+                'bail',
+                'required',
+                'integer',
+                'min:0',
+                'max:2147483647',
+            ],
+            'HoatDong' => ['bail', 'required', 'boolean'],
+        ], [
+            'TenPT.required' => 'Vui lòng nhập tên phụ tùng.',
+            'TenPT.string' => 'Tên phụ tùng không hợp lệ.',
+            'TenPT.max' => 'Tên phụ tùng không được vượt quá 150 ký tự.',
+
+            'DonViTinh.required' => 'Vui lòng nhập đơn vị tính.',
+            'DonViTinh.string' => 'Đơn vị tính không hợp lệ.',
+            'DonViTinh.max' => 'Đơn vị tính không được vượt quá 30 ký tự.',
+
+            'GiaBan.required' => 'Vui lòng nhập giá bán.',
+            'GiaBan.integer' => 'Giá bán phải là số nguyên.',
+            'GiaBan.min' => 'Giá bán không được nhỏ hơn 0.',
+            'GiaBan.max' => 'Giá bán vượt quá giới hạn cho phép.',
+
+            'SoLuongTon.required' => 'Vui lòng nhập số lượng tồn.',
+            'SoLuongTon.integer' => 'Số lượng tồn phải là số nguyên.',
+            'SoLuongTon.min' => 'Số lượng tồn không được nhỏ hơn 0.',
+            'SoLuongTon.max' => 'Số lượng tồn vượt quá giới hạn cho phép.',
+
+            'HoatDong.required' => 'Vui lòng chọn trạng thái.',
+            'HoatDong.boolean' => 'Trạng thái không hợp lệ.',
+        ]);
+
+        return [
+            'TenPT' => $data['TenPT'],
+            'DonViTinh' => $data['DonViTinh'],
+            'GiaBan' => (int) $data['GiaBan'],
+            'SoLuongTon' => (int) $data['SoLuongTon'],
+            'HoatDong' => (bool) $data['HoatDong'],
+        ];
     }
 }

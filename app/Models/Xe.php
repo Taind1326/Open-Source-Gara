@@ -4,8 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Validation\Rule;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Xe extends Model
 {
@@ -25,17 +24,19 @@ class Xe extends Model
         'BienSo',
         'HangXe',
         'DongXe',
-        'NamSanXuat',
-        'TrangThai',
+        'NamSX',
+        'MauSac',
     ];
 
-    protected $casts = [
-        'MaXe' => 'integer',
-        'MaTK' => 'integer',
-        'NamSanXuat' => 'integer',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'MaTK' => 'integer',
+            'NamSX' => 'integer',
+        ];
+    }
 
-    public function taiKhoan()
+    public function taiKhoan(): BelongsTo
     {
         return $this->belongsTo(
             TaiKhoan::class,
@@ -44,9 +45,13 @@ class Xe extends Model
         );
     }
 
-    public function yeuCauSuaChuas()
+    public function lichHens(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->yeuCauSuaChua();
+        return $this->hasMany(
+            LichHen::class,
+            'MaXe',
+            'MaXe'
+        );
     }
 
     // Các trạng thái yêu cầu đã kết thúc (khớp enum YEUCAUSUACHUA.TrangThai)

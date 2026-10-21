@@ -22,14 +22,18 @@ return Application::configure(basePath: dirname(__DIR__))
         );
 
         $middleware->redirectUsersTo(function (Request $request) {
-            if ($request->user()?->VaiTro === 'ADMIN') {
-                return route('admin.dashboard');
-            }
-
-            return route('public.dichvu.index');
+            return route(
+                match ($request->user()?->VaiTro) {
+                    'ADMIN' => 'admin.dashboard',
+                    'TECHNICIAN' => 'ktv.lichhen.index',
+                    default => 'public.home',
+                }
+            );
         });
     })
     ->withExceptions(function (Exceptions $exceptions): void {
+        $exceptions->dontFlash(['MatKhau', 'MatKhau_confirmation', 'MatKhauHienTai']);
+
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*')
                 || $request->expectsJson(),

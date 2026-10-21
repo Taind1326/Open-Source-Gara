@@ -19,7 +19,7 @@
         <div class="col-xl-9">
             <div class="card">
                 <div class="card-body p-4">
-                    <form
+                    <form novalidate
                         action="{{ route('phutung.update', $phuTung->MaPT) }}"
                         method="POST"
                     >

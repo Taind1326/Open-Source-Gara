@@ -3,67 +3,59 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class PhieuSuaChua extends Model
 {
     protected $table = 'PHIEUSUACHUA';
+
     protected $primaryKey = 'MaPSC';
+
     public $timestamps = false;
 
     protected $fillable = [
-        'MaYC',
-        'MaKTV',
+        'MaLH',
+        'MaPKT',
         'NgayBatDau',
         'NgayHoanThanh',
-        'TrangThai',
+        'DaKiemTraCuoi',
         'GhiChu',
+        'BaoHanhDen',
     ];
 
     protected $casts = [
+        'MaPSC' => 'integer',
+        'MaLH' => 'integer',
+        'MaPKT' => 'integer',
         'NgayBatDau' => 'datetime',
         'NgayHoanThanh' => 'datetime',
+        'DaKiemTraCuoi' => 'boolean',
+        'BaoHanhDen' => 'datetime',
     ];
 
-    public function yeuCau()
+    public function lichHen(): BelongsTo
     {
         return $this->belongsTo(
-            YeuCauSuaChua::class,
-            'MaYC',
-            'MaYC'
+            LichHen::class,
+            'MaLH',
+            'MaLH'
         );
     }
 
-    public function chiTiet()
+    public function phieuKiemTra(): BelongsTo
     {
-        return $this->hasMany(
-            ChiTietSuaChua::class,
-            'MaPSC',
-            'MaPSC'
+        return $this->belongsTo(
+            PhieuKiemTra::class,
+            'MaPKT',
+            'MaPKT'
         );
     }
 
-    public function hoaDon()
+    public function hoaDon(): HasOne
     {
         return $this->hasOne(
             HoaDon::class,
-            'MaPSC',
-            'MaPSC'
-        );
-    }
-
-    public function baoGia()
-    {
-        return $this->hasOne(
-            BaoGia::class,
-            'MaYC',
-            'MaYC'
-        );
-    }
-
-    public function tienDos()
-    {
-        return $this->hasMany(
-            TienDo::class,
             'MaPSC',
             'MaPSC'
         );

@@ -8,257 +8,145 @@ use Illuminate\Support\Facades\DB;
 
 class ThongKeController extends Controller
 {
-    private function dbDate(CarbonImmutable $date): string
-    {
-        return $date
-            ->setTimezone(config('app.timezone', 'UTC'))
-            ->format('Y-m-d H:i:s');
-    }
-
-    private function paidInvoices(
-        CarbonImmutable $start,
-        CarbonImmutable $end
-    ) {
-        return DB::table('HOADON')
-            ->where('TrangThaiThanhToan', 'DA_THANH_TOAN')
-            ->whereBetween('NgayThanhToan', [
-                $this->dbDate($start),
-                $this->dbDate($end),
-            ]);
-    }
-
-    private function ranking(
-        string $type,
-        CarbonImmutable $start,
-        CarbonImmutable $end
-    ) {
-        $isService = $type === 'service';
-        $table = $isService ? 'DICHVU' : 'PHUTUNG';
-        $key = $isService ? 'MaDV' : 'MaPT';
-        $name = $isService ? 'TenDV' : 'TenPT';
-
-        return DB::table('CHITIETSUACHUA as ct')
-            ->join("$table as dm", "ct.$key", '=', "dm.$key")
-            ->join('HOADON as hd', 'ct.MaPSC', '=', 'hd.MaPSC')
-            ->where('hd.TrangThaiThanhToan', 'DA_THANH_TOAN')
-            ->whereBetween('hd.NgayThanhToan', [
-                $this->dbDate($start),
-                $this->dbDate($end),
-            ])
-            ->select("dm.$key as Ma", "dm.$name as Ten")
-            ->selectRaw('SUM(ct.SoLuong) AS SoLuong')
-            ->selectRaw(
-                'SUM(
-                    ct.SoLuong * ct.DonGia *
-                    CASE
-                        WHEN hd.TongTienGoc > 0
-                        THEN hd.TongThanhToan / hd.TongTienGoc
-                        ELSE 0
-                    END
-                ) AS DoanhThu'
-            )
-            ->groupBy("dm.$key", "dm.$name")
-            ->orderByDesc('DoanhThu')
-            ->orderBy("dm.$key")
-            ->get();
-    }
-
     public function index(Request $request)
     {
-        $today = CarbonImmutable::now('Asia/Ho_Chi_Minh');
+        $now = CarbonImmutable::now('Asia/Ho_Chi_Minh');
 
-        $request->validate([
-            'tu_ngay' => [
+        $data = $request->validate([
+            'nam' => [
                 'nullable',
-                'date_format:Y-m-d',
-                'before_or_equal:' . $today->format('Y-m-d'),
-            ],
-            'den_ngay' => [
-                'nullable',
-                'date_format:Y-m-d',
-                'before_or_equal:' . $today->format('Y-m-d'),
+                'integer',
+                'min:1900',
+                'max:' . $now->year,
             ],
         ], [
-            '*.date_format' => 'Ngày phải có định dạng hợp lệ.',
-            '*.before_or_equal' => 'Không chọn ngày trong tương lai.',
+            'nam.integer' => 'Năm thống kê phải là số nguyên.',
+            'nam.min' => 'Năm thống kê phải từ 1900.',
+            'nam.max' => 'Không chọn năm lớn hơn năm hiện tại.',
         ]);
 
-        $tuNgay = $request->input('tu_ngay')
-            ?: $today->startOfMonth()->format('Y-m-d');
+        $nam = (int) ($data['nam'] ?? $now->year);
 
-        $denNgay = $request->input('den_ngay')
-            ?: $today->format('Y-m-d');
-
-        $start = CarbonImmutable::createFromFormat(
-            '!Y-m-d',
-            $tuNgay,
+        $start = CarbonImmutable::create(
+            $nam,
+            1,
+            1,
+            0,
+            0,
+            0,
             'Asia/Ho_Chi_Minh'
-        )->startOfDay();
-
-        $end = CarbonImmutable::createFromFormat(
-            '!Y-m-d',
-            $denNgay,
-            'Asia/Ho_Chi_Minh'
-        )->endOfDay();
-
-        if ($start->gt($end)) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'den_ngay' => 'Ngày kết thúc phải từ ngày bắt đầu trở đi.',
-            ]);
-        }
-
-        if ($start->addDays(365)->lt($end->startOfDay())) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
-                'den_ngay' => 'Mỗi lần thống kê chọn tối đa 366 ngày.',
-            ]);
-        }
-
-        $paid = $this->paidInvoices($start, $end)->get();
-
-        $doanhThu = (float) $paid->sum('TongThanhToan');
-        $soHoaDonThanhToan = $paid->count();
-
-        $tongYeuCau = DB::table('YEUCAUSUACHUA')
-            ->whereBetween('NgayTao', [
-                $this->dbDate($start),
-                $this->dbDate($end),
-            ])
-            ->count();
-
-        $soHoaDonChuaThanhToan = DB::table('HOADON')
-            ->where('TrangThaiThanhToan', 'CHUA_THANH_TOAN')
-            ->whereBetween('NgayLap', [
-                $this->dbDate($start),
-                $this->dbDate($end),
-            ])
-            ->count();
-
-        // Khởi tạo cả những ngày không phát sinh doanh thu.
-        $daily = [];
-
-        for ($day = $start; $day->lte($end); $day = $day->addDay()) {
-            $daily[$day->format('Y-m-d')] = 0;
-        }
-
-        foreach ($paid as $invoice) {
-            $day = CarbonImmutable::parse(
-                $invoice->NgayThanhToan,
-                config('app.timezone', 'UTC')
-            )
-                ->setTimezone('Asia/Ho_Chi_Minh')
-                ->format('Y-m-d');
-
-            if (array_key_exists($day, $daily)) {
-                $daily[$day] += (float) $invoice->TongThanhToan;
-            }
-        }
-
-        $dailyLabels = array_map(
-            fn ($day) => CarbonImmutable::parse($day)->format('d/m'),
-            array_keys($daily)
         );
 
-        $dailyValues = array_values($daily);
+        $end = $nam === $now->year
+            ? $now
+            : $start->addYear();
 
-        // So sánh hai tháng theo cùng số ngày, giới hạn theo tháng ngắn hơn.
-        $monthStart = $end->startOfMonth();
-        $previousStart = $monthStart->subMonth();
-
-        $comparisonDays = min(
-            $end->day,
-            $previousStart->daysInMonth
-        );
-
-        $currentCutoff = $monthStart
-            ->addDays($comparisonDays - 1)
-            ->endOfDay();
-
-        $previousCutoff = $previousStart
-            ->addDays($comparisonDays - 1)
-            ->endOfDay();
-
-        $currentRevenue = (float) $this
-            ->paidInvoices($monthStart, $currentCutoff)
-            ->sum('TongThanhToan');
-
-        $previousRevenue = (float) $this
-            ->paidInvoices($previousStart, $previousCutoff)
-            ->sum('TongThanhToan');
-
-        $difference = $currentRevenue - $previousRevenue;
-
-        $growth = $previousRevenue > 0
-            ? round($difference / $previousRevenue * 100, 1)
-            : null;
-
-        $currentMonthLabel = $monthStart->format('m/Y');
-        $previousMonthLabel = $previousStart->format('m/Y');
-
-        // Sáu tháng kết thúc ở tháng chứa ngày kết thúc bộ lọc.
-        $sixMonthStart = $monthStart->subMonths(5);
-        $monthly = [];
-
-        for ($i = 0; $i < 6; $i++) {
-            $monthly[$sixMonthStart->addMonths($i)->format('Y-m')] = 0;
-        }
-
-        $monthlyInvoices = $this
-            ->paidInvoices($sixMonthStart, $end)
-            ->get(['NgayThanhToan', 'TongThanhToan']);
-
-        foreach ($monthlyInvoices as $invoice) {
-            $month = CarbonImmutable::parse(
-                $invoice->NgayThanhToan,
-                config('app.timezone', 'UTC')
+        $summary = $this->paidIn($start, $end)
+            ->selectRaw(
+                'COUNT(*) AS SoHoaDon, '
+                . 'COALESCE(SUM(hd.TongTien), 0) AS DoanhThu'
             )
-                ->setTimezone('Asia/Ho_Chi_Minh')
-                ->format('Y-m');
+            ->first();
 
-            if (array_key_exists($month, $monthly)) {
-                $monthly[$month] += (float) $invoice->TongThanhToan;
-            }
+        $doanhThu = $summary->DoanhThu;
+        $soHoaDonThanhToan = (int) $summary->SoHoaDon;
+
+        // Hóa đơn lập trong năm chọn và hiện vẫn chưa thanh toán.
+        $soHoaDonChuaThanhToan = DB::table('HOADON as hd')
+            ->join('LICHHEN as lh', 'lh.MaLH', '=', 'hd.MaLH')
+            ->where('hd.TrangThai', 'CHUA_THANH_TOAN')
+            ->where('lh.TrangThai', 'CHO_THANH_TOAN')
+            ->where('hd.NgayLap', '>=', $start->format('Y-m-d H:i:s'))
+            ->where('hd.NgayLap', '<', $end->format('Y-m-d H:i:s'))
+            ->count();
+
+        $tongLichHen = DB::table('LICHHEN')
+            ->where('NgayTao', '>=', $start->format('Y-m-d H:i:s'))
+            ->where('NgayTao', '<', $end->format('Y-m-d H:i:s'))
+            ->count();
+
+        // Đủ 12 tháng, kể cả tháng không có doanh thu.
+        $monthlyValues = array_fill(0, 12, 0);
+
+        $monthlyRows = $this->paidIn($start, $end)
+            ->selectRaw(
+                'MONTH(COALESCE(tt.NgayThanhToan, lh.NgayHoanTat)) AS Thang'
+            )
+            ->selectRaw('SUM(hd.TongTien) AS DoanhThu')
+            ->groupByRaw(
+                'MONTH(COALESCE(tt.NgayThanhToan, lh.NgayHoanTat))'
+            )
+            ->get();
+
+        foreach ($monthlyRows as $row) {
+            $monthlyValues[(int) $row->Thang - 1] = (float) $row->DoanhThu;
         }
 
         $monthlyLabels = array_map(
-            fn ($month) => CarbonImmutable::parse($month . '-01')->format('m/Y'),
-            array_keys($monthly)
+            fn ($month) => 'Tháng ' . $month,
+            range(1, 12)
         );
 
-        $monthlyValues = array_values($monthly);
+        // Năm hiện tại: so sánh tháng hiện tại với tháng trước.
+        // Năm cũ: so sánh tháng 12 với tháng 11.
+        $anchor = $nam === $now->year
+            ? $now
+            : $start->addYear()->subDay();
 
-        $allServices = $this->ranking('service', $start, $end);
-        $allParts = $this->ranking('part', $start, $end);
+        $currentStart = $anchor->startOfMonth();
+        $previousStart = $currentStart->subMonth();
 
-        $topServices = $allServices->take(10)->values();
-        $topParts = $allParts->take(10)->values();
+        // So sánh cùng số ngày để tháng dài không có lợi thế.
+        $comparisonDays = min(
+            $anchor->day,
+            $previousStart->daysInMonth
+        );
 
-        $tongLuotDichVu = $allServices->sum('SoLuong');
-        $tongLuotPhuTung = $allParts->sum('SoLuong');
+        $currentEnd = $currentStart->addDays($comparisonDays);
+        $previousEnd = $previousStart->addDays($comparisonDays);
+
+        // Nếu là ngày hiện tại, chỉ tính đến thời điểm hiện tại.
+        $currentEnd = $currentEnd->gt($now) ? $now : $currentEnd;
+        $previousEnd = $previousEnd->gt($now) ? $now : $previousEnd;
+
+        $currentRevenue = $this->paidIn($currentStart, $currentEnd)
+            ->sum('hd.TongTien');
+
+        $previousRevenue = $this->paidIn($previousStart, $previousEnd)
+            ->sum('hd.TongTien');
+
+        $difference = (float) $currentRevenue - (float) $previousRevenue;
+
+        $growth = (float) $previousRevenue > 0
+            ? round($difference / (float) $previousRevenue * 100, 1)
+            : null;
+
+        $currentMonthLabel = $currentStart->format('m/Y');
+        $previousMonthLabel = $previousStart->format('m/Y');
+
+        $topServices = $this->ranking(
+            'DICH_VU',
+            $start,
+            $end
+        );
+
+        $topParts = $this->ranking(
+            'PHU_TUNG',
+            $start,
+            $end
+        );
 
         $chartData = [
-            'dailyLabels' => $dailyLabels,
-            'dailyValues' => $dailyValues,
             'monthlyLabels' => $monthlyLabels,
             'monthlyValues' => $monthlyValues,
-            'comparisonLabels' => [
-                $previousMonthLabel,
-                $currentMonthLabel,
-            ],
-            'comparisonValues' => [
-                $previousRevenue,
-                $currentRevenue,
-            ],
         ];
 
         return view('thongke.index', compact(
-            'tuNgay',
-            'denNgay',
+            'nam',
             'doanhThu',
-            'tongYeuCau',
             'soHoaDonThanhToan',
             'soHoaDonChuaThanhToan',
-            'tongLuotDichVu',
-            'tongLuotPhuTung',
+            'tongLichHen',
             'topServices',
             'topParts',
             'currentRevenue',
@@ -270,5 +158,78 @@ class ThongKeController extends Controller
             'previousMonthLabel',
             'chartData'
         ));
+    }
+
+    private function paidIn(
+        CarbonImmutable $start,
+        CarbonImmutable $end
+    ) {
+        $successfulPayments = DB::table('THANHTOAN')
+            ->where('TrangThai', 'THANH_CONG')
+            ->select('MaHD', 'NgayThanhToan', 'SoTien');
+
+        return DB::table('HOADON as hd')
+            ->join('LICHHEN as lh', 'lh.MaLH', '=', 'hd.MaLH')
+            ->leftJoinSub(
+                $successfulPayments,
+                'tt',
+                function ($join) {
+                    $join->on('tt.MaHD', '=', 'hd.MaHD');
+                }
+            )
+            ->where('hd.TrangThai', 'DA_THANH_TOAN')
+            ->where('hd.DaXuLyDiem', true)
+            ->where('lh.TrangThai', 'HOAN_TAT')
+            ->where(function ($query) {
+                $query->where(function ($query) {
+                    $query->where('hd.TongTien', '>', 0)
+                        ->whereNotNull('tt.NgayThanhToan')
+                        ->whereColumn('tt.SoTien', 'hd.TongTien');
+                })->orWhere(function ($query) {
+                    // Hóa đơn 0đ không có giao dịch thu tiền.
+                    $query->where('hd.TongTien', 0)
+                        ->whereNotNull('lh.NgayHoanTat');
+                });
+            })
+            ->whereRaw(
+                'COALESCE(tt.NgayThanhToan, lh.NgayHoanTat) >= ?',
+                [$start->format('Y-m-d H:i:s')]
+            )
+            ->whereRaw(
+                'COALESCE(tt.NgayThanhToan, lh.NgayHoanTat) < ?',
+                [$end->format('Y-m-d H:i:s')]
+            );
+    }
+
+    private function ranking(
+        string $type,
+        CarbonImmutable $start,
+        CarbonImmutable $end
+    ) {
+        $key = $type === 'DICH_VU' ? 'item.MaDV' : 'item.MaPT';
+
+        $paidInvoices = $this->paidIn($start, $end)
+            ->select('hd.MaHD');
+
+        return DB::table('CTHOADON as ct')
+            ->joinSub($paidInvoices, 'paid', function ($join) {
+                $join->on('paid.MaHD', '=', 'ct.MaHD');
+            })
+            ->join('CHITIETLICHHEN as item', function ($join) {
+                $join->on('item.MaCTLH', '=', 'ct.MaCTLH')
+                    ->on('item.MaLH', '=', 'ct.MaLH');
+            })
+            ->where('ct.LoaiHangMuc', $type)
+            ->whereNotNull($key)
+            ->select($key . ' as Ma')
+            ->selectRaw('MAX(ct.TenHangMuc) AS Ten')
+            ->selectRaw('SUM(ct.SoLuong) AS SoLuong')
+            ->selectRaw('SUM(ct.ThanhTien) AS DoanhThu')
+            ->groupBy($key)
+            ->orderByDesc('SoLuong')
+            ->orderByDesc('DoanhThu')
+            ->orderBy($key)
+            ->limit(10)
+            ->get();
     }
 }

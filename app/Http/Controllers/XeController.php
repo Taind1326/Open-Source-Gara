@@ -3,34 +3,25 @@
 namespace App\Http\Controllers;
 
 use App\Models\Xe;
-use App\Services\VehicleCatalogService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
-use RuntimeException;
+use Illuminate\Database\QueryException;
 
 class XeController extends Controller
 {
-    public function __construct(
-        private VehicleCatalogService $catalog
-    ) {
-    }
-
     public function index(Request $request)
     {
         $data = $request->validate([
             'tu_khoa' => ['nullable', 'string', 'max:100'],
-            'trang_thai' => [
-                'nullable',
-                Rule::in(['HOAT_DONG', 'NGUNG_SU_DUNG']),
-            ],
+            'page' => ['nullable', 'integer', 'min:1'],
         ]);
 
         $tuKhoa = trim($data['tu_khoa'] ?? '');
-        $trangThai = $data['trang_thai'] ?? null;
 
-        $xes = Xe::where('MaTK', $request->user()->MaTK)
+        $xes = Xe::query()
+            ->where('MaTK', $request->user()->MaTK)
             ->when($tuKhoa !== '', function ($query) use ($tuKhoa) {
                 $query->where(function ($query) use ($tuKhoa) {
                     $query->where('BienSo', 'like', "%{$tuKhoa}%")
@@ -38,18 +29,21 @@ class XeController extends Controller
                         ->orWhere('DongXe', 'like', "%{$tuKhoa}%");
                 });
             })
-            ->when($trangThai, function ($query) use ($trangThai) {
-                $query->where('TrangThai', $trangThai);
-            })
             ->orderByDesc('MaXe')
             ->paginate(9)
             ->withQueryString();
 
-        return view('public.xe.index', compact(
-            'xes',
-            'tuKhoa',
-            'trangThai'
-        ));
+        if ($xes->currentPage() > $xes->lastPage()) {
+            return redirect()->route(
+                'public.xe.index',
+                array_merge(
+                    $request->only('tu_khoa'),
+                    ['page' => $xes->lastPage()]
+                )
+            );
+        }
+
+        return view('public.xe.index', compact('xes', 'tuKhoa'));
     }
 
     public function create()
@@ -63,11 +57,7 @@ class XeController extends Controller
 
         Xe::create([
             'MaTK' => $request->user()->MaTK,
-            'BienSo' => $data['BienSo'],
-            'HangXe' => $data['HangXe'],
-            'DongXe' => $data['DongXe'],
-            'NamSanXuat' => $data['NamSanXuat'],
-            'TrangThai' => 'HOAT_DONG',
+            ...$data,
         ]);
 
         return redirect()
@@ -77,7 +67,8 @@ class XeController extends Controller
 
     public function edit(Request $request, $maXe)
     {
-        $xe = Xe::where('MaTK', $request->user()->MaTK)
+        $xe = Xe::query()
+            ->where('MaTK', $request->user()->MaTK)
             ->findOrFail($maXe);
 
         return view('public.xe.edit', compact('xe'));
@@ -85,23 +76,25 @@ class XeController extends Controller
 
     public function update(Request $request, $maXe)
     {
-        $xe = Xe::where('MaTK', $request->user()->MaTK)
+        $xe = Xe::query()
+            ->where('MaTK', $request->user()->MaTK)
             ->findOrFail($maXe);
 
         $data = $this->validateVehicle($request, $xe);
 
         DB::transaction(function () use ($request, $maXe, $data) {
-            $xe = Xe::where('MaTK', $request->user()->MaTK)
+            $xe = Xe::query()
+                ->where('MaTK', $request->user()->MaTK)
                 ->where('MaXe', $maXe)
                 ->lockForUpdate()
                 ->firstOrFail();
 
             $xe->fill($data);
 
-            if ($xe->isDirty() && $this->hasOpenRequest($xe)) {
+            if ($xe->isDirty() && $this->hasOpenAppointment($xe)) {
                 throw ValidationException::withMessages([
-                    'BienSo' => 'Xe đang có yêu cầu chưa kết thúc. '
-                        . 'Vui lòng hoàn tất hoặc hủy yêu cầu trước khi sửa thông tin.',
+                    'BienSo' => 'Xe đang có lịch hẹn chưa kết thúc. '
+                        . 'Vui lòng hoàn tất hoặc hủy lịch trước khi sửa thông tin.',
                 ]);
             }
 
@@ -113,91 +106,59 @@ class XeController extends Controller
             ->with('success', 'Đã cập nhật thông tin xe.');
     }
 
-    public function updateStatus(Request $request, $maXe)
-    {
-        $data = $request->validate([
-            'TrangThai' => [
-                'required',
-                Rule::in(['HOAT_DONG', 'NGUNG_SU_DUNG']),
-            ],
-        ]);
-
-        DB::transaction(function () use ($request, $maXe, $data) {
-            $xe = Xe::where('MaTK', $request->user()->MaTK)
+    public function destroy(Request $request, $maXe)
+{
+    try {
+        $daXoa = DB::transaction(function () use ($request, $maXe) {
+            $xe = Xe::query()
+                ->where('MaTK', $request->user()->MaTK)
                 ->where('MaXe', $maXe)
                 ->lockForUpdate()
                 ->firstOrFail();
 
-            if (
-                $data['TrangThai'] === 'NGUNG_SU_DUNG'
-                && $this->hasOpenRequest($xe)
-            ) {
-                throw ValidationException::withMessages([
-                    'TrangThai' => 'Xe đang có yêu cầu chưa kết thúc '
-                        . 'nên chưa thể ngừng sử dụng.',
-                ]);
+            // Giữ lịch sử của mọi lịch hẹn, kể cả đã hủy hoặc hoàn tất.
+            $daCoLichHen = DB::table('LICHHEN')
+                ->where('MaXe', $xe->MaXe)
+                ->exists();
+
+            if ($daCoLichHen) {
+                return false;
             }
 
-            $xe->update([
-                'TrangThai' => $data['TrangThai'],
-            ]);
-        });
+            $xe->delete();
 
+            return true;
+        }, 3);
+    } catch (QueryException $exception) {
+        if ((int) ($exception->errorInfo[1] ?? 0) !== 1451) {
+            throw $exception;
+        }
+
+        $daXoa = false;
+    }
+
+    if (!$daXoa) {
         return redirect()
             ->route('public.xe.index')
             ->with(
-                'success',
-                $data['TrangThai'] === 'HOAT_DONG'
-                    ? 'Đã kích hoạt lại xe.'
-                    : 'Đã ngừng sử dụng xe. Lịch sử sửa chữa vẫn được giữ lại.'
+                'error',
+                'Xe đã có lịch hẹn nên không thể xóa. '
+                . 'Thông tin xe được giữ lại để bảo toàn lịch sử sửa chữa, '
+                . 'hóa đơn và bảo hành.'
             );
     }
 
-    public function makes()
-    {
-        try {
-            return response()->json([
-                'data' => $this->catalog->makes(),
-            ]);
-        } catch (RuntimeException $exception) {
-            return response()->json([
-                'message' => $exception->getMessage(),
-            ], 503);
-        }
-    }
+    return redirect()
+        ->route('public.xe.index')
+        ->with('success', 'Đã xóa xe khỏi tài khoản của bạn.');
+}
 
-    public function models(Request $request)
+    private function hasOpenAppointment(Xe $xe): bool
     {
-        $data = $request->validate([
-            'make_id' => ['required', 'integer', 'min:1'],
-            'year' => [
-                'required',
-                'integer',
-                'min:1990',
-                'max:' . now('Asia/Ho_Chi_Minh')->year,
-            ],
-        ]);
-
-        try {
-            return response()->json(
-                $this->catalog->models(
-                    (int) $data['make_id'],
-                    (int) $data['year']
-                )
-            );
-        } catch (RuntimeException $exception) {
-            return response()->json([
-                'message' => $exception->getMessage(),
-            ], 503);
-        }
-    }
-
-    private function hasOpenRequest(Xe $xe): bool
-    {
-        return $xe->yeuCauSuaChuas()
+        return DB::table('LICHHEN')
+            ->where('MaXe', $xe->MaXe)
             ->whereNotIn('TrangThai', [
-                'HOAN_THANH',
-                'TU_CHOI',
+                'HOAN_TAT',
                 'DA_HUY',
             ])
             ->exists();
@@ -207,12 +168,24 @@ class XeController extends Controller
         Request $request,
         ?Xe $xe = null
     ): array {
-        $request->merge([
-            'BienSo' => mb_strtoupper(
-                trim((string) $request->input('BienSo')),
+        $normalized = [];
+
+        foreach (['BienSo', 'HangXe', 'DongXe', 'MauSac'] as $field) {
+            $value = $request->input($field);
+
+            if (is_string($value)) {
+                $normalized[$field] = trim($value);
+            }
+        }
+
+        if (isset($normalized['BienSo'])) {
+            $normalized['BienSo'] = mb_strtoupper(
+                $normalized['BienSo'],
                 'UTF-8'
-            ),
-        ]);
+            );
+        }
+
+        $request->merge($normalized);
 
         $uniquePlate = Rule::unique('XE', 'BienSo');
 
@@ -222,78 +195,101 @@ class XeController extends Controller
 
         $data = $request->validate([
             'BienSo' => [
+                'bail',
                 'required',
                 'string',
-                'max:15',
-                'regex:/^[A-Z0-9.-]+$/',
+                'regex:/\A[0-9]{2}[A-Z][A-Z0-9]?-[0-9]{4,5}\z/',
                 $uniquePlate,
             ],
-            'NamSanXuat' => [
+
+            'HangXe' => [
+                'bail',
                 'required',
+                'string',
+                'max:50',
+            ],
+
+            'DongXe' => [
+                'bail',
+                'required',
+                'string',
+                'max:70',
+            ],
+
+            'NamSX' => [
+                'bail',
+                'nullable',
                 'integer',
-                'min:1990',
+                'min:1900',
                 'max:' . now('Asia/Ho_Chi_Minh')->year,
             ],
-            'MakeId' => ['required', 'integer', 'min:1'],
-            'ModelId' => ['required', 'integer', 'min:1'],
+
+            'MauSac' => [
+                'bail',
+                'nullable',
+                'string',
+                'max:40',
+            ],
         ], [
             'BienSo.required' => 'Vui lòng nhập biển số xe.',
-            'BienSo.max' => 'Biển số không được vượt quá 15 ký tự.',
-            'BienSo.regex' => 'Biển số chỉ gồm chữ, số, dấu chấm và dấu gạch ngang.',
+            'BienSo.string' => 'Biển số xe không hợp lệ.',
+            'BienSo.regex' => 'Biển số phải gồm 2 số đầu, tiếp theo là '
+                . '1 chữ và có thể thêm 1 chữ hoặc 1 số, dấu gạch ngang, '
+                . 'cuối cùng là 4 hoặc 5 số. '
+                . 'Ví dụ: 51A-12345, 51AB-12345 hoặc 51A1-1234.',
             'BienSo.unique' => 'Biển số này đã được đăng ký trong hệ thống.',
 
-            'NamSanXuat.required' => 'Vui lòng chọn năm sản xuất.',
-            'NamSanXuat.integer' => 'Năm sản xuất không hợp lệ.',
-            'NamSanXuat.min' => 'Năm sản xuất phải từ năm 1990.',
-            'NamSanXuat.max' => 'Năm sản xuất không được lớn hơn năm hiện tại.',
+            'HangXe.required' => 'Vui lòng chọn hoặc nhập hãng xe.',
+            'HangXe.string' => 'Hãng xe không hợp lệ.',
+            'HangXe.max' => 'Tên hãng xe không được vượt quá 50 ký tự.',
 
-            'MakeId.required' => 'Vui lòng chọn hãng xe.',
-            'MakeId.integer' => 'Hãng xe không hợp lệ.',
-            'MakeId.min' => 'Hãng xe không hợp lệ.',
+            'DongXe.required' => 'Vui lòng chọn hoặc nhập dòng xe.',
+            'DongXe.string' => 'Dòng xe không hợp lệ.',
+            'DongXe.max' => 'Tên dòng xe không được vượt quá 70 ký tự.',
 
-            'ModelId.required' => 'Vui lòng chọn dòng xe.',
-            'ModelId.integer' => 'Dòng xe không hợp lệ.',
-            'ModelId.min' => 'Dòng xe không hợp lệ.',
+            'NamSX.integer' => 'Năm sản xuất phải là số nguyên.',
+            'NamSX.min' => 'Năm sản xuất phải từ năm 1900.',
+            'NamSX.max' => 'Năm sản xuất không được lớn hơn năm hiện tại.',
+
+            'MauSac.string' => 'Màu sắc không hợp lệ.',
+            'MauSac.max' => 'Màu sắc không được vượt quá 40 ký tự.',
         ]);
 
-        try {
-            $catalog = $this->catalog->models(
-                (int) $data['MakeId'],
-                (int) $data['NamSanXuat']
-            );
-        } catch (RuntimeException $exception) {
-            throw ValidationException::withMessages([
-                'MakeId' => $exception->getMessage(),
-            ]);
-        }
+        // Chuẩn hóa tên trùng với danh mục.
+        // Vẫn cho phép nhập hãng và dòng xe chưa có.
+        foreach (config('vehicle_catalog', []) as $make => $models) {
+            if (
+                mb_strtolower($make, 'UTF-8')
+                !== mb_strtolower($data['HangXe'], 'UTF-8')
+            ) {
+                continue;
+            }
 
-        $model = collect($catalog['models'])
-            ->firstWhere('id', (int) $data['ModelId']);
+            $data['HangXe'] = $make;
 
-        if (! $model) {
-            throw ValidationException::withMessages([
-                'ModelId' => 'Dòng xe không thuộc danh sách hãng và năm đã chọn. '
-                    . 'Vui lòng tải lại danh sách.',
-            ]);
-        }
+            foreach ($models as $model) {
+                if (
+                    mb_strtolower($model, 'UTF-8')
+                    === mb_strtolower($data['DongXe'], 'UTF-8')
+                ) {
+                    $data['DongXe'] = $model;
+                    break;
+                }
+            }
 
-        $makeName = $catalog['make']['name'];
-        $modelName = $model['name'];
-
-        if (
-            mb_strlen($makeName, 'UTF-8') > 50
-            || mb_strlen($modelName, 'UTF-8') > 50
-        ) {
-            throw ValidationException::withMessages([
-                'ModelId' => 'Tên hãng hoặc dòng xe vượt giới hạn lưu trữ 50 ký tự.',
-            ]);
+            break;
         }
 
         return [
             'BienSo' => $data['BienSo'],
-            'HangXe' => $makeName,
-            'DongXe' => $modelName,
-            'NamSanXuat' => (int) $data['NamSanXuat'],
+            'HangXe' => $data['HangXe'],
+            'DongXe' => $data['DongXe'],
+            'NamSX' => isset($data['NamSX'])
+                ? (int) $data['NamSX']
+                : null,
+            'MauSac' => ($data['MauSac'] ?? '') !== ''
+                ? $data['MauSac']
+                : null,
         ];
     }
 }
