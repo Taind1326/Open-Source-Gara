@@ -1,0 +1,442 @@
+/* =========================
+   Nút chuyển sáng / tối
+   ========================= */
+
+.garage-theme-toggle {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    z-index: 1030;
+
+    display: grid;
+    place-items: center;
+    width: 46px;
+    height: 46px;
+    padding: 0;
+
+    border: 1px solid var(--theme-toggle-border, #dbe2eb);
+    border-radius: 50%;
+    background: var(--theme-toggle-bg, #fff);
+    color: var(--theme-toggle-color, #10243a);
+    box-shadow: 0 4px 18px #10243a1a;
+
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.garage-theme-toggle:hover {
+    border-color: #f56616;
+    color: var(--theme-toggle-hover, #c74705);
+}
+
+.garage-theme-toggle:focus-visible {
+    outline: 3px solid #f7ac80;
+    outline-offset: 3px;
+}
+
+@media (max-width: 575.98px) {
+    .garage-theme-toggle {
+        right: 14px;
+        bottom: 14px;
+    }
+}
+
+/* =========================
+   Giao diện tối
+   Chỉ áp dụng trên màn hình
+   ========================= */
+
+@media screen {
+    html[data-bs-theme="dark"] {
+        color-scheme: dark;
+
+        /* Màu nền tảng */
+        --theme-background: #111827;
+        --theme-surface: #1b2636;
+        --theme-surface-raised: #253244;
+        --theme-input: #131e2d;
+        --theme-border: #364458;
+        --theme-input-border: #45546a;
+
+        --theme-text: #e5edf7;
+        --theme-muted: #a9b8ca;
+        --theme-placeholder: #91a2b7;
+
+        --theme-warm: #211e1c;
+        --theme-warm-raised: #35261e;
+        --theme-accent: #ffad7c;
+        --theme-danger: #ea868f;
+
+        /* Nút chuyển giao diện */
+        --theme-toggle-bg: var(--theme-surface-raised);
+        --theme-toggle-border: var(--theme-input-border);
+        --theme-toggle-color: #ffca7a;
+        --theme-toggle-hover: #ffe0a8;
+
+        /* Bootstrap */
+        --bs-body-bg: var(--theme-background);
+        --bs-body-bg-rgb: 17, 24, 39;
+        --bs-body-color: var(--theme-text);
+        --bs-body-color-rgb: 229, 237, 247;
+
+        --bs-secondary-color: var(--theme-muted);
+        --bs-secondary-color-rgb: 169, 184, 202;
+        --bs-secondary-bg: #202c3c;
+
+        --bs-tertiary-color: var(--theme-muted);
+        --bs-tertiary-color-rgb: 169, 184, 202;
+        --bs-tertiary-bg: var(--theme-surface-raised);
+        --bs-tertiary-bg-rgb: 37, 50, 68;
+
+        --bs-border-color: var(--theme-border);
+        --bs-emphasis-color: #f1f5fb;
+        --bs-emphasis-color-rgb: 241, 245, 251;
+
+        /* Màu dùng chung của website */
+        --garage-navy: var(--theme-text);
+        --garage-muted: var(--theme-muted);
+        --garage-bg: var(--theme-background);
+        --garage-border: var(--theme-border);
+        --garage-cream: var(--theme-warm);
+        --garage-peach: var(--theme-warm-raised);
+    }
+
+    /* =========================
+       Biến màu theo vai trò
+       ========================= */
+
+    html[data-bs-theme="dark"] body.admin-app {
+        --admin-navy: var(--theme-text);
+        --admin-muted: var(--theme-muted);
+        --admin-border: var(--theme-border);
+        --admin-background: var(--theme-background);
+    }
+
+    html[data-bs-theme="dark"] body.ktv-app {
+        --ktv-text: var(--theme-text);
+        --ktv-muted: var(--theme-muted);
+        --ktv-border: var(--theme-border);
+        --ktv-background: var(--theme-background);
+    }
+
+    html[data-bs-theme="dark"] body {
+        background: var(--theme-background);
+        color: var(--theme-text);
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .orange-home,
+        .public-page,
+        .services-page
+    ) {
+        --home-text: var(--theme-text);
+
+        background: var(--theme-background);
+        color: var(--theme-text);
+    }
+
+    /* =========================
+       Header và khung nội dung
+       ========================= */
+
+    html[data-bs-theme="dark"] body :is(
+        .site-navbar,
+        .ktv-header,
+        .admin-topbar,
+        .card,
+        .feature-card,
+        .home-benefits,
+        .home-service-card,
+        .catalog-card,
+        .contact-form,
+        .garage-auth-card,
+        .password-demo-card,
+        .garage-register-card
+    ) {
+        background-color: var(--theme-surface);
+        border-color: var(--theme-border);
+        color: var(--theme-text);
+    }
+
+    /*
+     * Admin dùng --admin-navy cho cả chữ và nền sidebar.
+     * Gán màu nền riêng để sidebar không bị chuyển thành màu sáng.
+     */
+    html[data-bs-theme="dark"] body.admin-app .admin-sidebar {
+        --bs-offcanvas-bg: #0e1726;
+
+        background-color: #0e1726;
+        color: #fff;
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .orange-hero,
+        .home-process,
+        .about-hero,
+        .about-history,
+        .services-hero,
+        .contact-map-section,
+        .garage-auth,
+        .password-demo-page,
+        .garage-register
+    ) {
+        background-color: var(--theme-warm);
+        color: var(--theme-text);
+    }
+
+    html[data-bs-theme="dark"] body .services-hero::after {
+        background: linear-gradient(
+            90deg,
+            #211e1c 0%,
+            #211e1c 39%,
+            #211e1cdb 50%,
+            #211e1c00 74%
+        );
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .home-booking,
+        .services-cta,
+        .garage-auth-story,
+        .password-demo-notice,
+        .password-demo-mark,
+        .contact-info-row > i
+    ) {
+        background-color: var(--theme-warm-raised);
+    }
+
+    /* =========================
+       Chữ và liên kết
+       ========================= */
+
+    html[data-bs-theme="dark"] body :is(
+        .form-text,
+        .garage-auth-story p,
+        .garage-auth-benefits span,
+        .garage-auth-intro,
+        .password-demo-card p,
+        .catalog-description,
+        .home-photo-placeholder small
+    ) {
+        color: var(--theme-muted);
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .site-navbar .nav-link,
+        .admin-website-link,
+        .ktv-website-link
+    ) {
+        color: var(--theme-text);
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .site-navbar .nav-link:hover,
+        .site-navbar .nav-link.active,
+        .about-page .about-year,
+        .garage-auth .garage-auth-eyebrow
+    ) {
+        color: var(--theme-accent);
+    }
+
+    /*
+     * Các utility Bootstrap dùng !important trong CSS gốc.
+     * Đổi biến mà utility sử dụng, không thêm !important mới.
+     */
+    html[data-bs-theme="dark"] body .text-dark {
+        --bs-dark-rgb: 229, 237, 247;
+    }
+
+    html[data-bs-theme="dark"] body .bg-white {
+        --bs-white-rgb: 27, 38, 54;
+    }
+
+    html[data-bs-theme="dark"] body .bg-light {
+        --bs-light-rgb: 37, 50, 68;
+    }
+
+    /*
+     * text-muted và text-secondary kế thừa biến Bootstrap
+     * hoặc biến muted của từng layout đã khai báo phía trên.
+     */
+
+    /* =========================
+       Hình và khung chờ ảnh
+       ========================= */
+
+    html[data-bs-theme="dark"] body :is(
+        .home-photo,
+        .catalog-photo-placeholder
+    ) {
+        background: linear-gradient(
+            135deg,
+            var(--theme-warm-raised),
+            var(--theme-surface-raised)
+        );
+
+        color: var(--theme-accent);
+    }
+
+    html[data-bs-theme="dark"] body .home-step-icon {
+        background: var(--theme-surface);
+        border-color: var(--theme-warm-raised);
+        box-shadow: 0 0 0 1px #59402f;
+    }
+
+    html[data-bs-theme="dark"] body .about-milestone-dot {
+        background: var(--theme-warm);
+    }
+
+    /* =========================
+       Ô nhập liệu
+       ========================= */
+
+    html[data-bs-theme="dark"] body :is(
+        .form-control,
+        .form-select,
+        .input-group-text
+    ) {
+        background-color: var(--theme-input);
+        border-color: var(--theme-input-border);
+        color: var(--theme-text);
+    }
+
+    html[data-bs-theme="dark"] body .form-control::placeholder {
+        color: var(--theme-placeholder);
+        opacity: 1;
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .form-control,
+        .form-select
+    ):disabled {
+        background-color: var(--theme-surface-raised);
+        color: var(--theme-muted);
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .form-control,
+        .form-select
+    ).is-invalid {
+        border-color: var(--theme-danger);
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .invalid-feedback,
+        .garage-field-error
+    ) {
+        color: var(--theme-danger);
+    }
+
+    /* =========================
+       Dropdown và popup
+       ========================= */
+
+    html[data-bs-theme="dark"] body .dropdown-menu {
+        --bs-dropdown-bg: var(--theme-surface);
+        --bs-dropdown-color: var(--theme-text);
+        --bs-dropdown-link-color: var(--theme-text);
+        --bs-dropdown-link-hover-color: #fff;
+        --bs-dropdown-link-hover-bg: #303c4e;
+        --bs-dropdown-link-active-bg: #35261e;
+
+        background-color: var(--theme-surface);
+        border-color: var(--theme-border);
+    }
+
+    html[data-bs-theme="dark"] body .dropdown-item {
+        color: var(--theme-text);
+    }
+
+    html[data-bs-theme="dark"] body .dropdown-item:disabled,
+    html[data-bs-theme="dark"] body .dropdown-item.disabled {
+        color: var(--theme-muted);
+    }
+
+    html[data-bs-theme="dark"] body .dropdown-item:hover,
+    html[data-bs-theme="dark"] body .dropdown-item:focus {
+        background-color: #303c4e;
+        color: #fff;
+    }
+
+    html[data-bs-theme="dark"] body .modal-content {
+        background-color: var(--theme-surface);
+        border-color: var(--theme-border);
+        color: var(--theme-text);
+    }
+
+    /* =========================
+       Bảng dữ liệu
+       ========================= */
+
+    html[data-bs-theme="dark"] body .table {
+        --bs-table-color: var(--theme-text);
+        --bs-table-bg: var(--theme-surface);
+        --bs-table-border-color: var(--theme-border);
+        --bs-table-striped-color: var(--theme-text);
+        --bs-table-striped-bg: #202c3c;
+        --bs-table-hover-color: #fff;
+        --bs-table-hover-bg: var(--theme-surface-raised);
+    }
+
+    html[data-bs-theme="dark"] body .table-light {
+        --bs-table-color: var(--theme-text);
+        --bs-table-bg: var(--theme-surface-raised);
+        --bs-table-border-color: var(--theme-border);
+    }
+
+    /* =========================
+       Nút phụ
+       ========================= */
+
+    html[data-bs-theme="dark"] body :is(
+        .btn-light,
+        .btn-home-secondary,
+        .services-secondary
+    ) {
+        --bs-btn-color: var(--theme-text);
+        --bs-btn-bg: var(--theme-surface-raised);
+        --bs-btn-border-color: var(--theme-input-border);
+        --bs-btn-hover-color: #fff;
+        --bs-btn-hover-bg: #364458;
+        --bs-btn-hover-border-color: #52647c;
+        --bs-btn-active-color: #fff;
+        --bs-btn-active-bg: #364458;
+        --bs-btn-active-border-color: #52647c;
+
+        background-color: var(--bs-btn-bg);
+        border-color: var(--bs-btn-border-color);
+        color: var(--bs-btn-color);
+    }
+
+    html[data-bs-theme="dark"] body :is(
+        .btn-light,
+        .btn-home-secondary,
+        .services-secondary
+    ):hover {
+        background-color: var(--bs-btn-hover-bg);
+        border-color: var(--bs-btn-hover-border-color);
+        color: var(--bs-btn-hover-color);
+    }
+
+    /* =========================
+       Footer
+       ========================= */
+
+    html[data-bs-theme="dark"] body .site-footer {
+        background: #0e1726;
+    }
+}
+
+/* =========================
+   Bản in
+   ========================= */
+
+@media print {
+    /*
+     * JS đặt hidden khi in để không cần ghi đè display
+     * bằng !important trong stylesheet.
+     */
+    .garage-theme-toggle {
+        visibility: hidden;
+    }
+}

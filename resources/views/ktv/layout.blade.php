@@ -19,6 +19,8 @@
     <link rel="stylesheet" href="{{ asset('css/ktv.css') }}">
 
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/garage-theme.css') }}">
+<script src="{{ asset('js/garage-theme.js') }}"></script>
 </head>
 
 <body class="ktv-app">

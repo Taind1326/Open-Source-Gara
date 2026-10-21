@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="{{ asset('css/public-theme.css') }}">
 
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/garage-theme.css') }}">
+<script src="{{ asset('js/garage-theme.js') }}"></script>
 </head>
 
 <body class="d-flex flex-column min-vh-100">

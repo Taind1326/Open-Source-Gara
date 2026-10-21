@@ -20,6 +20,8 @@
     <link href="{{ asset('css/admin.css') }}" rel="stylesheet">
 
     @stack('styles')
+    <link rel="stylesheet" href="{{ asset('css/garage-theme.css') }}">
+<script src="{{ asset('js/garage-theme.js') }}"></script>
 </head>
 
 <body class="admin-app">
