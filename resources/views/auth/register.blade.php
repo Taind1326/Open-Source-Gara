@@ -7,23 +7,23 @@
     <style>
         .garage-register {
             padding: 48px 0;
-            background: #fff8f2;
-            color: #10243a;
+            background: var(--ui-raised, #fff8f2);
+            color: var(--ui-text, #10243a);
         }
 
         .garage-register .register-card {
             max-width: 720px;
             margin-inline: auto;
             padding: 40px;
-            border: 1px solid #e5ebf2;
+            border: 1px solid var(--ui-border, #e5ebf2);
             border-radius: 20px;
-            background: #fff;
+            background: var(--ui-surface, #fff);
             box-shadow: 0 12px 40px rgb(16 36 58 / 5%);
         }
 
         .garage-register .register-eyebrow {
             margin-bottom: 12px;
-            color: #bd4806;
+            color: var(--ui-accent, #bd4806);
             font-size: .85rem;
             font-weight: 700;
             letter-spacing: .08em;
@@ -37,7 +37,7 @@
         }
 
         .garage-register .register-description {
-            color: #62748b;
+            color: var(--ui-muted, #62748b);
             line-height: 1.65;
         }
 
@@ -51,7 +51,7 @@
         .garage-register .register-step {
             position: relative;
             flex: 1;
-            color: #62748b;
+            color: var(--ui-muted, #62748b);
             font-size: .9rem;
             font-weight: 600;
             text-align: center;
@@ -63,7 +63,7 @@
             left: calc(50% + 26px);
             right: calc(-50% + 26px);
             height: 2px;
-            background: #e5ebf2;
+            background: var(--ui-raised, #e5ebf2);
             content: "";
         }
 
@@ -77,13 +77,13 @@
             width: 40px;
             height: 40px;
             margin: 0 auto 10px;
-            border: 1px solid #dbe3ed;
+            border: 1px solid var(--ui-border, #dbe3ed);
             border-radius: 50%;
-            background: #fff;
+            background: var(--ui-surface, #fff);
         }
 
         .garage-register .register-step.is-active {
-            color: #bd4806;
+            color: var(--ui-accent, #bd4806);
         }
 
         .garage-register .register-step.is-active .register-step-number {
@@ -95,8 +95,8 @@
 
         .garage-register .register-step.is-complete .register-step-number {
             border-color: #f56616;
-            background: #fff0e6;
-            color: #bd4806;
+            background: var(--ui-raised, #fff0e6);
+            color: var(--ui-accent, #bd4806);
         }
 
         .garage-register .form-control {
@@ -128,7 +128,7 @@
             border: 0;
             border-radius: 10px;
             background: transparent;
-            color: #62748b;
+            color: var(--ui-muted, #62748b);
         }
 
         .garage-register .register-password input.is-invalid {
@@ -138,9 +138,9 @@
         .garage-register .register-rules,
         .garage-register .register-summary {
             padding: 20px;
-            border: 1px solid #e5ebf2;
+            border: 1px solid var(--ui-border, #e5ebf2);
             border-radius: 12px;
-            background: #f8fafc;
+            background: var(--ui-surface, #f8fafc);
         }
 
         .garage-register .register-rules ul {
@@ -155,12 +155,12 @@
             display: flex;
             align-items: center;
             gap: 9px;
-            color: #62748b;
+            color: var(--ui-muted, #62748b);
             font-size: .9rem;
         }
 
         .garage-register .register-rules li.is-valid {
-            color: #198754;
+            color: var(--ui-success, #198754);
         }
 
         .garage-register .register-summary dl {
@@ -171,7 +171,7 @@
         }
 
         .garage-register .register-summary dt {
-            color: #62748b;
+            color: var(--ui-muted, #62748b);
             font-weight: 400;
         }
 

@@ -1,10 +1,10 @@
 /* Chỉ dùng chung màu sắc, font và hiệu ứng cuộn. */
 :root {
     --garage-orange: #f56616;
-    --garage-navy: #10243a;
-    --garage-muted: #4b6077;
-    --garage-cream: #fff8f2;
-    --garage-peach: #ffeadb;
+    --garage-navy: var(--ui-text, #10243a);
+    --garage-muted: var(--ui-muted, #4b6077);
+    --garage-cream: var(--ui-raised, #fff8f2);
+    --garage-peach: var(--ui-raised, #ffeadb);
     --garage-font: system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 body { font-family: var(--garage-font); }
@@ -12,7 +12,7 @@ body { font-family: var(--garage-font); }
     --home-orange: var(--garage-orange);
     --home-text: var(--garage-navy);
     color: var(--home-text);
-    background: #fff;
+    background: var(--ui-surface, #fff);
 }
 .reveal-ready [data-reveal] {
     opacity: 0;

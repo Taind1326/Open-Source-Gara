@@ -4,10 +4,10 @@
 
 .ktv-app {
     --ktv-orange: #f56616;
-    --ktv-text: #10243a;
-    --ktv-muted: #62748b;
-    --ktv-border: #e1e8f1;
-    --ktv-background: #f5f7fb;
+    --ktv-text: var(--ui-text, #10243a);
+    --ktv-muted: var(--ui-muted, #62748b);
+    --ktv-border: var(--ui-border, #e1e8f1);
+    --ktv-background: var(--ui-background, #f5f7fb);
 
     margin: 0;
     background: var(--ktv-background);
@@ -55,7 +55,7 @@
     top: 0;
     z-index: 1020;
     border-bottom: 1px solid var(--ktv-border);
-    background: #fff;
+    background: var(--ui-surface, #fff);
 }
 
 .ktv-header .navbar {
@@ -124,7 +124,7 @@
 
 .ktv-nav-link:hover,
 .ktv-nav-link.is-active {
-    color: #cf4d08;
+    color: var(--ui-accent, #cf4d08);
 }
 
 .ktv-nav-link.is-active {
@@ -149,7 +149,7 @@
 }
 
 .ktv-website-link:hover {
-    color: #cf4d08;
+    color: var(--ui-accent, #cf4d08);
 }
 
 .ktv-account-toggle {
@@ -170,8 +170,8 @@
     width: 42px;
     height: 42px;
     border-radius: 50%;
-    background: #edf1f7;
-    color: #6b7d94;
+    background: var(--ui-raised, #edf1f7);
+    color: var(--ui-muted, #6b7d94);
     font-size: 25px;
 }
 
@@ -215,8 +215,8 @@
 }
 
 .ktv-app .dropdown-item:active {
-    background: #fff0e6;
-    color: #a94008;
+    background: var(--ui-raised, #fff0e6);
+    color: var(--ui-accent, #a94008);
 }
 
 /* =========================
@@ -257,7 +257,7 @@
     padding: 20px;
     border: 1px solid var(--ktv-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--ui-surface, #fff);
     color: var(--ktv-text);
     text-decoration: none;
 }
@@ -278,33 +278,33 @@
 }
 
 .ktv-tone-blue {
-    background: #e9f3ff;
-    color: #0969d8;
+    background: var(--ui-raised, #e9f3ff);
+    color: var(--ui-info, #0969d8);
 }
 
 .ktv-tone-purple {
-    background: #f2eafe;
-    color: #8242ce;
+    background: var(--ui-raised, #f2eafe);
+    color: var(--ui-purple, #8242ce);
 }
 
 .ktv-tone-yellow {
-    background: #fff6db;
-    color: #996500;
+    background: var(--ui-raised, #fff6db);
+    color: var(--ui-accent, #996500);
 }
 
 .ktv-tone-orange {
-    background: #fff0e6;
-    color: #c74b08;
+    background: var(--ui-raised, #fff0e6);
+    color: var(--ui-accent, #c74b08);
 }
 
 .ktv-tone-green {
-    background: #e7f5ee;
-    color: #21764c;
+    background: var(--ui-raised, #e7f5ee);
+    color: var(--ui-success, #21764c);
 }
 
 .ktv-tone-gray {
-    background: #edf1f5;
-    color: #5b6b7d;
+    background: var(--ui-raised, #edf1f5);
+    color: var(--ui-muted, #5b6b7d);
 }
 
 .ktv-stat-label {
@@ -329,7 +329,7 @@
     padding: 22px;
     border: 1px solid var(--ktv-border);
     border-radius: 12px;
-    background: #fff;
+    background: var(--ui-surface, #fff);
 }
 
 .ktv-filter-form {
@@ -376,8 +376,8 @@
 .ktv-status-tab:hover,
 .ktv-status-tab.is-active {
     border-color: #f7b08a;
-    background: #fff3ea;
-    color: #c54a08;
+    background: var(--ui-raised, #fff3ea);
+    color: var(--ui-accent, #c54a08);
 }
 
 .ktv-status-tab.is-active {
@@ -397,7 +397,7 @@
 }
 
 .ktv-table thead th {
-    background: #f5f7fb;
+    background: var(--ui-raised, #f5f7fb);
     font-size: 14px;
     font-weight: 650;
     white-space: nowrap;
@@ -473,7 +473,7 @@
 }
 
 .ktv-app .btn-outline-primary {
-    --bs-btn-color: #c94c08;
+    --bs-btn-color: var(--ui-accent, #c94c08);
     --bs-btn-border-color: var(--ktv-orange);
     --bs-btn-hover-color: #fff;
     --bs-btn-hover-bg: var(--ktv-orange);
@@ -487,7 +487,7 @@
 .ktv-app .form-control,
 .ktv-app .form-select {
     min-height: 46px;
-    border-color: #d7e0ec;
+    border-color: var(--ui-border, #d7e0ec);
     border-radius: 8px;
     color: var(--ktv-text);
     font-size: 14px;
@@ -505,7 +505,7 @@
 }
 
 .ktv-app .page-link {
-    color: #b6470a;
+    color: var(--ui-accent, #b6470a);
 }
 
 .ktv-app .active > .page-link {
@@ -515,7 +515,7 @@
 }
 
 .ktv-app .disabled > .page-link {
-    color: #8997a8;
+    color: var(--ui-muted, #8997a8);
 }
 
 /* =========================

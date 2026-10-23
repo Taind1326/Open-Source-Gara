@@ -4,7 +4,7 @@
 }
 .about-hero {
     padding: 36px 0;
-    background: #fff8f2;
+    background: var(--ui-raised, #fff8f2);
 }
 .about-page h1 {
     font-size: clamp(2rem, 3.2vw, 3.1rem);
@@ -30,7 +30,7 @@
     background: var(--home-orange);
 }
 .about-history {
-    background: #fff8f2;
+    background: var(--ui-raised, #fff8f2);
 }
 .about-milestones {
     position: relative;
@@ -61,12 +61,12 @@
     height: 26px;
     border: 3px solid var(--home-orange);
     border-radius: 50%;
-    background: #fff8f2;
+    background: var(--ui-raised, #fff8f2);
     margin-bottom: 16px;
     flex-shrink: 0;
 }
 .about-page .about-year {
-    color: #b94708;
+    color: var(--ui-accent, #b94708);
     font-weight: 700;
     margin-bottom: 8px;
 }
@@ -96,7 +96,7 @@
     text-align: center;
 }
 .about-values article + article {
-    border-left: 1px solid #e5eaf1;
+    border-left: 1px solid var(--ui-border, #e5eaf1);
 }
 .about-values i {
     display: block;
@@ -115,7 +115,7 @@
     grid-template-columns: 1.4fr 1fr;
     border-radius: 16px;
     overflow: hidden;
-    background: #10243a;
+    background: var(--ui-inverse-bg, #10243a);
 }
 .about-team .about-photo {
     border-radius: 0;
@@ -177,7 +177,7 @@
     }
     .about-values article + article {
         border-left: 0;
-        border-top: 1px solid #e5eaf1;
+        border-top: 1px solid var(--ui-border, #e5eaf1);
         padding-top: 24px;
     }
     .about-team {

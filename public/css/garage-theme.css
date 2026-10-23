@@ -1,468 +1,156 @@
-/* =========================
-   Nút chuyển giao diện
-   ========================= */
-
+/* Shared theme controls. Layout and page styles stay in their own files. */
 .garage-theme-toggle {
     position: fixed;
     right: 20px;
     bottom: 20px;
     z-index: 1030;
-
     display: grid;
     place-items: center;
     width: 46px;
     height: 46px;
     padding: 0;
-
-    border: 1px solid var(--theme-toggle-border, #dbe2eb);
+    border: 1px solid var(--ui-border, #dbe2eb);
     border-radius: 50%;
-    background: var(--theme-toggle-bg, #fff);
-    color: var(--theme-toggle-color, #10243a);
+    background: var(--ui-surface, #fff);
+    color: var(--ui-text, #10243a);
     box-shadow: 0 4px 18px #0000001a;
-
     font-size: 20px;
     cursor: pointer;
 }
-
 .garage-theme-toggle:hover {
     border-color: #f56616;
-    color: #f56616;
+    color: var(--ui-accent, #c74705);
 }
-
 .garage-theme-toggle:focus-visible {
     outline: 3px solid #f7ac80;
     outline-offset: 3px;
 }
-
 @media (max-width: 575.98px) {
-    .garage-theme-toggle {
-        right: 14px;
-        bottom: 14px;
-    }
+    .garage-theme-toggle { right: 14px; bottom: 14px; }
 }
 
-/* =========================
-   Chế độ tối
-   ========================= */
-
+/* Only semantic values change in dark mode. Original light colors are fallbacks. */
 @media screen {
     html[data-bs-theme="dark"] {
         color-scheme: dark;
-
-        /* Bảng màu xám trung tính */
-        --theme-background: #161616;
-        --theme-surface: #202020;
-        --theme-raised: #2a2a2a;
-        --theme-input: #191919;
-        --theme-border: #383838;
-        --theme-input-border: #484848;
-        --theme-text: #f0f0f0;
-        --theme-muted: #b5b5b5;
-        --theme-placeholder: #929292;
-        --theme-warm: #1c1b1a;
-        --theme-peach: #32271f;
-        --theme-accent: #ffad7c;
-        --theme-danger: #ea868f;
-
-        /* Nút chuyển giao diện */
-        --theme-toggle-bg: var(--theme-raised);
-        --theme-toggle-border: var(--theme-input-border);
-        --theme-toggle-color: #ffca7a;
-
-        /* Bootstrap */
-        --bs-body-bg: var(--theme-background);
-        --bs-body-bg-rgb: 22, 22, 22;
-        --bs-body-color: var(--theme-text);
-        --bs-body-color-rgb: 240, 240, 240;
-        --bs-secondary-color: var(--theme-muted);
+        --ui-background: #181818;
+        --ui-surface: #222222;
+        --ui-raised: #2b2b2b;
+        --ui-input: #1d1d1d;
+        --ui-inverse-bg: #1c1c1c;
+        --ui-border: #3d3d3d;
+        --ui-text: #ededed;
+        --ui-muted: #b5b5b5;
+        --ui-accent: #ffad7c;
+        --ui-success: #82d5a6;
+        --ui-info: #94bfff;
+        --ui-purple: #c8a9f2;
+        --ui-hero-fade: #2b2b2bdb;
+        --ui-hero-transparent: #2b2b2b00;
+        --bs-body-bg: var(--ui-background);
+        --bs-body-bg-rgb: 24, 24, 24;
+        --bs-body-color: var(--ui-text);
+        --bs-body-color-rgb: 237, 237, 237;
+        --bs-emphasis-color: #fafafa;
+        --bs-emphasis-color-rgb: 250, 250, 250;
+        --bs-secondary-color: var(--ui-muted);
         --bs-secondary-color-rgb: 181, 181, 181;
         --bs-secondary-bg: #262626;
         --bs-secondary-bg-rgb: 38, 38, 38;
-        --bs-tertiary-color: var(--theme-placeholder);
-        --bs-tertiary-bg: var(--theme-raised);
-        --bs-tertiary-bg-rgb: 42, 42, 42;
-        --bs-border-color: var(--theme-border);
-        --bs-emphasis-color: #fafafa;
-        --bs-emphasis-color-rgb: 250, 250, 250;
-        --bs-primary-bg-subtle: var(--theme-peach);
-        --bs-primary-text-emphasis: var(--theme-accent);
-
-        /* Màu website */
-        --garage-navy: var(--theme-text);
-        --garage-muted: var(--theme-muted);
-        --garage-bg: var(--theme-background);
-        --garage-border: var(--theme-border);
-        --garage-cream: var(--theme-warm);
-        --garage-peach: var(--theme-peach);
-        --garage-primary-text: var(--theme-accent);
+        --bs-tertiary-bg: var(--ui-raised);
+        --bs-tertiary-bg-rgb: 43, 43, 43;
+        --bs-border-color: var(--ui-border);
+        --bs-primary-bg-subtle: #38291f;
+        --bs-primary-text-emphasis: var(--ui-accent);
     }
 
     html[data-bs-theme="dark"] body {
-        background: var(--theme-background);
-        color: var(--theme-text);
+        background-color: var(--ui-background);
     }
 
-    /* Biến màu của từng layout */
-    html[data-bs-theme="dark"] body.admin-app {
-        --admin-navy: var(--theme-text);
-        --admin-muted: var(--theme-muted);
-        --admin-border: var(--theme-border);
-        --admin-background: var(--theme-background);
+    /* Bootstrap utilities retain their existing priority. */
+    html[data-bs-theme="dark"] .bg-white { --bs-white-rgb: 34, 34, 34; }
+    html[data-bs-theme="dark"] .bg-light { --bs-light-rgb: 43, 43, 43; }
+    html[data-bs-theme="dark"] .text-dark { --bs-dark-rgb: 237, 237, 237; }
+    html[data-bs-theme="dark"] .text-secondary { --bs-secondary-rgb: 181, 181, 181; }
+
+    html[data-bs-theme="dark"] .card {
+        --bs-card-bg: var(--ui-surface);
+        --bs-card-color: var(--ui-text);
+        --bs-card-border-color: var(--ui-border);
     }
-
-    html[data-bs-theme="dark"] body.ktv-app {
-        --ktv-text: var(--theme-text);
-        --ktv-muted: var(--theme-muted);
-        --ktv-border: var(--theme-border);
-        --ktv-background: var(--theme-background);
+    html[data-bs-theme="dark"] .dropdown-menu {
+        --bs-dropdown-bg: var(--ui-surface);
+        --bs-dropdown-color: var(--ui-text);
+        --bs-dropdown-border-color: var(--ui-border);
+        --bs-dropdown-link-color: var(--ui-text);
+        --bs-dropdown-link-hover-color: #fff;
+        --bs-dropdown-link-hover-bg: var(--ui-raised);
+        --bs-dropdown-link-active-bg: #9c3906;
     }
-
-    /* Nền trang */
-    html[data-bs-theme="dark"] body :is(
-        .orange-home,
-        .public-page,
-        .services-page
-    ) {
-        --home-text: var(--theme-text);
-
-        background: var(--theme-background);
-        color: var(--theme-text);
+    html[data-bs-theme="dark"] .modal-content {
+        --bs-modal-bg: var(--ui-surface);
+        --bs-modal-color: var(--ui-text);
+        --bs-modal-border-color: var(--ui-border);
     }
-
-    /* Header, thẻ và panel */
-    html[data-bs-theme="dark"] body :is(
-        .site-navbar,
-        .ktv-header,
-        .admin-topbar,
-        .card,
-        .feature-card,
-        .service-card,
-        .home-benefits,
-        .home-service-card,
-        .catalog-card,
-        .contact-form,
-        .garage-auth-card,
-        .password-demo-card,
-        .garage-register-card,
-        .ktv-panel
-    ) {
-        background-color: var(--theme-surface);
-        border-color: var(--theme-border);
-        color: var(--theme-text);
+    html[data-bs-theme="dark"] .table {
+        --bs-table-color: var(--ui-text);
+        --bs-table-bg: var(--ui-surface);
+        --bs-table-border-color: var(--ui-border);
+        --bs-table-striped-color: var(--ui-text);
+        --bs-table-striped-bg: #262626;
+        --bs-table-hover-color: var(--ui-text);
+        --bs-table-hover-bg: var(--ui-raised);
     }
-
-    /*
-     * Các vùng này trước đây dùng cùng biến với màu chữ.
-     * Gán nền riêng để không bị sáng trắng khi đổi theme.
-     */
-    html[data-bs-theme="dark"] body :is(
-        .hero,
-        .home-hero,
-        .site-footer
-    ) {
-        background: #1a1a1a;
-        color: var(--theme-text);
+    html[data-bs-theme="dark"] .table-light {
+        --bs-table-color: var(--ui-text);
+        --bs-table-bg: var(--ui-raised);
+        --bs-table-border-color: var(--ui-border);
     }
-
-    html[data-bs-theme="dark"] body.admin-app .admin-sidebar {
-        --bs-offcanvas-bg: #1a1a1a;
-
-        background-color: #1a1a1a;
-        color: #fff;
+    html[data-bs-theme="dark"] :is(.form-control, .form-select, .input-group-text) {
+        background-color: var(--ui-input);
+        border-color: var(--ui-border);
+        color: var(--ui-text);
     }
-
-    html[data-bs-theme="dark"] body :is(
-        .hero-description,
-        .hero-benefits,
-        .hero-panel-description
-    ) {
-        color: var(--theme-muted);
-    }
-
-    /* Các phần nền cam nhạt */
-    html[data-bs-theme="dark"] body :is(
-        .orange-hero,
-        .home-process,
-        .about-hero,
-        .about-history,
-        .services-hero,
-        .contact-map-section,
-        .garage-auth,
-        .password-demo-page,
-        .garage-register
-    ) {
-        background-color: var(--theme-warm);
-        color: var(--theme-text);
-    }
-
-    html[data-bs-theme="dark"] body .services-hero::after {
-        background: linear-gradient(
-            90deg,
-            #1c1b1a 0%,
-            #1c1b1a 39%,
-            #1c1b1adb 50%,
-            #1c1b1a00 74%
-        );
-    }
-
-    html[data-bs-theme="dark"] body :is(
-        .home-booking,
-        .services-cta,
-        .garage-auth-story,
-        .password-demo-notice,
-        .password-demo-mark,
-        .contact-info-row > i,
-        .feature-icon
-    ) {
-        background-color: var(--theme-peach);
-    }
-
-    /* Chữ phụ */
-    html[data-bs-theme="dark"] body :is(
-        .form-text,
-        .garage-auth-story p,
-        .garage-auth-benefits span,
-        .garage-auth-intro,
-        .password-demo-card p,
-        .catalog-description,
-        .home-photo-placeholder small
-    ) {
-        color: var(--theme-muted);
-    }
-
-    html[data-bs-theme="dark"] body :is(
-        .site-navbar .nav-link,
-        .admin-website-link,
-        .ktv-website-link
-    ) {
-        color: var(--theme-text);
-    }
-
-    html[data-bs-theme="dark"] body :is(
-        .site-navbar .nav-link:hover,
-        .site-navbar .nav-link.active,
-        .about-page .about-year,
-        .garage-auth .garage-auth-eyebrow,
-        .feature-icon
-    ) {
-        color: var(--theme-accent);
-    }
-
-    /* Điều chỉnh utility qua biến Bootstrap */
-    html[data-bs-theme="dark"] body .text-secondary {
-        --bs-secondary-rgb: 181, 181, 181;
-    }
-
-    html[data-bs-theme="dark"] body .text-dark {
-        --bs-dark-rgb: 240, 240, 240;
-    }
-
-    html[data-bs-theme="dark"] body .bg-white {
-        --bs-white-rgb: 32, 32, 32;
-    }
-
-    html[data-bs-theme="dark"] body .bg-light {
-        --bs-light-rgb: 42, 42, 42;
-    }
-
-    html[data-bs-theme="dark"] body .bg-primary-subtle {
-        --bs-primary-bg-subtle: var(--theme-peach);
-    }
-
-    /* Khung ảnh */
-    html[data-bs-theme="dark"] body :is(
-        .home-photo,
-        .catalog-photo-placeholder
-    ) {
-        background: linear-gradient(135deg, #32271f, #2a2a2a);
-        color: var(--theme-accent);
-    }
-
-    html[data-bs-theme="dark"] body .home-step-icon {
-        background: var(--theme-surface);
-        border-color: var(--theme-peach);
-        box-shadow: 0 0 0 1px #59402f;
-    }
-
-    html[data-bs-theme="dark"] body .about-milestone-dot {
-        background: var(--theme-warm);
-    }
-
-    /* Ô nhập */
-    html[data-bs-theme="dark"] body :is(
-        .form-control,
-        .form-select,
-        .input-group-text
-    ) {
-        background-color: var(--theme-input);
-        border-color: var(--theme-input-border);
-        color: var(--theme-text);
-    }
-
-    html[data-bs-theme="dark"] body .form-control::placeholder {
-        color: var(--theme-placeholder);
+    html[data-bs-theme="dark"] .form-control::placeholder {
+        color: #a0a0a0;
         opacity: 1;
     }
-
-    html[data-bs-theme="dark"] body :is(
-        .form-control,
-        .form-select
-    ):disabled {
-        background-color: var(--theme-raised);
-        color: var(--theme-muted);
+    html[data-bs-theme="dark"] :is(.form-control, .form-select):disabled {
+        background-color: var(--ui-raised);
+        color: var(--ui-muted);
     }
-
-    html[data-bs-theme="dark"] body :is(
-        .form-control,
-        .form-select
-    ):focus {
-        border-color: #f56616;
-        box-shadow: 0 0 0 0.2rem #f5661626;
+    html[data-bs-theme="dark"] :is(.form-control, .form-select).is-invalid {
+        border-color: #ea868f;
     }
-
-    html[data-bs-theme="dark"] body :is(
-        .form-control,
-        .form-select
-    ).is-invalid {
-        border-color: var(--theme-danger);
+    html[data-bs-theme="dark"] :is(.invalid-feedback, .garage-field-error) {
+        color: #ea868f;
     }
-
-    html[data-bs-theme="dark"] body :is(
-        .form-control,
-        .form-select
-    ).is-invalid:focus {
-        box-shadow: 0 0 0 0.2rem #ea868f26;
-    }
-
-    html[data-bs-theme="dark"] body :is(
-        .invalid-feedback,
-        .garage-field-error
-    ) {
-        color: var(--theme-danger);
-    }
-
-    /* Dropdown */
-    html[data-bs-theme="dark"] body .dropdown-menu {
-        --bs-dropdown-bg: var(--theme-surface);
-        --bs-dropdown-color: var(--theme-text);
-        --bs-dropdown-link-color: var(--theme-text);
-        --bs-dropdown-link-hover-color: #fff;
-        --bs-dropdown-link-hover-bg: #303030;
-        --bs-dropdown-link-active-color: #fff;
-        --bs-dropdown-link-active-bg: var(--theme-peach);
-        --bs-dropdown-link-disabled-color: var(--theme-placeholder);
-
-        background-color: var(--theme-surface);
-        border-color: var(--theme-border);
-    }
-
-    html[data-bs-theme="dark"] body .dropdown-item {
-        color: var(--theme-text);
-    }
-
-    html[data-bs-theme="dark"] body .dropdown-item:hover,
-    html[data-bs-theme="dark"] body .dropdown-item:focus {
-        background-color: #303030;
-        color: #fff;
-    }
-
-    html[data-bs-theme="dark"] body .dropdown-item.active,
-    html[data-bs-theme="dark"] body .dropdown-item:active {
-        background-color: var(--theme-peach);
-        color: #fff;
-    }
-
-    html[data-bs-theme="dark"] body .dropdown-item.disabled,
-    html[data-bs-theme="dark"] body .dropdown-item:disabled {
-        background-color: transparent;
-        color: var(--theme-placeholder);
-    }
-
-    /* Popup */
-    html[data-bs-theme="dark"] body .modal-content {
-        background-color: var(--theme-surface);
-        border-color: var(--theme-border);
-        color: var(--theme-text);
-    }
-
-    /* Bảng */
-    html[data-bs-theme="dark"] body .table {
-        --bs-table-color: var(--theme-text);
-        --bs-table-bg: var(--theme-surface);
-        --bs-table-border-color: var(--theme-border);
-        --bs-table-striped-color: var(--theme-text);
-        --bs-table-striped-bg: #262626;
-        --bs-table-hover-color: #fff;
-        --bs-table-hover-bg: var(--theme-raised);
-    }
-
-    html[data-bs-theme="dark"] body .table-light {
-        --bs-table-color: var(--theme-text);
-        --bs-table-bg: var(--theme-raised);
-        --bs-table-border-color: var(--theme-border);
-    }
-
-    /* Nút phụ */
-    html[data-bs-theme="dark"] body :is(
-        .btn-light,
-        .btn-home-secondary,
-        .services-secondary
-    ) {
-        --bs-btn-color: var(--theme-text);
-        --bs-btn-bg: var(--theme-raised);
-        --bs-btn-border-color: var(--theme-input-border);
+    html[data-bs-theme="dark"] .btn-light {
+        --bs-btn-color: var(--ui-text);
+        --bs-btn-bg: var(--ui-raised);
+        --bs-btn-border-color: var(--ui-border);
         --bs-btn-hover-color: #fff;
         --bs-btn-hover-bg: #383838;
-        --bs-btn-hover-border-color: #606060;
+        --bs-btn-hover-border-color: #555;
         --bs-btn-active-color: #fff;
         --bs-btn-active-bg: #404040;
         --bs-btn-active-border-color: #606060;
-
-        background-color: var(--bs-btn-bg);
-        border-color: var(--bs-btn-border-color);
-        color: var(--bs-btn-color);
     }
-
-    html[data-bs-theme="dark"] body :is(
-        .btn-light,
-        .btn-home-secondary,
-        .services-secondary
-    ):hover {
-        background-color: var(--bs-btn-hover-bg);
-        border-color: var(--bs-btn-hover-border-color);
-        color: var(--bs-btn-hover-color);
-    }
-
-    html[data-bs-theme="dark"] body :is(
-        .btn-light,
-        .btn-home-secondary,
-        .services-secondary
-    ):active {
-        background-color: var(--bs-btn-active-bg);
-        border-color: var(--bs-btn-active-border-color);
-        color: var(--bs-btn-active-color);
-    }
-
-    /* Phân trang */
-    html[data-bs-theme="dark"] body .pagination {
-        --bs-pagination-color: var(--theme-text);
-        --bs-pagination-bg: var(--theme-surface);
-        --bs-pagination-border-color: var(--theme-border);
-        --bs-pagination-hover-color: var(--theme-accent);
-        --bs-pagination-hover-bg: var(--theme-raised);
-        --bs-pagination-hover-border-color: var(--theme-input-border);
-        --bs-pagination-disabled-color: var(--theme-placeholder);
-        --bs-pagination-disabled-bg: var(--theme-background);
-        --bs-pagination-disabled-border-color: var(--theme-border);
+    html[data-bs-theme="dark"] .pagination {
+        --bs-pagination-color: var(--ui-text);
+        --bs-pagination-bg: var(--ui-surface);
+        --bs-pagination-border-color: var(--ui-border);
+        --bs-pagination-hover-color: var(--ui-accent);
+        --bs-pagination-hover-bg: var(--ui-raised);
+        --bs-pagination-hover-border-color: var(--ui-border);
+        --bs-pagination-focus-color: var(--ui-accent);
+        --bs-pagination-focus-bg: var(--ui-raised);
+        --bs-pagination-disabled-color: #929292;
+        --bs-pagination-disabled-bg: var(--ui-background);
+        --bs-pagination-disabled-border-color: var(--ui-border);
     }
 }
-
-/* =========================
-   Bản in
-   ========================= */
-
 @media print {
-    .garage-theme-toggle {
-        display: none;
-    }
+    .garage-theme-toggle { display: none; }
 }

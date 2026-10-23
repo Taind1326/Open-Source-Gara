@@ -106,4 +106,68 @@
             applyTheme();
         }
     });
+
+    // Keep canvas chart labels readable and restore each chart's light settings.
+    const chartColors = new WeakMap();
+
+    function updateCharts() {
+        if (!window.Chart?.instances) {
+            return;
+        }
+
+        const dark = root.getAttribute('data-bs-theme') === 'dark';
+
+        Object.values(window.Chart.instances).forEach((chart) => {
+            const options = chart.config.options;
+
+            if (!chartColors.has(chart)) {
+                chartColors.set(chart, {
+                    color: options.color,
+                    scales: Object.fromEntries(
+                        Object.entries(options.scales ?? {}).map(([key, scale]) => [
+                            key,
+                            { ticks: scale.ticks?.color, grid: scale.grid?.color }
+                        ])
+                    )
+                });
+            }
+
+            const original = chartColors.get(chart);
+            options.color = dark ? '#b5b5b5' : original.color;
+
+            Object.entries(options.scales ?? {}).forEach(([key, scale]) => {
+                scale.ticks ??= {};
+                scale.grid ??= {};
+                scale.ticks.color = dark ? '#b5b5b5' : original.scales[key]?.ticks;
+                scale.grid.color = dark ? '#3d3d3d' : original.scales[key]?.grid;
+            });
+
+            chart.update('none');
+        });
+    }
+
+    new MutationObserver(updateCharts).observe(root, {
+        attributes: true,
+        attributeFilter: ['data-bs-theme']
+    });
+
+    window.addEventListener('load', updateCharts, { once: true });
+
+    // Bootstrap also reads data-bs-theme while printing.
+    // Temporarily use light mode without changing the saved preference.
+    let themeBeforePrint = null;
+
+    window.addEventListener('beforeprint', () => {
+        themeBeforePrint = root.getAttribute('data-bs-theme');
+        root.setAttribute('data-bs-theme', 'light');
+        updateCharts();
+    });
+
+    window.addEventListener('afterprint', () => {
+        if (themeBeforePrint !== null) {
+            root.setAttribute('data-bs-theme', themeBeforePrint);
+            themeBeforePrint = null;
+            applyTheme();
+        }
+    });
 })();
